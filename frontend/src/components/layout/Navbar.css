@@ -1,0 +1,203 @@
+.nav-05 {
+  --bg: #F9F9F9;
+  --surface: #FFFFFF;
+  --text: #092634;
+  --muted: #004E72;
+  --accent: #FF6E42;
+  --accent2: #FF8C66;
+}
+
+#nav-05-toggle {
+  display: none;
+}
+
+.nav-05__bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 300;
+  padding: 24px 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.nav-05__logo {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--text);
+  letter-spacing: -.04em;
+  text-decoration: none;
+  z-index: 310;
+  position: relative;
+}
+
+.nav-05__logo em {
+  color: var(--accent);
+  font-style: normal;
+}
+
+/* open btn */
+.nav-05__btn {
+  z-index: 310;
+  position: relative;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px;
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 10px;
+  transition: background .18s;
+  user-select: none;
+}
+
+.nav-05__btn:hover {
+  background: rgba(255,255,255,.1);
+}
+
+.nav-05__btn span {
+  display: block;
+  border-radius: 2px;
+  background: var(--text);
+  transition: transform .35s cubic-bezier(.23,1,.32,1),opacity .25s,width .35s;
+}
+
+.nav-05__btn span:nth-child(1) { width: 24px; height: 2px; }
+.nav-05__btn span:nth-child(2) { width: 16px; height: 2px; }
+.nav-05__btn span:nth-child(3) { width: 20px; height: 2px; }
+
+#nav-05-toggle:checked ~ .nav-05__bar .nav-05__btn span:nth-child(1) {
+  transform: translateY(6px) rotate(45deg);
+  width: 24px;
+}
+#nav-05-toggle:checked ~ .nav-05__bar .nav-05__btn span:nth-child(2) {
+  opacity: 0;
+  width: 0;
+}
+#nav-05-toggle:checked ~ .nav-05__bar .nav-05__btn span:nth-child(3) {
+  transform: translateY(-6px) rotate(-45deg);
+  width: 24px;
+}
+
+/* full-screen overlay */
+.nav-05__overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: rgba(249, 249, 249, 0.85);
+  backdrop-filter: blur(24px) saturate(150%);
+  -webkit-backdrop-filter: blur(24px) saturate(150%);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 80px 60px;
+  transform: translateY(-100%);
+  transition: transform .5s cubic-bezier(.77,0,.175,1);
+  overflow: hidden;
+}
+
+#nav-05-toggle:checked ~ .nav-05__overlay {
+  transform: translateY(0);
+}
+
+.nav-05__overlay::before {
+  content: '';
+  position: absolute;
+  bottom: -200px;
+  right: -200px;
+  width: 600px;
+  height: 600px;
+  border-radius: 50%;
+  background: radial-gradient(circle,rgba(255, 110, 66, 0.12) 0%,transparent 70%);
+  pointer-events: none;
+}
+
+.nav-05__nav-list {
+  list-style: none;
+  margin-bottom: 48px;
+  padding: 0;
+}
+
+.nav-05__nav-list li {
+  overflow: hidden;
+}
+
+.nav-05__nav-list li a {
+  display: inline-flex;
+  align-items: center;
+  gap: 16px;
+  font-size: clamp(2.5rem,7vw,5rem);
+  font-weight: 800;
+  color: rgba(9, 38, 52, 0.4);
+  text-decoration: none;
+  letter-spacing: -.04em;
+  line-height: 1.15;
+  transition: color .2s ease;
+  padding: 4px 0;
+}
+
+.nav-05__nav-list li a:hover {
+  color: var(--text);
+}
+
+.nav-05__nav-list li a .nav-05__num {
+  font-size: .875rem;
+  font-weight: 600;
+  color: var(--accent);
+  letter-spacing: .06em;
+  margin-top: 4px;
+  opacity: 0;
+  transition: opacity .2s;
+}
+
+.nav-05__nav-list li a:hover .nav-05__num {
+  opacity: 1;
+}
+
+.nav-05__overlay-footer {
+  display: flex;
+  align-items: center;
+  gap: 48px;
+  flex-wrap: wrap;
+}
+
+.nav-05__overlay-social {
+  display: flex;
+  gap: 16px;
+}
+
+.nav-05__overlay-social a {
+  font-size: .875rem;
+  color: var(--muted);
+  text-decoration: none;
+  font-weight: 600;
+  transition: color .18s;
+}
+
+.nav-05__overlay-social a:hover {
+  color: var(--text);
+}
+
+.nav-05__overlay-cta {
+  padding: 12px 28px;
+  background: var(--accent);
+  color: #fff;
+  border-radius: 100px;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: .9375rem;
+  transition: opacity .18s;
+}
+
+.nav-05__overlay-cta:hover {
+  opacity: .85;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nav-05__overlay, .nav-05__btn span {
+    transition: none;
+  }
+}
