@@ -217,6 +217,45 @@
   letter-spacing: 0.06em;
 }
 
+/* ============ COMPANY BRIEF ============ */
+.about-us .company-brief {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 40px 32px 0;
+  position: relative;
+  z-index: 5;
+  text-align: center;
+}
+.about-us .company-brief p {
+  font-size: 16px;
+  line-height: 1.65;
+  color: var(--nb-ink-soft);
+  margin: 0 0 32px;
+}
+.about-us .company-timeline {
+  list-style: none;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--nb-mute);
+}
+.about-us .company-timeline li {
+  padding: 8px 16px;
+  border: 1px solid var(--nb-line);
+  border-radius: 999px;
+}
+.about-us .company-timeline li:not(:last-child)::after {
+  content: '→';
+  margin-left: 8px;
+  color: var(--nb-orange-1);
+}
+
 /* ============ SECTION 2: TEAM GRID ============ */
 .about-us .team-section {
   padding: 140px 40px 80px;
@@ -231,6 +270,11 @@
   align-items: flex-end;
   gap: 40px;
   flex-wrap: wrap;
+  background: linear-gradient(165deg, #fffefb 0%, #fdfaf3 45%, #faf7f0 100%);
+  border: 2px solid var(--nb-ink);
+  border-radius: 20px;
+  padding: 40px 44px;
+  box-shadow: 8px 9px 0 rgba(9, 38, 52, .9);
 }
 .about-us .eyebrow {
   display: inline-flex;
@@ -295,9 +339,7 @@
     var(--nb-orange-4) 100%
   );
   position: relative;
-  box-shadow: 0 24px 40px -16px rgba(180, 50, 20, 0.4),
-    0 10px 22px -6px rgba(140, 40, 10, 0.22),
-    inset 0 2px 0 rgba(255, 220, 180, 0.4),
+  box-shadow: inset 0 2px 0 rgba(255, 220, 180, 0.4),
     inset 0 -3px 6px rgba(120, 20, 0, 0.3);
   cursor: pointer;
   transition: transform 0.5s cubic-bezier(0.6, 0, 0.2, 1), box-shadow 0.5s;
@@ -318,6 +360,10 @@
 }
 .about-us .t-card:hover {
   transform: translateY(-10px) rotate(-1deg);
+  box-shadow: 0 24px 40px -16px rgba(180, 50, 20, 0.4),
+    0 10px 22px -6px rgba(140, 40, 10, 0.22),
+    inset 0 2px 0 rgba(255, 220, 180, 0.4),
+    inset 0 -3px 6px rgba(120, 20, 0, 0.3);
 }
 .about-us .t-card img {
   width: 100%;
@@ -368,16 +414,15 @@
   max-width: 1280px;
   margin: 0 auto;
   background: var(--nb-ink);
-  border-radius: 36px;
+  border: 2px solid var(--nb-ink);
+  border-radius: 20px;
   padding: 80px 60px;
   color: #f4edde;
   display: grid;
   grid-template-columns: 1.4fr 1fr 1fr 1fr;
   gap: 40px;
   align-items: end;
-  box-shadow: 0 40px 80px -30px rgba(20, 8, 0, 0.45),
-    0 16px 32px -12px rgba(20, 8, 0, 0.25),
-    inset 0 1px 0 rgba(255, 255, 255, 0.08), inset 0 -3px 8px rgba(0, 0, 0, 0.5);
+  box-shadow: 8px 9px 0 rgba(9, 38, 52, .9);
   position: relative;
   overflow: hidden;
 }

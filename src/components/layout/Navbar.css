@@ -38,6 +38,24 @@
   font-style: normal;
 }
 
+.nav-05__page-label {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  font-size: clamp(1.4rem, 3vw, 2rem);
+  font-weight: 800;
+  letter-spacing: -.04em;
+  color: rgba(9, 38, 52, 0.55);
+  pointer-events: none;
+  user-select: none;
+  transition: opacity .2s ease;
+}
+
+#nav-05-toggle:checked ~ .nav-05__bar .nav-05__page-label {
+  opacity: 0;
+}
+
 /* open btn */
 .nav-05__btn {
   z-index: 310;

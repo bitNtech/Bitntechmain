@@ -43,6 +43,7 @@
 body {
   margin: 0;
   background: var(--bg);
+  overflow-x: hidden;
 }
 
 h1,

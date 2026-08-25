@@ -8,7 +8,7 @@ gsap.registerPlugin(ScrollTrigger)
 const CARDS = [
   { rot: -9, depth: 14, img: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&h=600&fit=crop&crop=faces&q=80' },
   { rot: -5, depth: 10, img: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=600&fit=crop&crop=faces&q=80' },
-  { rot: -2, depth: 8, img: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=600&fit=crop&crop=faces&q=80' },
+  { rot: -2, depth: 8, img: '/assets/akashimg.png' },
   { rot: 3, depth: 12, img: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=400&h=600&fit=crop&crop=faces&q=80' },
   { rot: 0, depth: 6, img: 'https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=400&h=600&fit=crop&crop=faces&q=80' },
   { rot: 4, depth: 11, img: 'https://images.unsplash.com/photo-1599566150163-29194dcaad36?w=400&h=600&fit=crop&crop=faces&q=80' },
@@ -19,13 +19,15 @@ const CARDS = [
 const TEAM = [
   { img: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&h=540&fit=crop&crop=faces&q=80', name: 'Mateus Aldana', role: 'Creative Director' },
   { img: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=540&fit=crop&crop=faces&q=80', name: 'Eli Ramirez', role: 'Design Lead' },
-  { img: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=540&fit=crop&crop=faces&q=80', name: 'Naomi Park', role: 'Brand Strategist' },
+  { img: '/assets/akashimg.png', name: 'Naomi Park', role: 'Brand Strategist' },
   { img: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=400&h=540&fit=crop&crop=faces&q=80', name: 'Theo Vance', role: 'Senior Engineer' },
   { img: 'https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=400&h=540&fit=crop&crop=faces&q=80', name: 'Kit Bellamy', role: 'Art Direction' },
   { img: 'https://images.unsplash.com/photo-1599566150163-29194dcaad36?w=400&h=540&fit=crop&crop=faces&q=80', name: 'Ravi Saigal', role: 'Motion · 3D' },
   { img: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=540&fit=crop&crop=faces&q=80', name: 'Iris Caldwell', role: 'Producer' },
   { img: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400&h=540&fit=crop&crop=faces&q=80', name: 'Maya Okafor', role: 'Founder · CEO' },
 ]
+
+const TIMELINE = ['Beginning', 'Expansion', 'Building bitNtech', 'The Next Evolution'] as const
 
 const STATS = [
   { count: 62, decimals: 0, suffix: '', label: 'Projects shipped' },
@@ -309,10 +311,23 @@ export default function AboutUs() {
         </div>
       </section>
 
+      <section className="company-brief">
+        <p>
+          bitNtech is a technology and engineering company building intelligent solutions for an evolving world.
+          We work across software, artificial intelligence, robotics, embedded systems, IoT and digital products
+          to transform ideas and real-world problems into practical technology.
+        </p>
+        <ol className="company-timeline">
+          {TIMELINE.map((stage) => (
+            <li key={stage}>{stage}</li>
+          ))}
+        </ol>
+      </section>
+
       <section className="team-section">
         <div className="team-head">
           <div>
-            <div className="eyebrow">The Crew · Eight strong</div>
+            
             <h2>Designers, builders<br />and the <em>quietly brilliant</em>.</h2>
           </div>
           <p>Every person you see here touches every project we ship. No middle layer, no handoffs to strangers — just direct work with the people doing it.</p>
