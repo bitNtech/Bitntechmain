@@ -5,6 +5,7 @@ import ChatWidget from './components/chat/ChatWidget'
 import Home from './pages/Home'
 import AboutUs from './pages/AboutUs'
 import ContactUs from './pages/ContactUs'
+import ExperiencePage from './pages/ExperiencePage'
 
 function App() {
   return (
@@ -14,6 +15,8 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/about" element={<AboutUs />} />
         <Route path="/contact" element={<ContactUs />} />
+        <Route path="/hardware" element={<ExperiencePage mode="hardware" />} />
+        <Route path="/software" element={<ExperiencePage mode="software" />} />
       </Routes>
       <Footer />
       <ChatWidget />
