@@ -15,6 +15,7 @@ export default function Navbar() {
   const toggleRef = useRef<HTMLInputElement>(null)
   const progressSegmentsRef = useRef<(HTMLDivElement | null)[]>([])
   const { pathname } = useLocation()
+  const isDarkPage = pathname === '/hardware' || pathname === '/software' || pathname === '/contact'
   const [isScrolled, setIsScrolled] = useState(false)
   const [sectionsCount, setSectionsCount] = useState(1)
 
@@ -64,7 +65,7 @@ export default function Navbar() {
 
   return (
     <div className="nav-05">
-      <div className={`nav-05__progress${pathname === '/hardware' || pathname === '/software' ? ' nav-05__progress--on-dark' : ''}`} aria-hidden="true">
+      <div className={`nav-05__progress${isDarkPage ? ' nav-05__progress--on-dark' : ''}`} aria-hidden="true">
         <div className="nav-05__progress-track">
           {Array.from({ length: sectionsCount }).map((_, i) => (
             <div key={i} className="nav-05__progress-segment">
@@ -77,7 +78,7 @@ export default function Navbar() {
         </div>
       </div>
       <input ref={toggleRef} type="checkbox" id="nav-05-toggle" />
-      <nav className={`nav-05__bar${isScrolled ? ' is-scrolled' : ''}${pathname === '/hardware' || pathname === '/software' ? ' nav-05__bar--on-dark' : ''}`}>
+      <nav className={`nav-05__bar${isScrolled ? ' is-scrolled' : ''}${isDarkPage ? ' nav-05__bar--on-dark' : ''}`}>
         <div className="nav-05__glass" aria-hidden="true">
           <div className="nav-05__glass-inner"></div>
         </div>

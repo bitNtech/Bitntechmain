@@ -14,6 +14,7 @@ type MaterialStyle = {
 }
 
 const DESK_WIDTH = 4.6
+const FACE_ANCHOR = new Vector3(0.06, 0.2, -0.1)
 
 function materialStyleFor(name: string): MaterialStyle {
   if (name === 'ellipse') return { color: '#171b20', metalness: 0.52, roughness: 0.3 }
@@ -55,9 +56,9 @@ function colorizeWorkspace(model: THREE.Object3D) {
   })
 }
 
-function ComputerFace() {
+function ComputerFace({ faceRef }: { faceRef: React.RefObject<THREE.Group | null> }) {
   return (
-    <group position={[0.06, 0.2, -0.1]}>
+    <group ref={faceRef} position={FACE_ANCHOR.toArray()}>
       <mesh position={[-0.1, 0.025, 0]}>
         <capsuleGeometry args={[0.025, 0.065, 6, 12]} />
         <meshStandardMaterial color="#55f5de" emissive="#24f6d7" emissiveIntensity={2.6} toneMapped={false} />
@@ -76,10 +77,10 @@ function ComputerFace() {
 
 export default function CuteComputerModel({ pointerRef }: { pointerRef: MutableRefObject<{ x: number; y: number }> }) {
   const { scene } = useGLTF('/assets/cute_computer_follow_cursor.glb')
-  const groupRef = useRef<THREE.Group>(null)
+  const faceRef = useRef<THREE.Group>(null)
   const { camera } = useThree()
 
-  const model = useMemo(() => {
+  const { model, head, headRestRotation, faceInHead } = useMemo(() => {
     const clone = scene.clone(true)
 
     // The export includes a huge invisible backdrop mesh. Remove it before
@@ -95,8 +96,16 @@ export default function CuteComputerModel({ pointerRef }: { pointerRef: MutableR
 
     clone.scale.setScalar(scale)
     clone.position.set(-center.x * scale, -center.y * scale, -center.z * scale)
+    clone.updateMatrixWorld(true)
 
-    return clone
+    const computerHead = clone.getObjectByName('Top-CRT')
+
+    return {
+      model: clone,
+      head: computerHead,
+      headRestRotation: computerHead?.rotation.clone() ?? null,
+      faceInHead: computerHead ? computerHead.worldToLocal(FACE_ANCHOR.clone()) : null,
+    }
   }, [scene])
 
   useEffect(() => {
@@ -106,16 +115,22 @@ export default function CuteComputerModel({ pointerRef }: { pointerRef: MutableR
   }, [camera])
 
   useFrame(() => {
-    if (!groupRef.current) return
+    if (!head || !headRestRotation || !faceInHead || !faceRef.current) return
     const pointer = pointerRef.current
-    groupRef.current.rotation.y = MathUtils.lerp(groupRef.current.rotation.y, pointer.x * 0.12, 0.06)
-    groupRef.current.rotation.x = MathUtils.lerp(groupRef.current.rotation.x, -pointer.y * 0.05, 0.06)
+
+    // Keep the full workstation still. Only the CRT head follows the cursor.
+    head.rotation.y = MathUtils.lerp(head.rotation.y, headRestRotation.y + pointer.x * 0.16, 0.08)
+    head.rotation.x = MathUtils.lerp(head.rotation.x, headRestRotation.x - pointer.y * 0.09, 0.08)
+    head.updateWorldMatrix(true, false)
+
+    faceRef.current.position.copy(faceInHead).applyMatrix4(head.matrixWorld)
+    faceRef.current.quaternion.copy(head.getWorldQuaternion(new THREE.Quaternion()))
   })
 
   return (
-    <group ref={groupRef}>
+    <group>
       <primitive object={model} />
-      <ComputerFace />
+      <ComputerFace faceRef={faceRef} />
     </group>
   )
 }

@@ -48,6 +48,8 @@
   align-items: center;
   justify-content: center;
   z-index: 5;
+  /* Match the Hardware hero background exactly. */
+  background: radial-gradient(circle at 75% 42%, #122019, #0f1818 44%);
 }
 
 .about-us .small-team {
@@ -55,7 +57,8 @@
   font-size: clamp(40px, 6.4vw, 92px);
   letter-spacing: -0.035em;
   line-height: 1;
-  color: var(--nb-ink);
+  color: #f6f5ee;
+  text-shadow: 0 3px 16px rgba(0, 0, 0, .24);
   text-align: center;
   margin-bottom: 0;
   z-index: 4;
@@ -85,12 +88,12 @@
   font-size: clamp(110px, 21vw, 300px);
   letter-spacing: -0.045em;
   line-height: 0.85;
-  color: var(--nb-ghost);
+  color: #b6ee44;
   text-align: center;
   white-space: nowrap;
   user-select: none;
   z-index: 1;
-  text-shadow: 0 4px 12px rgba(120, 100, 50, 0.04);
+  text-shadow: 0 6px 18px rgba(0, 0, 0, .32);
 }
 .about-us .big-results .letter {
   display: inline-block;
