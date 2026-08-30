@@ -13,25 +13,48 @@ const PAGE_LABELS: Record<string, string> = {
 
 export default function Navbar() {
   const toggleRef = useRef<HTMLInputElement>(null)
+  const progressSegmentsRef = useRef<(HTMLDivElement | null)[]>([])
   const { pathname } = useLocation()
   const [isScrolled, setIsScrolled] = useState(false)
+  const [sectionsCount, setSectionsCount] = useState(1)
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      // Find sections or main containers to count segments
+      const sections = document.querySelectorAll('section')
+      setSectionsCount(sections.length > 0 ? sections.length : 1)
+    }, 150)
+    return () => clearTimeout(timer)
+  }, [pathname])
 
   useEffect(() => {
     let frame = 0
     const updateScrollState = () => {
       frame = 0
-      setIsScrolled(window.scrollY > 36)
+      const scrollY = window.scrollY
+      setIsScrolled(scrollY > 36)
+      const maxScroll = document.documentElement.scrollHeight - window.innerHeight
+      const scrolled = maxScroll > 0 ? Math.min(scrollY / maxScroll, 1) : 0
+      
+      const N = sectionsCount
+      progressSegmentsRef.current.forEach((segment, i) => {
+        if (!segment) return
+        const localScrolled = Math.min(1, Math.max(0, scrolled * N - i))
+        segment.style.width = `${localScrolled * 100}%`
+      })
     }
     const onScroll = () => {
       if (!frame) frame = requestAnimationFrame(updateScrollState)
     }
     updateScrollState()
     window.addEventListener('scroll', onScroll, { passive: true })
+    window.addEventListener('resize', onScroll, { passive: true })
     return () => {
       window.removeEventListener('scroll', onScroll)
+      window.removeEventListener('resize', onScroll)
       if (frame) cancelAnimationFrame(frame)
     }
-  }, [pathname])
+  }, [pathname, sectionsCount])
 
   const closeAfterNavigate = () => {
     setTimeout(() => {
@@ -41,8 +64,23 @@ export default function Navbar() {
 
   return (
     <div className="nav-05">
+      <div className={`nav-05__progress${pathname === '/hardware' || pathname === '/software' ? ' nav-05__progress--on-dark' : ''}`} aria-hidden="true">
+        <div className="nav-05__progress-track">
+          {Array.from({ length: sectionsCount }).map((_, i) => (
+            <div key={i} className="nav-05__progress-segment">
+              <div 
+                ref={el => { progressSegmentsRef.current[i] = el }} 
+                className="nav-05__progress-fill" 
+              />
+            </div>
+          ))}
+        </div>
+      </div>
       <input ref={toggleRef} type="checkbox" id="nav-05-toggle" />
-      <nav className={`nav-05__bar nav-05__pill${isScrolled ? ' is-scrolled' : ''}${pathname === '/hardware' || pathname === '/software' ? ' nav-05__pill--on-dark' : ''}`}>
+      <nav className={`nav-05__bar${isScrolled ? ' is-scrolled' : ''}${pathname === '/hardware' || pathname === '/software' ? ' nav-05__bar--on-dark' : ''}`}>
+        <div className="nav-05__glass" aria-hidden="true">
+          <div className="nav-05__glass-inner"></div>
+        </div>
         <Link to="/" className="nav-05__brand">
           <span className="nav-05__logo">BitN<em>Tech</em></span>
         </Link>
@@ -52,13 +90,13 @@ export default function Navbar() {
             .filter(([path]) => path !== '/get-started')
             .map(([path, label]) => (
               <li key={path}>
-                <Link to={path} tabIndex={isScrolled ? 0 : -1} className={pathname === path ? 'is-active' : ''}>{label}</Link>
+                <Link to={path} tabIndex={0} className={pathname === path ? 'is-active' : ''}>{label}</Link>
               </li>
             ))}
         </ul>
 
         <div className="nav-05__actions">
-          <Link to="/get-started" tabIndex={isScrolled ? 0 : -1} className="nav-05__cta">Get Started <span>↗</span></Link>
+          <Link to="/get-started" tabIndex={0} className="nav-05__cta">Get Started <span>↗</span></Link>
           <label htmlFor="nav-05-toggle" className="nav-05__btn" aria-label="Open menu">
             <span></span><span></span><span></span>
           </label>

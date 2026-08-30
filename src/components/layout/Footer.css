@@ -4,7 +4,7 @@
   display: grid;
   position: relative;
   min-height: 12rem;
-  margin-top: 6rem;
+  margin-top: 0;
   font-family: 'DM Mono', monospace;
 
   .bubbles {
@@ -51,7 +51,7 @@
       letter-spacing: -0.04em;
       line-height: 1;
       white-space: nowrap;
-      color: #092634;
+      color: #220934;
     }
 
     .brand-watermark em {
@@ -88,7 +88,7 @@
     }
 
     .what-if-final {
-      color: #092634 !important;
+      color: #220934 !important;
       font-size: clamp(1.6rem, 3.6vw, 2.6rem) !important;
       margin-top: 0.5rem !important;
       opacity: 1 !important;
@@ -98,7 +98,7 @@
       margin-top: 1rem;
       padding: 0.85rem 2rem;
       border-radius: 999px;
-      background: #092634;
+      background: #220934;
       color: #fff !important;
       font-weight: 700;
       font-size: 0.85rem;

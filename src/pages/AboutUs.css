@@ -1,7 +1,7 @@
 :root {
   --nb-bg: #F9F9F9;
   --nb-bg-2: #F0F0F0;
-  --nb-ink: #092634;
+  --nb-ink: #220934;
   --nb-ink-soft: #004E72;
   --nb-mute: #8B9DA6;
   --nb-line: #E0E0E0;
@@ -274,7 +274,7 @@
   border: 2px solid var(--nb-ink);
   border-radius: 20px;
   padding: 40px 44px;
-  box-shadow: 8px 9px 0 rgba(9, 38, 52, .9);
+  box-shadow: 8px 9px 0 rgba(34, 9, 52, .9);
 }
 .about-us .eyebrow {
   display: inline-flex;
@@ -422,7 +422,7 @@
   grid-template-columns: 1.4fr 1fr 1fr 1fr;
   gap: 40px;
   align-items: end;
-  box-shadow: 8px 9px 0 rgba(9, 38, 52, .9);
+  box-shadow: 8px 9px 0 rgba(34, 9, 52, .9);
   position: relative;
   overflow: hidden;
 }
