@@ -239,8 +239,16 @@
   cursor: pointer;
 }
 
+/* Ride above the fixed tab bar rather than behind it. */
+@media (max-width: 860px) {
+  .chat-widget { bottom: calc(14px + var(--app-bottom-nav)); }
+  .chat-widget__panel { height: min(420px, calc(100svh - 200px)); }
+  /* Under 16px iOS zooms the whole page the moment the field takes focus. */
+  .chat-widget__form input { font-size: 16px; height: 42px; }
+}
+
 @media (max-width: 480px) {
-  .chat-widget { right: 14px; bottom: 14px; }
+  .chat-widget { right: 14px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

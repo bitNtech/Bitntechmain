@@ -35,13 +35,6 @@ const STATS = [
   { count: 9, decimals: 1, suffix: '', label: 'Avg NPS' },
 ]
 
-const ArrowIcon = () => (
-  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round">
-    <line x1="7" y1="17" x2="17" y2="7" />
-    <polyline points="7 7 17 7 17 17" />
-  </svg>
-)
-
 export default function AboutUs() {
   const rootRef = useRef<HTMLDivElement>(null)
 
@@ -303,10 +296,6 @@ export default function AboutUs() {
         </div>
 
         <div className="subline nb-subline">
-          <button className="arrow-pill">
-            Meet the crew
-            <span className="ar"><ArrowIcon /></span>
-          </button>
           <div className="subline-text">8 people. 60+ shipped projects. Zero filler.</div>
         </div>
       </section>

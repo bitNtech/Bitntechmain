@@ -1,0 +1,194 @@
+/* Nila — the robot that lives on the site. One set of styles for all three
+   places she shows up: the home hero, the floating companion, and the
+   contact form. */
+
+.nila-scene {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.nila-scene canvas {
+  display: block;
+  /* The canvas paints over its own hit area otherwise, which would swallow
+     clicks on whatever she is floating above. */
+  pointer-events: none !important;
+}
+
+/* --- speech bubble ------------------------------------------------------ */
+
+.nila-bubble {
+  position: absolute;
+  bottom: calc(100% - 6px);
+  left: 50%;
+  transform: translate(-50%, 8px) scale(.94);
+  width: max-content;
+  max-width: min(260px, 68vw);
+  padding: 10px 14px;
+  border-radius: 14px;
+  background: #fffdf8;
+  border: 2px solid #1c1917;
+  box-shadow: 3px 3px 0 rgba(28, 25, 23, .9);
+  color: #1c1917;
+  font: 600 13px/1.35 var(--sans);
+  text-align: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity .28s ease, transform .28s cubic-bezier(.34, 1.4, .64, 1), visibility .28s;
+  z-index: 4;
+}
+
+.nila-bubble.is-on {
+  opacity: 1;
+  visibility: visible;
+  transform: translate(-50%, 0) scale(1);
+}
+
+.nila-bubble::after {
+  content: '';
+  position: absolute;
+  top: calc(100% - 6px);
+  left: 50%;
+  width: 11px;
+  height: 11px;
+  background: #fffdf8;
+  border-right: 2px solid #1c1917;
+  border-bottom: 2px solid #1c1917;
+  transform: translateX(-50%) rotate(45deg);
+}
+
+.nila-bubble.is-nudge {
+  border-color: var(--nb-orange-3, #ff6e42);
+  box-shadow: 3px 3px 0 rgba(255, 110, 66, .85);
+}
+
+.nila-bubble.is-nudge::after {
+  border-color: var(--nb-orange-3, #ff6e42);
+}
+
+.nila-bubble__cta {
+  display: inline-block;
+  margin-top: 8px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: #220934;
+  color: #fff;
+  font: 700 12px var(--mono);
+  text-decoration: none;
+  pointer-events: auto;
+}
+
+.nila-bubble__cta:hover { background: var(--nb-orange-3, #ff6e42); }
+
+/* --- home hero ---------------------------------------------------------- */
+
+.nila-hero {
+  position: absolute;
+  right: clamp(1rem, 5vw, 5rem);
+  bottom: clamp(1rem, 6vh, 4rem);
+  width: clamp(150px, 20vw, 260px);
+  height: clamp(150px, 20vw, 260px);
+  z-index: 3;
+  pointer-events: none;
+}
+
+.nila-hero .nila-bubble { pointer-events: auto; }
+
+@media (max-width: 720px) {
+  .nila-hero {
+    right: 50%;
+    transform: translateX(50%);
+    bottom: 1.25rem;
+    width: 128px;
+    height: 128px;
+  }
+  .nila-bubble { font-size: 12px; padding: 8px 12px; }
+}
+
+/* --- floating companion ------------------------------------------------- */
+
+.nila-companion {
+  position: fixed;
+  z-index: 300;
+  width: 84px;
+  height: 84px;
+  /* Driven from JS so she can drift toward the pointer; the transition is what
+     makes the drift read as swimming rather than snapping. */
+  transition: transform .9s cubic-bezier(.22, 1, .36, 1);
+  pointer-events: none;
+}
+
+.nila-companion__hit {
+  position: absolute;
+  inset: 6px;
+  border-radius: 50%;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  cursor: pointer;
+  pointer-events: auto;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+.nila-companion .nila-bubble {
+  bottom: calc(100% - 10px);
+  pointer-events: auto;
+}
+
+/* Near the right edge the bubble would run off screen, so it hugs that side. */
+.nila-companion[data-side='right'] .nila-bubble {
+  left: auto;
+  right: 0;
+  transform: translate(0, 8px) scale(.94);
+}
+
+.nila-companion[data-side='right'] .nila-bubble.is-on {
+  transform: translate(0, 0) scale(1);
+}
+
+.nila-companion[data-side='right'] .nila-bubble::after {
+  left: auto;
+  right: 26px;
+}
+
+.nila-companion__ping {
+  position: absolute;
+  right: 10px;
+  top: 8px;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: var(--nb-orange-3, #ff6e42);
+  box-shadow: 0 0 0 3px rgba(255, 110, 66, .28);
+  animation: nila-ping 2.4s ease-in-out infinite;
+}
+
+@keyframes nila-ping {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.35); opacity: .65; }
+}
+
+@media (max-width: 860px) {
+  .nila-companion { width: 68px; height: 68px; }
+}
+
+/* --- contact page ------------------------------------------------------- */
+
+.nila-contact {
+  position: relative;
+  width: clamp(190px, 26vw, 300px);
+  height: clamp(190px, 26vw, 300px);
+  margin-inline: auto;
+}
+
+@media (max-width: 900px) {
+  .nila-contact { width: 190px; height: 190px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nila-companion { transition: none; }
+  .nila-bubble { transition: opacity .2s ease; }
+  .nila-companion__ping { animation: none; }
+}

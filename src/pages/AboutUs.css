@@ -519,12 +519,14 @@
   .about-us .small-team {
     font-size: 10vw;
   }
+  /* "big results" is one nowrap line: 24vw ran past both edges and got clipped.
+     17vw is the largest that still fits 11 glyphs across a phone. */
   .about-us .big-results {
-    font-size: 24vw;
+    font-size: 17vw;
   }
   .about-us .cards-row {
-    height: 220px;
-    top: 52%;
+    height: 200px;
+    top: 46%;
   }
   .about-us .card-1 { width: 80px; height: 110px; left: 0%; top: 20px; }
   .about-us .card-2 { width: 90px; height: 130px; left: 10%; top: 35px; }
@@ -534,8 +536,15 @@
   .about-us .card-6 { width: 95px; height: 130px; left: 62%; top: 40px; }
   .about-us .card-7 { width: 100px; height: 140px; left: 74%; top: 20px; }
   .about-us .card-8 { width: 80px; height: 110px; left: 87%; top: 35px; }
+  /* Clear the absolutely-placed photo row instead of sitting behind it. */
   .about-us .subline {
-    margin-top: 120px;
+    margin-top: 300px;
+  }
+  .about-us .subline-text {
+    font-size: 12px;
+    line-height: 1.5;
+    max-width: 22ch;
+    margin-inline: auto;
   }
   .about-us .team-section {
     padding: 80px 20px 40px;
@@ -552,4 +561,32 @@
     padding: 40px 24px;
     gap: 24px;
   }
+
+  /* svh tracks the visible viewport, so the hero doesn't jump by the height
+     of the browser chrome as it hides on scroll. */
+  .about-us .hero {
+    min-height: 100svh;
+    padding-top: calc(6rem + env(safe-area-inset-top));
+  }
+
+  .about-us .company-brief { padding: 32px 20px 0; }
+  .about-us .company-brief p { font-size: 15px; margin-bottom: 24px; }
+  .about-us .company-timeline { font-size: 11px; gap: 6px; }
+  .about-us .company-timeline li { padding: 7px 12px; }
+
+  .about-us .team-head { margin-bottom: 36px; }
+  .about-us .team-head h2 { font-size: clamp(2rem, 9.5vw, 3rem); }
+
+  /* Touch can't hover, so the name plate that hover reveals stays put. */
+  .about-us .t-card .t-meta { opacity: 1; transform: none; }
+}
+
+@media (max-width: 480px) {
+  .about-us .team-grid { gap: 12px; }
+  /* One column stacked the three figures into a very tall slab. Two columns
+     keeps the desktop composition and fits the panel on one screen. */
+  .about-us .stats-inner { grid-template-columns: 1fr 1fr; padding: 28px 18px; gap: 18px 16px; }
+  .about-us .stats h3 { grid-column: 1 / -1; font-size: 24px; }
+  .about-us .stat-block .num { font-size: 38px; }
+  .about-us .stat-block .lbl { font-size: 10px; letter-spacing: .12em; margin-top: 8px; padding-top: 8px; }
 }

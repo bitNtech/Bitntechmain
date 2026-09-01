@@ -675,9 +675,35 @@
   z-index: 10;
 }
 
+@media (max-width: 860px) {
+  .contact-us .scene {
+    padding: calc(5.5rem + env(safe-area-inset-top)) 1.25rem 3rem;
+    gap: 32px;
+    min-height: auto;
+  }
+
+  .contact-us .card {
+    width: min(400px, calc(100vw - 32px));
+    padding: 28px 20px 32px;
+  }
+
+  /* iOS zooms the whole page when a focused field is under 16px. Bumping the
+     control text is the only way to keep the form from yanking the layout. */
+  .contact-us .field input,
+  .contact-us .field textarea,
+  .contact-us .field select,
+  .contact-us .reason-trigger {
+    font-size: 16px;
+  }
+
+  .contact-us .field { height: 54px; }
+}
+
 @media (max-width: 560px) {
-  .contact-us .scene { padding-top: 96px; }
+  .contact-us .scene { padding-top: calc(5rem + env(safe-area-inset-top)); }
   .contact-us .bubble { max-width: 210px; font-size: 12.5px; }
+  .contact-us .head3d { width: 132px; height: 122px; }
+  .contact-us .info-card { padding-bottom: 24px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -690,4 +716,25 @@
   .contact-us .is-spinning .head { animation: none; }
   .contact-us .bubble.pop { animation: none; }
   .contact-us .eyes { transition: none; }
+}
+
+/* --- Phone stacking ------------------------------------------------------
+   Single column puts the mascot between the two cards. Its speech bubble is
+   absolutely positioned above it and its arms hang below, so without reserved
+   room it covered the info card's last row and got clipped by the form. */
+@media (max-width: 900px) {
+  .contact-us .stage {
+    padding-top: 86px;
+    margin-bottom: 12px;
+  }
+
+  /* Bubble and robot both sit above the form card's ground. */
+  .contact-us .stage,
+  .contact-us .bubble { z-index: 4; }
+}
+
+@media (max-width: 560px) {
+  .contact-us .stage { padding-top: 78px; }
+  /* Nila already owns this page; the floating copy of her is noise here. */
+  body:has(.contact-us) .chat-widget { display: none; }
 }

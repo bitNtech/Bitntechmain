@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { animate, createTimeline, stagger } from 'animejs'
 import RobotArmModel from '../components/3d/RobotArmModel'
@@ -7,13 +7,16 @@ import ErrorBoundary from '../components/ErrorBoundary'
 import { Bounds } from '@react-three/drei'
 import { Canvas } from '@react-three/fiber'
 import { Suspense } from 'react'
+import { SERVICES } from '../data/services'
 import './ExperiencePage.css'
 
 function RobotArmScene({ pointerRef }: { pointerRef: React.MutableRefObject<{ x: number; y: number }> }) {
   const ARM_FACING = Math.PI
   return (
     <div className="experience-object" aria-hidden="true" style={{ zIndex: 0, pointerEvents: 'none' }}>
-      <Canvas camera={{ position: [2.5, 1.8, 3.5], fov: 40 }}>
+      {/* Capped DPR: phones report 3x and would render 9x the pixels for a
+          decorative model, which is where the scroll jank comes from. */}
+      <Canvas dpr={[1, 1.6]} camera={{ position: [2.5, 1.8, 3.5], fov: 40 }}>
         <ambientLight intensity={0.8} />
         <directionalLight position={[3, 5, 2]} intensity={1.6} />
         <directionalLight position={[-4, -2, -3]} intensity={0.4} />
@@ -33,7 +36,7 @@ function CuteComputerScene({ pointerRef }: { pointerRef: React.MutableRefObject<
   return (
     <div className="experience-object" aria-hidden="true" style={{ zIndex: 0, pointerEvents: 'none' }}>
       <ErrorBoundary fallback={null}>
-        <Canvas camera={{ position: [4, 3, 6], fov: 40 }}>
+        <Canvas dpr={[1, 1.6]} camera={{ position: [4, 3, 6], fov: 40 }}>
           <ambientLight intensity={2} />
           <directionalLight position={[4, 8, 4]} intensity={3} color="#fff5e6" />
           <directionalLight position={[-5, 3, -2]} intensity={1.2} color="#8ce5ff" />
@@ -50,14 +53,16 @@ function CuteComputerScene({ pointerRef }: { pointerRef: React.MutableRefObject<
 
 type Props = { mode: 'hardware' | 'software' }
 const COPY = {
-  hardware: { eyebrow: 'Physical intelligence', title: ['Make the', 'physical world', 'responsive.'], lead: 'Connected devices, sensor systems and robotic prototypes that turn real-world signals into useful action.', pillars: ['Embedded systems', 'Smart sensing', 'Robotics', 'IoT platforms'], hue: 'lime' },
-  software: { eyebrow: 'Digital systems', title: ['Build products', 'people want', 'to return to.'], lead: 'From a sharp first interface to the infrastructure behind it, we make software that feels effortless and grows intelligently.', pillars: ['Product design', 'Web platforms', 'AI integration', 'Automation'], hue: 'violet' },
+  hardware: { eyebrow: 'Physical intelligence', title: ['Make the', 'physical world', 'responsive.'], lead: 'Connected devices, sensor systems and robotic prototypes that turn real-world signals into useful action.', hue: 'lime' },
+  software: { eyebrow: 'Digital systems', title: ['Build products', 'people want', 'to return to.'], lead: 'From a sharp first interface to the infrastructure behind it, we make software that feels effortless and grows intelligently.', hue: 'violet' },
 } as const
 export default function ExperiencePage({ mode }: Props) {
   const page = useRef<HTMLElement>(null)
   const armPointerRef = useRef({ x: 0, y: 0 })
   const copy = COPY[mode]
-  
+  const pillars = SERVICES.filter(s => s.domain === mode)
+  const [expandedPillar, setExpandedPillar] = useState<string | null>(null)
+
   // Pointer tracking for both scenes
   useEffect(() => {
     const hero = page.current?.querySelector<HTMLElement>('.experience-hero')
@@ -110,7 +115,25 @@ export default function ExperiencePage({ mode }: Props) {
     )}
     
     <p className="experience-hero__index experience-hero__body" aria-hidden="true">SYSTEM<br />ONLINE</p></section>
-    <section className="experience-field" id="field" data-xp><div className="xp-reveal"><p className="xp-label">Explore the system</p><h2>Every layer,<br /><em>in conversation.</em></h2></div><div className="experience-pillar-grid">{copy.pillars.map((item,index)=><article className="xp-reveal" key={item}><span>0{index+1}</span><h3>{item}</h3><p>Designed as a flexible part of a larger, living product ecosystem.</p><b>↗</b></article>)}</div></section>
+    <section className="experience-field" id="field" data-xp><div className="xp-reveal"><p className="xp-label">Explore the system</p><h2>Every layer,<br /><em>in conversation.</em></h2></div><div className="experience-pillar-grid">{pillars.map(({ Icon, title, body, desc, items }, index)=>{
+      const expanded = expandedPillar === title
+      return <article
+        className={`xp-reveal experience-pillar${expanded ? ' experience-pillar--expanded' : ''}`}
+        key={title}
+        onClick={() => setExpandedPillar(v => v === title ? null : title)}
+        role="button"
+        tabIndex={0}
+      >
+        <div className="experience-pillar__row">
+          <div className="experience-pillar__head"><span>{String(index + 1).padStart(2, '0')}</span><Icon size={28} /><h3>{title}</h3></div>
+          <div className="experience-pillar__meta"><p>{body}</p><b>{expanded ? '×' : '+'}</b></div>
+        </div>
+        <div className="experience-pillar__collapse"><div className="experience-pillar__collapse-inner">
+          <p className="experience-pillar__desc">{desc}</p>
+          <ul className="experience-pillar__items">{items.map(entry=><li key={entry}>{entry}</li>)}</ul>
+        </div></div>
+      </article>
+    })}</div></section>
     <section className="experience-quote" data-xp><p className="xp-reveal">Not a stack of features. A <em>living experience</em> with a clear reason to exist.</p></section>
     <section className="experience-cta" data-xp><p className="xp-label xp-reveal">Have a project in mind?</p><h2 className="xp-reveal">Let’s give it<br />some momentum.</h2><Link className="xp-reveal" to="/contact">Talk to bitNtech <span>↗</span></Link></section>
   </main>

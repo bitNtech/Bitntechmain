@@ -15,7 +15,9 @@ export default function Navbar() {
   const toggleRef = useRef<HTMLInputElement>(null)
   const progressSegmentsRef = useRef<(HTMLDivElement | null)[]>([])
   const { pathname } = useLocation()
-  const isDarkPage = pathname === '/hardware' || pathname === '/software' || pathname === '/contact'
+  // Every page whose first screen is a dark ground — the bar sits on top of it.
+  const isDarkPage = pathname === '/hardware' || pathname === '/software'
+    || pathname === '/contact' || pathname === '/about' || pathname === '/get-started'
   const [isScrolled, setIsScrolled] = useState(false)
   const [sectionsCount, setSectionsCount] = useState(1)
 

@@ -44,6 +44,60 @@ body {
   margin: 0;
   background: var(--bg);
   overflow-x: hidden;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+/* --- App shell / touch tuning ------------------------------------------
+   Height the fixed bottom tab bar occupies, so page footers can reserve
+   room for it instead of hiding their last row underneath. */
+:root {
+  --app-bottom-nav: 0px;
+  --safe-bottom: env(safe-area-inset-bottom);
+}
+
+@media (max-width: 860px) {
+  :root { --app-bottom-nav: calc(60px + env(safe-area-inset-bottom)); }
+
+  /* In-page anchors (the hero's "Enter the field" jump) otherwise land the
+     target underneath the fixed top bar or the tab bar. */
+  html {
+    scroll-padding-top: calc(56px + env(safe-area-inset-top));
+    scroll-padding-bottom: var(--app-bottom-nav);
+  }
+}
+
+/* Kill the 300ms tap delay and the grey flash on everything tappable. */
+a, button, label, summary, [role='button'], input, select, textarea {
+  touch-action: manipulation;
+}
+
+/* Any horizontal rail scrolls with momentum and won't drag the page sideways
+   or trigger the browser's back-swipe when it reaches an end. */
+@media (max-width: 860px) {
+  .home-worlds__track,
+  .about-us .team-grid,
+  [data-touch-rail] {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+  }
+}
+
+/* Touch devices have no hover, so transforms parked on :hover stick after a
+   tap. Neutralise the ones that move layout; colour changes stay. */
+@media (hover: none) {
+  .home-service:hover,
+  .home-world:hover,
+  .experience-pillar-grid article:hover,
+  .about-us .arrow-pill:hover {
+    transform: none;
+  }
+  .home-service:hover { box-shadow: none; }
+
+  /* Content that only appears on hover would never appear at all. */
+  .about-us .t-card .t-meta { opacity: 1; transform: none; }
+  .nav-05__nav-list li a .nav-05__num { opacity: 1; }
 }
 
 h1,

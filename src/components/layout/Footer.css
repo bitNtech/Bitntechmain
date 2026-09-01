@@ -15,6 +15,12 @@
     height: 1rem;
     background: var(--footer-background);
     filter: url('#blob');
+    /* Bubbles are placed at percentage offsets and half of them hang past the
+       right edge. Desktop hid that behind body's overflow-x; mobile browsers
+       instead shrink the whole page to fit, so clip on x only — y stays
+       visible because the bubbles animate upward out of this 1rem strip. */
+    overflow-x: clip;
+    overflow-y: visible;
 
     .bubble {
       position: absolute;
@@ -175,5 +181,19 @@
   .site-footer .content .footer-grid {
     grid-template-columns: 1fr;
     text-align: center;
+  }
+}
+
+/* The tab bar is fixed over the page, so the footer grows by its height —
+   its own background runs under the bar and nothing is left hidden. */
+@media (max-width: 860px) {
+  .site-footer .content {
+    padding: 3rem 1.25rem 0;
+    grid-gap: 2rem;
+    padding-bottom: var(--app-bottom-nav);
+  }
+
+  .site-footer .content .brand-watermark {
+    font-size: clamp(3rem, 20vw, 8rem);
   }
 }

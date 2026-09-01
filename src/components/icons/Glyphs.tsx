@@ -110,3 +110,69 @@ export const GlyphArm = (p: GlyphProps) => (
     </g>
   </Frame>
 )
+
+/** 07 — Embedded & IoT: a chip with radiating pins. */
+export const GlyphChip = (p: GlyphProps) => (
+  <Frame {...p}>
+    <rect x="20" y="20" width="24" height="24" />
+    <circle cx="32" cy="32" r="3.5" className="glyph-blink" />
+    <g className="glyph-draw" opacity={0.9}>
+      <path d="M20 26h-8M20 38h-8M44 26h8M44 38h8M26 20v-8M38 20v-8M26 44v8M38 44v8" />
+    </g>
+  </Frame>
+)
+
+/** 08 — Electronics & Hardware: circuit traces meeting at nodes. */
+export const GlyphCircuit = (p: GlyphProps) => (
+  <Frame {...p}>
+    <g className="glyph-draw" opacity={0.9}>
+      <path d="M8 16h18v14h20v-14h10M8 48h14v-14M42 48h14v-8" />
+    </g>
+    <circle cx="26" cy="16" r="2.5" fill="currentColor" />
+    <circle cx="48" cy="16" r="2.5" fill="currentColor" />
+    <circle cx="22" cy="48" r="2.5" fill="currentColor" />
+    <circle cx="56" cy="48" r="2.5" className="glyph-blink" fill="currentColor" />
+  </Frame>
+)
+
+/** 09 — Cloud & DevOps: a cloud with an orbiting sync arrow. */
+export const GlyphCloud = (p: GlyphProps) => (
+  <Frame {...p}>
+    <path d="M20 40a10 10 0 1 1 2-19.8A13 13 0 0 1 46 26a9 9 0 0 1-2 18H20Z" />
+    <g className="glyph-spin" style={{ transformOrigin: '32px 30px' }}>
+      <path d="M32 22a8 8 0 0 1 8 8M40 30l-2-4M40 30l4-1" opacity={0.7} />
+    </g>
+  </Frame>
+)
+
+/** 10 — Data & Analytics: rising bars. */
+export const GlyphChart = (p: GlyphProps) => (
+  <Frame {...p}>
+    <path d="M10 52h44" />
+    <g className="glyph-lift">
+      <rect x="16" y="34" width="8" height="18" />
+      <rect x="30" y="22" width="8" height="30" style={{ animationDelay: '.3s' }} />
+      <rect x="44" y="12" width="8" height="40" style={{ animationDelay: '.6s' }} />
+    </g>
+  </Frame>
+)
+
+/** 11 — Cybersecurity: a shield standing guard. */
+export const GlyphShield = (p: GlyphProps) => (
+  <Frame {...p}>
+    <g className="glyph-draw" opacity={0.9}>
+      <path d="M32 8 52 16v16c0 14-9 22-20 24C21 54 12 46 12 32V16Z" />
+    </g>
+    <path d="M23 32l6 6 12-14" className="glyph-blink" />
+  </Frame>
+)
+
+/** 12 — Research & Innovation: a compass finding direction. */
+export const GlyphCompass = (p: GlyphProps) => (
+  <Frame {...p}>
+    <circle cx="32" cy="32" r="20" />
+    <g className="glyph-spin-rev" style={{ transformOrigin: '32px 32px' }}>
+      <path d="M32 32 24 42 32 22 40 32Z" fill="currentColor" stroke="none" />
+    </g>
+  </Frame>
+)

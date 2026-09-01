@@ -319,6 +319,10 @@
   color: var(--pill-bg);
 }
 
+.nav-05__bar--on-dark:not(.is-scrolled) .nav-05__logo {
+  color: #fff;
+}
+
 .nav-05__bar--on-dark:not(.is-scrolled) .nav-05__links a {
   color: rgba(255, 255, 255, .72);
 }
@@ -475,4 +479,67 @@
   .nav-05__cta {
     transition: none;
   }
+}
+
+/* --- Phones -------------------------------------------------------------
+   The tab bar at the bottom owns navigation here, so the top bar shrinks to
+   a compact header: brand on the left, menu on the right. */
+@media (max-width: 860px) {
+  .nav-05__bar {
+    padding: 10px 16px calc(10px);
+    padding-top: calc(10px + env(safe-area-inset-top));
+  }
+
+  /* The liquid-glass displacement filter is a per-frame GPU cost that phones
+     pay for a pill nobody sees once the links are hidden. */
+  .nav-05__glass { display: none; }
+
+  .nav-05__logo { font-size: 1.05rem; }
+
+  .nav-05__progress { height: 3px; }
+
+  .nav-05__overlay {
+    padding: calc(84px + env(safe-area-inset-top)) 24px calc(32px + var(--app-bottom-nav));
+    justify-content: flex-start;
+    overflow-y: auto;
+  }
+
+  .nav-05__nav-list { margin-bottom: 32px; }
+
+  .nav-05__nav-list li a {
+    font-size: clamp(2rem, 11vw, 3.2rem);
+    gap: 12px;
+    padding: 6px 0;
+  }
+
+  /* Touch has no hover to reveal these, so keep the index numerals visible. */
+  .nav-05__nav-list li a .nav-05__num { opacity: 1; }
+
+  .nav-05__overlay-footer { gap: 24px; }
+}
+/* --- Phone top bar ------------------------------------------------------
+   The glass pill is hidden on phones, which left the bar fully transparent:
+   the brand mark floated over whatever scrolled beneath it. Give it a ground,
+   following the same light/dark logic the desktop pill uses so the two views
+   read the same: page-matched at the top, dark once you scroll. */
+@media (max-width: 860px) {
+  .nav-05__bar {
+    background: rgba(250, 249, 245, 0.9);
+    backdrop-filter: blur(18px) saturate(1.4);
+    -webkit-backdrop-filter: blur(18px) saturate(1.4);
+    border-bottom: 1px solid rgba(34, 9, 52, 0.1);
+    transition: background .25s ease, border-color .25s ease;
+  }
+
+  .nav-05__bar--on-dark,
+  .nav-05__bar.is-scrolled {
+    background: rgba(14, 17, 21, 0.9);
+    border-bottom-color: rgba(255, 255, 255, 0.14);
+  }
+
+  .nav-05__bar--on-dark .nav-05__logo,
+  .nav-05__bar.is-scrolled .nav-05__logo { color: #fff; }
+
+  .nav-05__bar--on-dark .nav-05__mark,
+  .nav-05__bar.is-scrolled .nav-05__mark { background: #fff; color: var(--pill-bg); }
 }
