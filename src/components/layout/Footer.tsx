@@ -86,13 +86,11 @@ export default function Footer() {
 
           <div className="columns">
             <b>{NAV_COLUMNS[1].heading}</b>
-            {NAV_COLUMNS[1].links.map((link) =>
-              'to' in link ? (
-                <Link key={link.label} to={link.to}>{link.label}</Link>
-              ) : (
-                <a key={link.label} href={link.href} target="_blank" rel="noreferrer">{link.label}</a>
-              ),
-            )}
+            {/* Every link in this column is external, so there is no router
+                branch to take here. */}
+            {NAV_COLUMNS[1].links.map((link) => (
+              <a key={link.label} href={link.href} target="_blank" rel="noreferrer">{link.label}</a>
+            ))}
           </div>
         </div>
 

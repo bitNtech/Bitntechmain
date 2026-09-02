@@ -22,5 +22,8 @@
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["src"]
+  /* The *.test.ts files are Node scripts (node:assert, node:fs), not app code.
+     They belong to tsconfig.node.json, which has the Node types. */
+  "include": ["src"],
+  "exclude": ["src/**/*.test.ts"]
 }

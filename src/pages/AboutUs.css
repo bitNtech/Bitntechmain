@@ -10,6 +10,13 @@
   --nb-orange-2: #E85A2B;
   --nb-orange-3: #FF6E42;
   --nb-orange-4: #FFB29A;
+
+  /* Cast shadow under the image cards. Held as RGB triplets, not finished
+     colours, because each shadow layer and each hover state uses its own
+     alpha — see .card and .t-card. */
+  --nb-shadow-a: 20, 96, 64;
+  --nb-shadow-b: 14, 72, 47;
+  --nb-shadow-c: 6, 40, 26;
 }
 
 .about-us {
@@ -41,6 +48,7 @@
 /* ============ HERO ============ */
 .about-us .hero {
   position: relative;
+  overflow: hidden;
   min-height: 100vh;
   padding: 130px 32px 60px;
   display: flex;
@@ -124,9 +132,9 @@
     var(--nb-orange-3) 70%,
     var(--nb-orange-4) 100%
   );
-  box-shadow: 0 30px 50px -16px rgba(180, 50, 20, 0.5),
-    0 14px 26px -8px rgba(140, 40, 10, 0.32),
-    0 5px 10px -2px rgba(80, 20, 0, 0.2),
+  box-shadow: 0 30px 50px -16px rgba(var(--nb-shadow-a), 0.5),
+    0 14px 26px -8px rgba(var(--nb-shadow-b), 0.32),
+    0 5px 10px -2px rgba(var(--nb-shadow-c), 0.2),
     inset 0 2px 0 rgba(255, 220, 180, 0.45),
     inset 0 -4px 8px rgba(120, 20, 0, 0.4);
   cursor: pointer;
@@ -156,9 +164,9 @@
   display: block;
 }
 .about-us .card:hover {
-  box-shadow: 0 44px 70px -20px rgba(180, 50, 20, 0.6),
-    0 22px 38px -10px rgba(140, 40, 10, 0.38),
-    0 8px 14px -3px rgba(80, 20, 0, 0.22),
+  box-shadow: 0 44px 70px -20px rgba(var(--nb-shadow-a), 0.6),
+    0 22px 38px -10px rgba(var(--nb-shadow-b), 0.38),
+    0 8px 14px -3px rgba(var(--nb-shadow-c), 0.22),
     inset 0 2px 0 rgba(255, 220, 180, 0.5),
     inset 0 -4px 8px rgba(120, 20, 0, 0.4);
 }
@@ -177,41 +185,6 @@
   text-align: center;
   z-index: 4;
   position: relative;
-}
-.about-us .subline .arrow-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  background: var(--nb-ink);
-  color: #fafaf7;
-  border: none;
-  padding: 12px 20px 12px 24px;
-  border-radius: 999px;
-  font-family: inherit;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  box-shadow: 0 14px 24px -8px rgba(0, 0, 0, 0.4),
-    0 5px 10px -2px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.12),
-    inset 0 -2px 4px rgba(0, 0, 0, 0.4);
-  transition: transform 0.4s cubic-bezier(0.6, 0, 0.2, 1);
-}
-.about-us .subline .arrow-pill:hover {
-  transform: translateY(-2px);
-}
-.about-us .subline .arrow-pill .ar {
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
-  background: linear-gradient(180deg, var(--nb-orange-1), var(--nb-orange-3));
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #fff;
-  transition: transform 0.4s cubic-bezier(0.6, 0, 0.2, 1);
-}
-.about-us .subline .arrow-pill:hover .ar {
-  transform: rotate(45deg);
 }
 .about-us .subline-text {
   margin-top: 22px;
@@ -235,28 +208,263 @@
   color: var(--nb-ink-soft);
   margin: 0 0 32px;
 }
-.about-us .company-timeline {
+
+/* ============ TIMELINE — "the trace" ============
+   bitNtech builds embedded and robotics systems, so the milestones are drawn
+   the way that world draws anything over time: as a signal. Five cards, each
+   dropping a stem onto a square wave that steps up once per milestone, over a
+   scope graticule. The card shell is the page's existing language — 2px ink
+   border, warm paper face, hard purple offset — so it reads as part of the
+   set rather than a widget. */
+
+.about-us .tl {
+  position: relative;
+  z-index: 5;
+  padding: 120px 40px 40px;
+  /* The graticule. Faint enough to be a surface, not a pattern, and faded out
+     at the edges so it has no hard boundary. */
+  background-image: linear-gradient(rgba(34, 9, 52, 0.055) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(34, 9, 52, 0.055) 1px, transparent 1px);
+  background-size: 44px 44px;
+  background-position: center;
+  -webkit-mask-image: radial-gradient(ellipse 80% 70% at 50% 55%, #000 40%, transparent 100%);
+  mask-image: radial-gradient(ellipse 80% 70% at 50% 55%, #000 40%, transparent 100%);
+}
+
+.about-us .tl-head {
+  max-width: 1280px;
+  margin: 0 auto 56px;
+  /* #root centres text globally; this section is a readout, so it reads left. */
+  text-align: left;
+}
+.about-us .tl-head h2 {
+  font-weight: 700;
+  font-size: clamp(30px, 3.6vw, 52px);
+  line-height: 1;
+  letter-spacing: -0.03em;
+  margin: 0;
+  max-width: 640px;
+}
+.about-us .tl-head h2 em {
+  font-style: italic;
+  font-weight: 800;
+  background: linear-gradient(135deg, var(--nb-orange-1), var(--nb-orange-3));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.about-us .tl-plot {
+  max-width: 1280px;
+  margin: 0 auto;
+  display: grid;
+  /* Cards / wave / axis. The wave row is exactly as tall as the SVG viewBox so
+     one unit is one pixel vertically, which is what the stem maths relies on. */
+  grid-template-rows: auto 120px auto;
+}
+
+/* --- the five cards --- */
+
+.about-us .tl-cards {
+  grid-row: 1;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  /* No column gap on purpose. A gap pushes the outer columns' centres inward,
+     and the wave's rising edges are fixed at 10/30/50/70/90% — the first card's
+     stem would then land 20px above the trace, before its step. Symmetric
+     margins on the card separate them without moving the centres. */
+  gap: 0;
   list-style: none;
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 8px;
   margin: 0;
   padding: 0;
-  font-size: 12px;
-  letter-spacing: 0.08em;
+}
+
+.about-us .tl-card {
+  position: relative;
+  margin-inline: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+  gap: 10px;
+  padding: 22px 20px 24px;
+  border: 2px solid var(--nb-ink);
+  border-radius: 18px;
+  background: linear-gradient(165deg, #fffefb 0%, #fdfaf3 45%, #faf7f0 100%);
+  box-shadow: 6px 7px 0 rgba(34, 9, 52, 0.9);
+  transition: transform 0.4s cubic-bezier(0.6, 0, 0.2, 1), box-shadow 0.4s cubic-bezier(0.6, 0, 0.2, 1);
+}
+.about-us .tl-card:hover,
+.about-us .tl-card:focus-within {
+  transform: translateY(-6px);
+  box-shadow: 9px 12px 0 rgba(34, 9, 52, 0.9);
+}
+
+.about-us .tl-card__index {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  color: var(--nb-orange-1);
+}
+.about-us .tl-card h3 {
+  margin: 0;
+  font-size: clamp(17px, 1.5vw, 21px);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.12;
+  color: var(--nb-ink);
+}
+.about-us .tl-card p {
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--nb-ink-soft);
+}
+
+.about-us .tl-tags {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: auto 0 0;
+  padding: 0;
+}
+.about-us .tl-tags li {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--nb-mute);
-}
-.about-us .company-timeline li {
-  padding: 8px 16px;
   border: 1px solid var(--nb-line);
   border-radius: 999px;
+  padding: 4px 9px;
 }
-.about-us .company-timeline li:not(:last-child)::after {
-  content: '→';
-  margin-left: 8px;
-  color: var(--nb-orange-1);
+
+/* --- stem: drops from each card onto its own step of the wave --- */
+
+.about-us .tl-stem {
+  position: absolute;
+  /* An absolute child is positioned against the padding box, so a bare 100%
+     starts the stem at the card's inner edge — 2px short, the width of the
+     border. The offset puts it on the card's outer edge. */
+  top: calc(100% + 2px);
+  left: 50%;
+  width: 0;
+  /* The wave's step after rising edge `i` sits at y = 90 - i * 20 inside the
+     120px wave row, and the row starts at the card's bottom edge. */
+  height: calc(90px - var(--tl-i) * 20px);
+  border-left: 2px dashed rgba(34, 9, 52, 0.35);
+  transition: height 0.4s cubic-bezier(0.6, 0, 0.2, 1);
+}
+/* The card lifts on hover but the trace does not move, so the stem grows by
+   exactly what the card rose — otherwise the pad would pull off the line. */
+.about-us .tl-card:hover .tl-stem,
+.about-us .tl-card:focus-within .tl-stem {
+  height: calc(96px - var(--tl-i) * 20px);
+}
+/* The pad where the stem meets the trace — a via, turned on its corner. */
+.about-us .tl-stem::after {
+  content: '';
+  position: absolute;
+  /* 14px square (10 + 2px border each side) centred on the stem's end. */
+  bottom: -7px;
+  left: -6px;
+  width: 10px;
+  height: 10px;
+  background: var(--nb-orange-3);
+  border: 2px solid var(--nb-ink);
+  transform: rotate(45deg);
+}
+
+/* --- the trace --- */
+
+.about-us .tl-wave {
+  grid-row: 2;
+  width: 100%;
+  height: 120px;
+  overflow: visible;
+}
+.about-us .tl-wave__path {
+  fill: none;
+  stroke: url(#tl-wave-ink);
+  stroke-width: 3;
+  stroke-linejoin: round;
+}
+
+/* --- time axis --- */
+
+.about-us .tl-axis {
+  grid-row: 3;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 2px solid var(--nb-ink);
+}
+.about-us .tl-axis li {
+  position: relative;
+  padding-top: 14px;
+  text-align: center;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  color: var(--nb-mute);
+}
+/* Tick, aligned to the column centre — the same x as the rising edge above. */
+.about-us .tl-axis li::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 2px;
+  height: 7px;
+  background: var(--nb-ink);
+}
+
+.about-us .tl-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* Below the point where five columns stop being readable, the diagram keeps
+   its shape and pans instead — the same rail behaviour as the team grid. */
+@media (max-width: 1000px) {
+  .about-us .tl {
+    padding: 90px 0 32px;
+  }
+  .about-us .tl-head {
+    padding: 0 24px;
+    margin-bottom: 40px;
+  }
+  .about-us .tl-scope {
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    padding: 0 24px 8px;
+    scrollbar-width: none;
+  }
+  .about-us .tl-scope::-webkit-scrollbar {
+    display: none;
+  }
+  .about-us .tl-plot {
+    /* Five columns wide enough that the note is not a column of two-word
+       lines — about 210px each. Panning further is the cheaper cost. */
+    min-width: 1140px;
+  }
+  .about-us .tl-card {
+    scroll-snap-align: center;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .about-us .tl-card {
+    transition: none;
+  }
 }
 
 /* ============ SECTION 2: TEAM GRID ============ */
@@ -363,8 +571,8 @@
 }
 .about-us .t-card:hover {
   transform: translateY(-10px) rotate(-1deg);
-  box-shadow: 0 24px 40px -16px rgba(180, 50, 20, 0.4),
-    0 10px 22px -6px rgba(140, 40, 10, 0.22),
+  box-shadow: 0 24px 40px -16px rgba(var(--nb-shadow-a), 0.4),
+    0 10px 22px -6px rgba(var(--nb-shadow-b), 0.22),
     inset 0 2px 0 rgba(255, 220, 180, 0.4),
     inset 0 -3px 6px rgba(120, 20, 0, 0.3);
 }
@@ -507,12 +715,6 @@
   }
 }
 @media (max-width: 750px) {
-  .about-us .nav {
-    padding: 18px 18px;
-  }
-  .about-us .nav-links {
-    display: none;
-  }
   .about-us .hero {
     padding: 100px 16px 40px;
   }
@@ -571,8 +773,6 @@
 
   .about-us .company-brief { padding: 32px 20px 0; }
   .about-us .company-brief p { font-size: 15px; margin-bottom: 24px; }
-  .about-us .company-timeline { font-size: 11px; gap: 6px; }
-  .about-us .company-timeline li { padding: 7px 12px; }
 
   .about-us .team-head { margin-bottom: 36px; }
   .about-us .team-head h2 { font-size: clamp(2rem, 9.5vw, 3rem); }

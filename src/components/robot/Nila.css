@@ -175,28 +175,16 @@
   .nila-companion { width: 68px; height: 68px; }
 }
 
-/* Phones: she gets smaller, her bubbles get wider, and the ask field is 16px
-   so iOS does not zoom the whole page the moment you tap it. */
+/* Phones: she gets smaller and her bubbles get wider. The ask field's own
+   phone sizing lives after its base rule further down — it was here, ahead of
+   the rule it was meant to override, so at equal specificity the base rule won
+   and none of it applied. */
 @media (max-width: 560px) {
   .nila-companion { width: 56px; height: 56px; }
   .nila-companion .nila-bubble { max-width: min(220px, 62vw); font-size: 12px; padding: 8px 11px; }
   .nila-ask { max-width: min(280px, 78vw); }
-  .nila-ask__input { font-size: 16px; padding: 8px 13px; }
   .nila-ask__answer { font-size: 12.5px; padding: 9px 12px; }
   .nila-ask__said { font-size: 12px; }
-}
-
-/* --- contact page ------------------------------------------------------- */
-
-.nila-contact {
-  position: relative;
-  width: clamp(190px, 26vw, 300px);
-  height: clamp(190px, 26vw, 300px);
-  margin-inline: auto;
-}
-
-@media (max-width: 900px) {
-  .nila-contact { width: 190px; height: 190px; }
 }
 
 .nila-companion.is-pinned .nila-companion__hit { cursor: grabbing; }
@@ -224,18 +212,82 @@
   align-items: flex-end;
 }
 
-.nila-ask form { width: 100%; }
+.nila-ask form {
+  width: 100%;
+  position: relative;
+}
 
 .nila-ask__input {
   width: 100%;
   border: 2px solid #1c1917;
   border-radius: 999px;
-  padding: 9px 14px;
+  /* Right side reserved for the send button, which sits inside the pill. */
+  padding: 9px 42px 9px 14px;
   font: 600 13px/1.35 var(--sans);
   background: #fff;
   color: #14100e;
   box-shadow: 2px 2px 0 rgba(28, 25, 23, .9);
   outline-offset: 2px;
+}
+
+/* Send. Sits inside the pill so the field stays one object, and carries the
+   same border-and-hard-shadow language as everything else she wears. */
+.nila-ask__send {
+  position: absolute;
+  right: 5px;
+  top: 50%;
+  translate: 0 -50%;
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 2px solid #1c1917;
+  border-radius: 50%;
+  background: var(--nb-orange-3, #ff6e42);
+  color: #1c1917;
+  font-size: 15px;
+  font-weight: 800;
+  line-height: 1;
+  cursor: pointer;
+  transition: transform 0.18s var(--ease), background 0.18s var(--ease), opacity 0.18s var(--ease);
+}
+.nila-ask__send:hover:not(:disabled) {
+  transform: translateY(-1px);
+  background: #ff8a66;
+}
+.nila-ask__send:active:not(:disabled) {
+  transform: translateY(1px);
+}
+.nila-ask__send:disabled {
+  /* Nothing to send yet. Dimmed rather than hidden, so the field never
+     changes shape as you type the first character. */
+  background: #fff;
+  color: #9a938d;
+  cursor: default;
+  opacity: 0.75;
+}
+.nila-ask__send:focus-visible {
+  outline: 2px solid #1c1917;
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nila-ask__send { transition: none; }
+}
+
+/* Phone sizing for the field, placed after the base rules it overrides.
+   16px is the threshold below which iOS zooms the whole page on focus. */
+@media (max-width: 560px) {
+  .nila-ask__input {
+    font-size: 16px;
+    padding: 9px 46px 9px 13px;
+  }
+  .nila-ask__send {
+    width: 34px;
+    height: 34px;
+    font-size: 17px;
+  }
 }
 
 /* What you asked, in your own bubble, so the reply has something to answer. */

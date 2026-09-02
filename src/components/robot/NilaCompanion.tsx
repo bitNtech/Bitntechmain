@@ -382,6 +382,16 @@ export default function NilaCompanion() {
               enterKeyHint="send"
               autoComplete="off"
             />
+            {/* Enter still sends. This is the same action for anyone who does
+                not have a keyboard in front of them, or does not know to try. */}
+            <button
+              type="submit"
+              className="nila-ask__send"
+              aria-label="Send question"
+              disabled={!question.trim()}
+            >
+              <span aria-hidden="true">↑</span>
+            </button>
           </form>
         </div>
       ) : (

@@ -412,7 +412,7 @@ export default function ContactUs() {
   }, [])
 
   return (
-    <div className="contact-us" ref={rootRef}>
+    <main className="contact-us" ref={rootRef}>
       <div className="scene">
         <div className="left-pane">
           <div className="card info-card">
@@ -442,7 +442,9 @@ export default function ContactUs() {
             </div>
           </div>
         </div>
-        <main className="stage" id="stage">
+        {/* Was a second <main> nested inside the page's own; only one is valid,
+            and screen readers pick one landmark arbitrarily when there are two. */}
+        <section className="stage" id="stage">
           <div className="robot" id="robot" data-mood="idle">
             <div className="bubble" id="bubble" role="status" aria-live="polite">
               <span id="bubbleText">Hi. I'm Nila. Tell me why you're here! 🩵</span>
@@ -544,8 +546,8 @@ export default function ContactUs() {
             <span className="foot foot--l" aria-hidden="true"></span>
             <span className="foot foot--r" aria-hidden="true"></span>
           </form>
-        </main>
+        </section>
       </div>
-    </div>
+    </main>
   )
 }

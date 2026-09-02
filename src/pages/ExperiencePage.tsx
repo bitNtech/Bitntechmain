@@ -67,15 +67,15 @@ export default function ExperiencePage({ mode }: Props) {
   useEffect(() => {
     const hero = page.current?.querySelector<HTMLElement>('.experience-hero')
     if (!hero) return
-    let frame = 0
-    let pointerX = 50
-    let pointerY = 50
+    // Measuring the hero on every pointermove forces a layout per mouse event.
+    // The box only moves when the page resizes or scrolls, so cache it there.
+    let bounds = hero.getBoundingClientRect()
+    const measure = () => { bounds = hero.getBoundingClientRect() }
     const onPointerMove = (event: PointerEvent) => {
-      const bounds = hero.getBoundingClientRect()
-      pointerX = Math.max(0, Math.min(100, ((event.clientX - bounds.left) / bounds.width) * 100))
-      pointerY = Math.max(0, Math.min(100, ((event.clientY - bounds.top) / bounds.height) * 100))
-      armPointerRef.current.x = (pointerX / 100) * 2 - 1
-      armPointerRef.current.y = (pointerY / 100) * 2 - 1
+      const x = Math.max(0, Math.min(1, (event.clientX - bounds.left) / bounds.width))
+      const y = Math.max(0, Math.min(1, (event.clientY - bounds.top) / bounds.height))
+      armPointerRef.current.x = x * 2 - 1
+      armPointerRef.current.y = y * 2 - 1
     }
     const onPointerLeave = () => {
       armPointerRef.current.x = 0
@@ -83,9 +83,13 @@ export default function ExperiencePage({ mode }: Props) {
     }
     hero.addEventListener('pointermove', onPointerMove)
     hero.addEventListener('pointerleave', onPointerLeave)
+    window.addEventListener('resize', measure)
+    window.addEventListener('scroll', measure, { passive: true })
     return () => {
       hero.removeEventListener('pointermove', onPointerMove)
       hero.removeEventListener('pointerleave', onPointerLeave)
+      window.removeEventListener('resize', measure)
+      window.removeEventListener('scroll', measure)
     }
   }, [mode])
   

@@ -105,6 +105,10 @@
 .contact-us .robot {
   position: relative;
   z-index: 1;
+  /* Nudged off the column's centre. Offset with `left`, not a transform: the
+     float animation below owns transform and would wipe it out. The bubble is
+     anchored to him, so it comes along and stops clipping the nav. */
+  left: clamp(12px, 3.5vw, 44px);
   margin-bottom: -16px;
   animation: cu-float 4s ease-in-out infinite alternate;
   perspective: 800px;
@@ -237,7 +241,8 @@
   height: 25px;
   border-radius: 9px;
   background: var(--cu-eye);
-  transition: all .22s ease;
+  transition: width .22s var(--ease), height .22s var(--ease),
+    border-radius .22s var(--ease), transform .22s var(--ease);
 }
 
 .contact-us [data-mood="happy"] .eye,
@@ -285,7 +290,8 @@
   height: 5px;
   border-radius: 4px;
   background: var(--cu-eye);
-  transition: all .25s ease;
+  transition: width .25s var(--ease), height .25s var(--ease),
+    border-radius .25s var(--ease);
 }
 .contact-us [data-mood="watching"] .mouth { width: 9px; height: 9px; border-radius: 50%; }
 .contact-us [data-mood="happy"] .mouth { width: 30px; height: 12px; border-radius: 0 0 16px 16px; }
@@ -635,7 +641,7 @@
   display: inline-block;
   opacity: 0;
   transform: translateX(-10px) scale(.4) rotate(-30deg);
-  transition: all .3s cubic-bezier(.34, 1.56, .64, 1);
+  transition: opacity .3s ease, transform .3s cubic-bezier(.34, 1.56, .64, 1);
 }
 .contact-us .btn:hover .btn-bolt, .contact-us .btn:focus-visible .btn-bolt {
   opacity: 1;

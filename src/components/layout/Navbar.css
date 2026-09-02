@@ -119,20 +119,6 @@
   position: relative;
 }
 
-.nav-05__mark {
-  width: 32px;
-  height: 32px;
-  flex-shrink: 0;
-  border-radius: 50%;
-  background: var(--ink, #220934);
-  color: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 800;
-  font-size: 1rem;
-}
-
 .nav-05__links {
   position: absolute;
   top: 50%;
@@ -286,11 +272,6 @@
   width: 14px;
 }
 
-.nav-05__bar.is-scrolled .nav-05__mark {
-  background: #fff;
-  color: var(--pill-bg);
-}
-
 .nav-05__bar.is-scrolled .nav-05__links a {
   color: var(--accent);
   text-shadow: 0 1px 3px rgba(0, 0, 0, .3), 0 1px 10px rgba(0, 0, 0, .15);
@@ -324,11 +305,6 @@
    gated on `:not(.is-scrolled)`, because the flag is now measured from what is
    actually behind the bar rather than guessed from the route. These sit after
    the `.is-scrolled` block on purpose: same specificity, so the ground wins. */
-.nav-05__bar--on-dark .nav-05__mark {
-  background: #fff;
-  color: var(--pill-bg);
-}
-
 .nav-05__bar--on-dark .nav-05__logo {
   color: #fff;
 }
@@ -498,9 +474,6 @@
 
   .nav-05__overlay,
   .nav-05__btn span,
-  .nav-05__pill,
-  .nav-05__pill::before,
-  .nav-05__pill::after,
   .nav-05__links,
   .nav-05__cta {
     transition: none;
@@ -565,7 +538,4 @@
 
   .nav-05__bar--on-dark .nav-05__logo,
   .nav-05__bar.is-scrolled .nav-05__logo { color: #fff; }
-
-  .nav-05__bar--on-dark .nav-05__mark,
-  .nav-05__bar.is-scrolled .nav-05__mark { background: #fff; color: var(--pill-bg); }
 }

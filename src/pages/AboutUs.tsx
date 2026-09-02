@@ -27,7 +27,27 @@ const TEAM = [
   { img: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400&h=540&fit=crop&crop=faces&q=80', name: 'Maya Okafor', role: 'Founder · CEO' },
 ]
 
-const TIMELINE = ['Beginning', 'Expansion', 'Building bitNtech', 'The Next Evolution'] as const
+/* PLACEHOLDER MILESTONES — the note below is deliberately the same on all five
+   until the real dates and details are confirmed. Order is the content here:
+   the signal under the cards steps up once per entry, so adding or removing one
+   means changing WAVE_PATH and the `repeat(5, ...)` grids in AboutUs.css. */
+const MILESTONE_NOTE =
+  'A short note on what changed at this point — what we started building, who it was for, and what it taught us.'
+
+const MILESTONES = [
+  { year: '2019', title: 'Beginning', tags: ['Software', 'Web'] },
+  { year: '2021', title: 'Expansion', tags: ['AI', 'Data'] },
+  { year: '2023', title: 'Building bitNtech', tags: ['Embedded', 'IoT'] },
+  { year: '2025', title: 'Into robotics', tags: ['Robotics'] },
+  { year: '2026', title: 'The Next Evolution', tags: ['Systems'] },
+] as const
+
+/* One rising edge per milestone, at 10/30/50/70/90% of the width — the centres
+   of five equal columns, so every card sits directly over its own step. The
+   viewBox is 120 tall and so is the rendered box, so `y` units are px: that is
+   what lets each card's stem drop to calc(90px - i * 20px) and land on its
+   step. preserveAspectRatio="none" stretches it to any width. */
+const WAVE_PATH = 'M0,110 H100 V90 H300 V70 H500 V50 H700 V30 H900 V10 H1000'
 
 const STATS = [
   { count: 62, decimals: 0, suffix: '', label: 'Projects shipped' },
@@ -181,7 +201,64 @@ export default function AboutUs() {
         },
       })
 
-      gsap.from('.eyebrow, .team-head h2, .team-head p', {
+      /* One beat, not five: the trace draws left to right and each card lands
+         as the signal passes under it. Guarded rather than tweened at zero
+         duration, so that with reduced motion the dasharray is never set and
+         the wave simply renders drawn. */
+      if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        const wave = root.querySelector<SVGPathElement>('.tl-wave__path')
+        const sweep = 1.7
+        if (wave) {
+          /* Not getTotalLength(): that is measured in viewBox units (~1100),
+             but non-scaling-stroke makes the dash array screen pixels, and the
+             box is stretched wider than its viewBox. The short dash left the
+             last step undrawn. Rendered length is the horizontal run plus the
+             120 units of vertical travel, which are 1:1 here. */
+          const drawLength = wave.getBoundingClientRect().width + 140
+          gsap.set(wave, { strokeDasharray: drawLength, strokeDashoffset: drawLength })
+          gsap.to(wave, {
+            strokeDashoffset: 0,
+            duration: sweep,
+            ease: 'power1.inOut',
+            scrollTrigger: { trigger: '.tl-plot', start: 'top 78%' },
+            // Drop the dashes once drawn, so a later resize cannot re-clip it.
+            onComplete: () => gsap.set(wave, { clearProps: 'strokeDasharray,strokeDashoffset' }),
+          })
+        }
+        /* Opacity only, deliberately. The stem hangs off the card's bottom edge
+           and has to meet the trace exactly, so anything that moves the card
+           moves the pad off the line — a `y` here left every pad 34px low. The
+           drawing trace already supplies the movement. */
+        gsap.from('.tl-card', {
+          opacity: 0,
+          duration: 0.7,
+          // Five cards across the sweep, so each lands as the signal reaches it.
+          stagger: sweep / MILESTONES.length,
+          ease: 'power2.out',
+          scrollTrigger: { trigger: '.tl-plot', start: 'top 78%' },
+        })
+        gsap.from('.tl-axis li', {
+          opacity: 0,
+          duration: 0.4,
+          stagger: sweep / MILESTONES.length,
+          ease: 'none',
+          scrollTrigger: { trigger: '.tl-plot', start: 'top 78%' },
+        })
+      }
+
+      gsap.from('.tl-head .eyebrow, .tl-head h2', {
+        opacity: 0,
+        y: 30,
+        duration: 0.9,
+        stagger: 0.1,
+        ease: 'power3.out',
+        scrollTrigger: { trigger: '.tl-head', start: 'top 82%' },
+      })
+
+      /* Was `.eyebrow, .team-head h2, ...`. There is no eyebrow inside
+         .team-head, so that bare selector now only matches the timeline's —
+         which this trigger would have held hidden until the team section. */
+      gsap.from('.team-head h2, .team-head p', {
         opacity: 0,
         y: 30,
         duration: 0.9,
@@ -246,12 +323,6 @@ export default function AboutUs() {
         once: true,
       })
 
-      root.querySelectorAll('.nav-cta, .arrow-pill').forEach((btn) => {
-        btn.addEventListener('click', () => {
-          gsap.fromTo(btn, { scale: 1 }, { scale: 0.93, duration: 0.12, yoyo: true, repeat: 1, ease: 'power2.inOut' })
-        })
-      })
-
       const bigResultsWrap = root.querySelector('.big-results-wrap')
       bigResultsWrap?.addEventListener('mouseenter', () => {
         gsap.to('.big-results .letter', { y: -8, duration: 0.5, stagger: 0.03, ease: 'back.out(1.6)' })
@@ -271,7 +342,7 @@ export default function AboutUs() {
   }, [])
 
   return (
-    <div className="about-us" ref={rootRef}>
+    <main className="about-us" ref={rootRef}>
       <div className="grain" />
 
       <section className="hero">
@@ -306,11 +377,60 @@ export default function AboutUs() {
           We work across software, artificial intelligence, robotics, embedded systems, IoT and digital products
           to transform ideas and real-world problems into practical technology.
         </p>
-        <ol className="company-timeline">
-          {TIMELINE.map((stage) => (
-            <li key={stage}>{stage}</li>
-          ))}
-        </ol>
+      </section>
+
+      {/* The milestones, drawn as a signal that steps up once per entry: the
+          cards are the readout, the wave under them is the trace, and the rule
+          at the bottom is the time axis. Replaces the row of arrow pills that
+          used to sit inside the brief above. */}
+      <section className="tl" aria-labelledby="tl-title">
+        <div className="tl-head">
+          <p className="eyebrow">Build log</p>
+          <h2 id="tl-title">
+            Every step, <em>still going up</em>.
+          </h2>
+        </div>
+
+        <div className="tl-scope" data-touch-rail>
+          <div className="tl-plot">
+            <ol className="tl-cards">
+              {MILESTONES.map((milestone, index) => (
+                <li className="tl-card" key={milestone.year} style={{ '--tl-i': String(index) } as React.CSSProperties}>
+                  <span className="tl-card__index">{String(index + 1).padStart(2, '0')}</span>
+                  {/* The year is on the axis for sighted readers; this keeps it
+                      attached to its milestone for everyone else. */}
+                  <span className="tl-sr">{milestone.year}</span>
+                  <h3>{milestone.title}</h3>
+                  <p>{MILESTONE_NOTE}</p>
+                  <ul className="tl-tags">
+                    {milestone.tags.map((tag) => (
+                      <li key={tag}>{tag}</li>
+                    ))}
+                  </ul>
+                  <span className="tl-stem" aria-hidden="true" />
+                </li>
+              ))}
+            </ol>
+
+            <svg className="tl-wave" viewBox="0 0 1000 120" preserveAspectRatio="none" aria-hidden="true">
+              <defs>
+                <linearGradient id="tl-wave-ink" x1="0" y1="0" x2="1" y2="0">
+                  <stop offset="0%" stopColor="var(--nb-orange-1)" />
+                  <stop offset="100%" stopColor="var(--nb-orange-3)" />
+                </linearGradient>
+              </defs>
+              {/* Stretched horizontally, so the stroke has to opt out of scaling
+                  or it would thin out as the section gets wider. */}
+              <path className="tl-wave__path" d={WAVE_PATH} vectorEffect="non-scaling-stroke" />
+            </svg>
+
+            <ol className="tl-axis" aria-hidden="true">
+              {MILESTONES.map((milestone) => (
+                <li key={milestone.year}>{milestone.year}</li>
+              ))}
+            </ol>
+          </div>
+        </div>
       </section>
 
       <section className="team-section">
@@ -350,6 +470,6 @@ export default function AboutUs() {
           ))}
         </div>
       </section>
-    </div>
+    </main>
   )
 }

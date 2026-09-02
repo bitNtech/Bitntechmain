@@ -11,6 +11,10 @@
   --shadow:
     rgba(0, 0, 0, 0.08) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
 
+  /* One curve for every hover and state change on the site, so nothing reads
+     as a different speed from the thing next to it. */
+  --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+
   --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
   --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
   --mono: ui-monospace, Consolas, monospace;
@@ -68,6 +72,22 @@ body {
   }
 }
 
+/* Each route renders its own <main>, so a route change remounts it and replays
+   this. Opacity only: a transform here would become the containing block for
+   any fixed-position descendant while it runs. */
+@keyframes route-in {
+  from { opacity: 0; }
+}
+
+main {
+  animation: route-in 0.42s var(--ease) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  main { animation: none; }
+  :root { scroll-behavior: auto; }
+}
+
 /* Kill the 300ms tap delay and the grey flash on everything tappable. */
 a, button, label, summary, [role='button'], input, select, textarea {
   touch-action: manipulation;
@@ -89,8 +109,7 @@ a, button, label, summary, [role='button'], input, select, textarea {
 @media (hover: none) {
   .home-service:hover,
   .home-world:hover,
-  .experience-pillar-grid article:hover,
-  .about-us .arrow-pill:hover {
+  .experience-pillar-grid article:hover {
     transform: none;
   }
   .home-service:hover { box-shadow: none; }
@@ -129,15 +148,11 @@ p {
   margin: 0;
 }
 
-code,
-.counter {
+code {
   font-family: var(--mono);
   display: inline-flex;
   border-radius: 4px;
   color: var(--text-h);
-}
-
-code {
   font-size: 15px;
   line-height: 135%;
   padding: 4px 8px;
