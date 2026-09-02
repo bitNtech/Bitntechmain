@@ -1,27 +1,11 @@
-import { Suspense, lazy, useEffect, useRef } from 'react'
+import { useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { animate, stagger } from 'animejs'
 import { GlyphStack, GlyphChip } from '../components/icons/Glyphs'
+import HeroScene from '../components/home/HeroScene'
 import './Home.css'
 
-// Keeps three.js out of the landing page's first paint. She fades in on her own
-// once loaded, so an empty slot for a moment is the intended state.
-const NilaHero = lazy(() => import('../components/robot/NilaHero'))
-
-/* The three layers the studio works across, in the order they sit on the
-   hero's signal: the line enters at the left as analog noise out of the
-   physical world and leaves at the right as clean data, so hardware is the
-   end it comes in at and software is the end it comes out of. */
-const SPAN = ['Hardware', 'AI', 'Software']
-
-/* The signal itself, drawn once at 1600x68 with the baseline at y=34: an
-   unruly analog wave for the first 40% of the width, settling through a short
-   transition into an even, deliberate pulse train. It is the studio's whole
-   job in one line — a rough signal out of the real world, made into something
-   exact — and the tagline sits on it. Stretched horizontally to whatever the
-   viewport is; `vector-effect` keeps the stroke honest while it stretches. */
-const SIGNAL = 'M0 34C24 34 30 16 52 16 74 16 78 48 100 48 122 48 128 20 152 20 176 20 180 46 202 46 224 46 230 12 256 12 282 12 286 50 310 50 334 50 338 18 362 18 386 18 390 44 412 44 434 44 440 22 464 22 488 22 492 46 516 46 540 46 546 24 570 25 594 26 600 38 622 36 640 34.5 652 34 668 34L700 34 700 14 760 14 760 34 822 34 822 14 850 14 850 34 920 34 920 14 1010 14 1010 34 1062 34 1062 14 1094 14 1094 34 1180 34 1180 14 1242 14 1242 34 1330 34 1330 14 1402 14 1402 34 1480 34 1480 14 1522 14 1522 34 1600 34'
-
+/* The two ways into what the studio builds. */
 const PATHS = [
   { num: '01', Icon: GlyphStack, title: 'Software', body: 'Digital systems people want to return to.', to: '/software' },
   { num: '02', Icon: GlyphChip, title: 'Hardware', body: 'Physical intelligence, from sensor to system.', to: '/hardware' },
@@ -172,52 +156,8 @@ export default function Home() {
   }
 
   return <main className="home-experience" ref={pageRef}>
-    <section className="home-hero">
-      <div className="home-hero__inner">
-        {/* Two registers, not three: a quiet lead-in, then the word itself at
-            the full width of its column. The word is drawn as an outline and
-            filled in from the left as the signal below it lands — the one
-            thing in the hero that moves on its own, and the reason the type
-            is set twice. Only the outline copy is read aloud. */}
-        <h1 className="hero-head">
-          <span className="hero-head__lead">Engineering the next</span>
-          <span className="hero-head__word">
-            <span className="hero-head__outline">Evolution</span>
-            <span className="hero-head__fill" aria-hidden="true">Evolution</span>
-          </span>
-        </h1>
+    <HeroScene />
 
-        <Suspense fallback={null}><NilaHero /></Suspense>
-
-        <div className="hero-signal">
-          <svg className="hero-signal__wave" viewBox="0 0 1600 68" preserveAspectRatio="none" aria-hidden="true" focusable="false">
-            <defs>
-              <linearGradient id="heroSignal" x1="0" x2="1" y1="0" y2="0">
-                <stop offset="0" stopColor="#9b7fbe" />
-                <stop offset=".3" stopColor="#b2769b" />
-                <stop offset=".44" stopColor="#ff6e42" />
-                <stop offset="1" stopColor="#ff6e42" />
-              </linearGradient>
-            </defs>
-            <path d={SIGNAL} pathLength="1" fill="none" stroke="url(#heroSignal)" strokeWidth="2.5" vectorEffect="non-scaling-stroke" strokeLinejoin="round" />
-          </svg>
-          <ul className="hero-signal__stops" aria-label="What we work across">
-            {SPAN.map((layer) => <li key={layer}>{layer}</li>)}
-          </ul>
-        </div>
-
-        <div className="hero-foot">
-          <p className="hero-lede">
-            One team, from the first sketch to the thing running in the real
-            world.
-          </p>
-          <div className="hero-actions">
-            <Link className="hero-cta" to="/contact">Start a project</Link>
-            <a className="hero-quiet-cta" href="#solutions">See what we build</a>
-          </div>
-        </div>
-      </div>
-    </section>
     <section className="home-manifesto" data-reveal><p className="home-kicker reveal">The bitNtech approach</p><h2 className="reveal">Ideas gain momentum when <em>every layer</em> works together.</h2><div className="home-manifesto__footer reveal"><p>AI. Software. Hardware. One curious team, building things that are useful in the real world.</p><span>01 / 05</span></div></section>
     <section className="home-solutions" id="solutions" data-reveal><div className="home-section-head reveal"><p className="home-kicker">Capabilities</p><h2>Choose your<br />launch point.</h2><p>Hover, tilt and pick a path into what we build.</p></div><div className="home-service-grid">{PATHS.map(({ num, Icon, title, body, to }) => <Link className="home-service reveal" key={num} to={to}><span className="home-service__number">{num}</span><Icon size={42} /><h3>{title}</h3><p>{body}</p><span className="home-service__arrow">↗</span></Link>)}</div></section>
     <section className="home-process" data-reveal ref={processRef}><div className="home-process__sticky"><p className="home-kicker reveal">From signal to system</p><h2 className="reveal">A process built to keep moving.</h2><p className="reveal">Scroll through the five moves that take a good question all the way to a working answer.</p></div><div className="home-process__list-wrap"><div className="home-process__line"><div className="home-process__line-progress" ref={lineRef} /></div><ol>{JOURNEY.map(([number, title, text]) => <li className="reveal" key={number}><span className="process-number">{number}</span><div><h3>{title}</h3><p>{text}</p></div></li>)}</ol></div></section>

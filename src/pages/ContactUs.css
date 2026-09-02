@@ -368,10 +368,25 @@
   margin-bottom: 24px;
 }
 
-.contact-us .social-row {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 14px;
+.contact-us .info-eyebrow {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--cu-muted);
+  margin-bottom: 12px;
+}
+.contact-us .info-label {
+  font-weight: 700;
+  color: var(--cu-muted);
+  font-size: 12.5px;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+/* Pushed right so the handles line up down the card. */
+.contact-us .info-value {
+  margin-left: auto;
+  font-weight: 700;
 }
 .contact-us .social-btn {
   flex: 1;

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
+import { CONTACT } from '../../contact'
 import './Navbar.css'
 
 const PAGE_LABELS: Record<string, string> = {
@@ -53,6 +54,9 @@ export default function Navbar() {
      routes" is wrong twice over: it missed Home, whose hero is dark, and it
      cannot know that scrolling Home moves the bar off that hero and onto a
      cream section. So sample the ground under the wordmark itself. */
+  /* On the contact page the CTA points at the page you are already on, so it
+     is dropped there. /get-started renders ContactUs as well - see App.tsx. */
+  const onContact = pathname === '/contact' || pathname === '/get-started'
   const [onDark, setOnDark] = useState(true)
   const [isScrolled, setIsScrolled] = useState(false)
   const [sectionsCount, setSectionsCount] = useState(1)
@@ -160,7 +164,7 @@ export default function Navbar() {
         </ul>
 
         <div className="nav-05__actions">
-          <Link to="/get-started" tabIndex={0} className="nav-05__cta">Get Started <span>↗</span></Link>
+          {!onContact && <Link to="/get-started" tabIndex={0} className="nav-05__cta">Get Started <span>↗</span></Link>}
           <label htmlFor="nav-05-toggle" className="nav-05__btn" aria-label="Open menu">
             <span></span><span></span><span></span>
           </label>
@@ -176,11 +180,11 @@ export default function Navbar() {
         </ul>
         <div className="nav-05__overlay-footer">
           <div className="nav-05__overlay-social">
-            <a href="#">Twitter</a>
-            <a href="#">LinkedIn</a>
-            <a href="#">Instagram</a>
+            <a href={CONTACT.linkedin.url} target="_blank" rel="noreferrer">LinkedIn</a>
+            <a href={CONTACT.instagram.url} target="_blank" rel="noreferrer">Instagram</a>
+            <a href={CONTACT.github.url} target="_blank" rel="noreferrer">GitHub</a>
           </div>
-          <Link to="/get-started" className="nav-05__overlay-cta">Get Started →</Link>
+          {!onContact && <Link to="/get-started" className="nav-05__overlay-cta">Get Started →</Link>}
         </div>
       </div>
       <svg className="nav-05__filters" aria-hidden="true" focusable="false">

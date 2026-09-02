@@ -1,4 +1,5 @@
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
+import { CONTACT } from '../../contact'
 import './Footer.css'
 
 const BUBBLE_COUNT = 60
@@ -24,10 +25,11 @@ const NAV_COLUMNS = [
   {
     heading: 'Connect',
     links: [
-      { label: 'LinkedIn', href: 'https://linkedin.com' },
-      { label: 'Instagram', href: 'https://instagram.com' },
-      { label: 'GitHub', href: 'https://github.com' },
-      { label: 'Email', href: 'mailto:care@bitntech.ai' },
+      { label: 'LinkedIn', href: CONTACT.linkedin.url },
+      { label: 'Instagram', href: CONTACT.instagram.url },
+      { label: 'GitHub', href: CONTACT.github.url },
+      { label: 'Email', href: CONTACT.emailHref },
+      { label: CONTACT.phone, href: CONTACT.phoneHref },
     ],
   },
 ] as const
@@ -42,6 +44,11 @@ const bubbles = Array.from({ length: BUBBLE_COUNT }, (_, i) => ({
 }))
 
 export default function Footer() {
+  /* Same reason as the nav's CTA: on the contact page this link goes nowhere
+     new, so the closing statement stands on its own. */
+  const { pathname } = useLocation()
+  const onContact = pathname === '/contact' || pathname === '/get-started'
+
   return (
     <footer className="site-footer">
       <div className="bubbles">
@@ -80,7 +87,7 @@ export default function Footer() {
               <p key={i}>{line}</p>
             ))}
             <p className="what-if-final">Engineering the next Evolution.</p>
-            <Link className="what-if-cta" to="/contact">Start a Project</Link>
+            {!onContact && <Link className="what-if-cta" to="/contact">Start a Project</Link>}
             <hr className="what-if-divider" />
           </div>
 
