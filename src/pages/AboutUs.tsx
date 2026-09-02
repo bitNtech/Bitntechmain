@@ -27,19 +27,40 @@ const TEAM = [
   { img: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400&h=540&fit=crop&crop=faces&q=80', name: 'Maya Okafor', role: 'Founder · CEO' },
 ]
 
-/* PLACEHOLDER MILESTONES — the note below is deliberately the same on all five
-   until the real dates and details are confirmed. Order is the content here:
-   the signal under the cards steps up once per entry, so adding or removing one
-   means changing WAVE_PATH and the `repeat(5, ...)` grids in AboutUs.css. */
-const MILESTONE_NOTE =
-  'A short note on what changed at this point — what we started building, who it was for, and what it taught us.'
-
+/* The real bitNtech journey. Order is the content here: the signal under the
+   cards steps up once per entry, so adding or removing one means changing
+   WAVE_PATH and the `repeat(5, ...)` grids in AboutUs.css. */
 const MILESTONES = [
-  { year: '2019', title: 'Beginning', tags: ['Software', 'Web'] },
-  { year: '2021', title: 'Expansion', tags: ['AI', 'Data'] },
-  { year: '2023', title: 'Building bitNtech', tags: ['Embedded', 'IoT'] },
-  { year: '2025', title: 'Into robotics', tags: ['Robotics'] },
-  { year: '2026', title: 'The Next Evolution', tags: ['Systems'] },
+  {
+    year: '2023',
+    title: 'VR Creations',
+    note: 'What started as freelancing became our first step into the world of technology. We began creating websites, software, and digital solutions for real clients while learning what it takes to build from the ground up.',
+    tags: ['Freelancing', 'Web', 'Software'],
+  },
+  {
+    year: '2024',
+    title: 'From Freelancer to Builder',
+    note: 'As our projects grew, so did our ambition. We moved beyond individual freelance work and started exploring bigger ideas, new technologies, and solutions we could build ourselves.',
+    tags: ['Projects', 'Technology'],
+  },
+  {
+    year: '2025',
+    title: 'Building bitNtech',
+    note: 'VR Creations evolved into bitNtech — a bigger vision built around creating technology, not just delivering services. We began laying the foundation for our own products and long-term innovation.',
+    tags: ['bitNtech', 'Software', 'AI'],
+  },
+  {
+    year: '2025–26',
+    title: 'Into AI & Automation',
+    note: 'We began turning our focus toward intelligent automation, developing AI-driven solutions that can handle real-world business operations and interactions.',
+    tags: ['AI', 'Automation'],
+  },
+  {
+    year: '2026',
+    title: 'The Next Evolution',
+    note: 'Today, bitNtech is moving toward a future of intelligent systems — combining AI, automation, software, embedded technology, and robotics to build products for the real world.',
+    tags: ['AICA', 'Robotics', 'Systems'],
+  },
 ] as const
 
 /* One rising edge per milestone, at 10/30/50/70/90% of the width — the centres
@@ -385,7 +406,7 @@ export default function AboutUs() {
           used to sit inside the brief above. */}
       <section className="tl" aria-labelledby="tl-title">
         <div className="tl-head">
-          <p className="eyebrow">Build log</p>
+          <p className="eyebrow">From ideas to intelligent systems. — bitNtech</p>
           <h2 id="tl-title">
             Every step, <em>still going up</em>.
           </h2>
@@ -401,7 +422,7 @@ export default function AboutUs() {
                       attached to its milestone for everyone else. */}
                   <span className="tl-sr">{milestone.year}</span>
                   <h3>{milestone.title}</h3>
-                  <p>{MILESTONE_NOTE}</p>
+                  <p>{milestone.note}</p>
                   <ul className="tl-tags">
                     {milestone.tags.map((tag) => (
                       <li key={tag}>{tag}</li>
