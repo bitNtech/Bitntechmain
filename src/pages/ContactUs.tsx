@@ -1,57 +1,18 @@
 import { useEffect, useRef } from 'react'
 import './ContactUs.css'
 
-type ReasonKey = 'website' | 'software' | 'ai' | 'robotics' | 'iot' | 'automation' | 'prototype' | 'careers' | 'other'
+type ReasonKey = 'hardware' | 'software'
 
 const REASONS: Record<ReasonKey, { label: string; mood: string; lines: string[] }> = {
-  website: {
-    label: 'Website',
-    mood: 'happy',
-    lines: ["A website! Let's make it count.", 'Ooh, digital real estate. Tell me more.'],
+  hardware: {
+    label: 'Hardware',
+    mood: 'excited',
+    lines: ['Hardware! Boards, sensors, things that move.', 'Something real and physical. Beep boop, my kind of build.'],
   },
   software: {
     label: 'Software',
     mood: 'excited',
-    lines: ['Software! My favorite kind of building.', 'A platform, an app — go on, I\'m listening.'],
-  },
-  ai: {
-    label: 'AI',
-    mood: 'excited',
-    lines: ['AI! Now we\'re speaking my language.', 'Ooh, intelligent systems. My antenna is tingling.'],
-  },
-  robotics: {
-    label: 'Robotics',
-    mood: 'excited',
-    lines: ['Robotics! Beep boop, one of us.', 'Something that moves in the real world. Yes please.'],
-  },
-  iot: {
-    label: 'IoT',
-    mood: 'watching',
-    lines: ['Connected devices. Sensors everywhere. Neat.', 'IoT — telemetry, boards, the good stuff.'],
-  },
-  automation: {
-    label: 'Automation',
-    mood: 'happy',
-    lines: ['Automation! Remove the repeat, I like it.', "Let's make something do the boring parts."],
-  },
-  prototype: {
-    label: 'Prototype',
-    mood: 'watching',
-    lines: ['A prototype. Uncertain idea, real proof. Love it.', "Let's find out if it works."],
-  },
-  careers: {
-    label: 'Careers',
-    mood: 'watching',
-    lines: [
-      "Careers. Let's see what you've got.",
-      "Scanning for talent. Don't worry, I'm friendly.",
-      "Ooh, joining the crew? I'll put in a good word.",
-    ],
-  },
-  other: {
-    label: 'Other',
-    mood: 'watching',
-    lines: ["Mysterious. I like it. Tell me in the details below."],
+    lines: ['Software! My favorite kind of building.', "A platform, an app — go on, I'm listening."],
   },
 }
 
@@ -71,11 +32,6 @@ export default function ContactUs() {
     const form = $<HTMLFormElement>('#form')
     const nameI = $<HTMLInputElement>('#name')
     const emailI = $<HTMLInputElement>('#email')
-    const reasonWrap = $<HTMLDivElement>('#reasonSelect')
-    const reasonTrigger = $<HTMLButtonElement>('#reasonTrigger')
-    const reasonTriggerLabel = $<HTMLSpanElement>('#reasonTriggerLabel')
-    const reasonList = $<HTMLUListElement>('#reasonList')
-    const reasonOptions = [...reasonList.querySelectorAll<HTMLLIElement>('li')]
     const detailsI = $<HTMLTextAreaElement>('#details')
     const btn = $<HTMLButtonElement>('#sendBtn')
     const btnLabel = $<HTMLSpanElement>('#btnLabel')
@@ -157,53 +113,101 @@ export default function ContactUs() {
     emailI.addEventListener('focus', onEmailFocus)
     emailI.addEventListener('input', onEmailInput)
 
-    let reasonValue: ReasonKey | '' = ''
+    /* Native <select> renders its popup with the OS, which ignores every style
+       on this page. Both dropdowns are listboxes we draw ourselves instead. */
+    function customSelect(
+        wrapId: string,
+        onPick: (value: string, label: string) => void,
+        onFocus: () => void,
+      ) {
+      const wrap = $<HTMLDivElement>(`#${wrapId}`)
+      const trigger = wrap.querySelector<HTMLButtonElement>('.reason-trigger')!
+      const label = trigger.querySelector<HTMLSpanElement>('span')!
+      const options = [...wrap.querySelectorAll<HTMLLIElement>('li')]
+      let value = ''
 
-    const closeReasonList = () => {
-      reasonWrap.classList.remove('open')
-      reasonTrigger.setAttribute('aria-expanded', 'false')
-    }
-    const openReasonList = () => {
-      reasonWrap.classList.add('open')
-      reasonTrigger.setAttribute('aria-expanded', 'true')
-    }
-    const onReasonTriggerClick = () => {
-      if (reasonWrap.classList.contains('open')) closeReasonList()
-      else openReasonList()
-    }
-    const onReasonFocus = () => {
-      setMood('watching')
-      say('Why are you here? Pick one. I promise not to judge. Much.')
-    }
-    const onReasonOptionClick = (li: HTMLLIElement) => {
-      const key = li.dataset.value as ReasonKey
-      reasonValue = key
-      reasonTriggerLabel.textContent = REASONS[key].label
-      reasonTriggerLabel.classList.remove('placeholder')
-      reasonOptions.forEach((o) => o.setAttribute('aria-selected', String(o === li)))
-      closeReasonList()
-      reasonTrigger.focus()
+      const close = () => {
+        wrap.classList.remove('open')
+        trigger.setAttribute('aria-expanded', 'false')
+      }
+      const onTriggerClick = () => {
+        // Only one list open at a time, or they overlap each other.
+        document.querySelectorAll('.contact-us .field--select.open').forEach((o) => {
+          if (o !== wrap) {
+            o.classList.remove('open')
+            o.querySelector('.reason-trigger')?.setAttribute('aria-expanded', 'false')
+          }
+        })
+        const open = wrap.classList.toggle('open')
+        trigger.setAttribute('aria-expanded', String(open))
+      }
+      const onOptionClick = (li: HTMLLIElement) => {
+        value = li.dataset.value!
+        label.textContent = li.textContent
+        label.classList.remove('placeholder')
+        options.forEach((o) => o.setAttribute('aria-selected', String(o === li)))
+        close()
+        trigger.focus()
+        onPick(value, li.textContent ?? '')
+      }
+      const onKeydown = (e: KeyboardEvent) => {
+        if (e.key === 'Escape') {
+          close()
+          trigger.focus()
+        }
+      }
+      const onDocClick = (e: MouseEvent) => {
+        if (!wrap.contains(e.target as Node)) close()
+      }
+      const clickHandlers = options.map((li) => () => onOptionClick(li))
 
-      const r = REASONS[key]
-      look(0, -4)
-      tilt(0, -6)
-      setMood(r.mood)
-      say(pick(r.lines))
-    }
-    const onDocClick = (e: MouseEvent) => {
-      if (!reasonWrap.contains(e.target as Node)) closeReasonList()
-    }
-    const onReasonKeydown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        closeReasonList()
-        reasonTrigger.focus()
+      trigger.addEventListener('click', onTriggerClick)
+      trigger.addEventListener('focus', onFocus)
+      options.forEach((li, i) => li.addEventListener('click', clickHandlers[i]))
+      wrap.addEventListener('keydown', onKeydown)
+      document.addEventListener('click', onDocClick)
+
+      return {
+        trigger,
+        get value() {
+          return value
+        },
+        destroy() {
+          trigger.removeEventListener('click', onTriggerClick)
+          trigger.removeEventListener('focus', onFocus)
+          options.forEach((li, i) => li.removeEventListener('click', clickHandlers[i]))
+          wrap.removeEventListener('keydown', onKeydown)
+          document.removeEventListener('click', onDocClick)
+        },
       }
     }
-    reasonTrigger.addEventListener('click', onReasonTriggerClick)
-    reasonTrigger.addEventListener('focus', onReasonFocus)
-    reasonOptions.forEach((li) => li.addEventListener('click', () => onReasonOptionClick(li)))
-    reasonWrap.addEventListener('keydown', onReasonKeydown)
-    document.addEventListener('click', onDocClick)
+
+    const reason = customSelect(
+      'reasonSelect',
+      (key) => {
+        const r = REASONS[key as ReasonKey]
+        look(0, -4)
+        tilt(0, -6)
+        setMood(r.mood)
+        say(pick(r.lines))
+      },
+      () => {
+        setMood('watching')
+        say('Hardware or software? Pick one. I promise not to judge. Much.')
+      },
+    )
+
+    const budget = customSelect(
+      'budgetSelect',
+      () => {
+        setMood('happy')
+        say(pick(['Noted. Numbers help more than you think.', 'Budget logged. No judgement, promise.']))
+      },
+      () => {
+        setMood('watching')
+        say(pick(["Ballpark is fine. I'm not an accountant.", 'Optional, but it helps us scope it.']))
+      },
+    )
 
     const onDetailsFocus = () => {
       setMood('watching')
@@ -313,7 +317,7 @@ export default function ContactUs() {
       const complaints: [string, HTMLElement][] = []
       if (!nameI.value.trim()) complaints.push(["Still don't know your name.", nameI])
       else if (!EMAIL_RE.test(emailI.value.trim())) complaints.push(["That email isn't a real place.", emailI])
-      else if (!reasonValue) complaints.push(["Pick a reason, I'm dying of suspense.", reasonTrigger])
+      else if (!reason.value) complaints.push(["Pick a project type, I'm dying of suspense.", reason.trigger])
 
       if (complaints.length) {
         const [msg, field] = complaints[0]
@@ -331,7 +335,7 @@ export default function ContactUs() {
       done = true
       robot.classList.remove('is-hyped')
 
-      const reasonLabel = REASONS[reasonValue as ReasonKey].label
+      const reasonLabel = REASONS[reason.value as ReasonKey].label
 
       schedule(() => {
         robot.dataset.mood = 'success'
@@ -388,9 +392,8 @@ export default function ContactUs() {
       nameI.removeEventListener('input', onNameInput)
       emailI.removeEventListener('focus', onEmailFocus)
       emailI.removeEventListener('input', onEmailInput)
-      reasonTrigger.removeEventListener('click', onReasonTriggerClick)
-      reasonTrigger.removeEventListener('focus', onReasonFocus)
-      document.removeEventListener('click', onDocClick)
+      reason.destroy()
+      budget.destroy()
       detailsI.removeEventListener('focus', onDetailsFocus)
       detailsI.removeEventListener('input', onDetailsInput)
       btn.removeEventListener('mouseenter', onBtnEnter)
@@ -502,28 +505,30 @@ export default function ContactUs() {
                 <svg className="reason-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10l5 5 5-5z"/></svg>
               </button>
               <ul className="reason-list" id="reasonList" role="listbox" aria-label="Project type">
-                <li role="option" aria-selected="false" data-value="website">Website</li>
+                <li role="option" aria-selected="false" data-value="hardware">Hardware</li>
                 <li role="option" aria-selected="false" data-value="software">Software</li>
-                <li role="option" aria-selected="false" data-value="ai">AI</li>
-                <li role="option" aria-selected="false" data-value="robotics">Robotics</li>
-                <li role="option" aria-selected="false" data-value="iot">IoT</li>
-                <li role="option" aria-selected="false" data-value="automation">Automation</li>
-                <li role="option" aria-selected="false" data-value="prototype">Prototype</li>
-                <li role="option" aria-selected="false" data-value="careers">Careers</li>
-                <li role="option" aria-selected="false" data-value="other">Other</li>
               </ul>
             </div>
 
             <div className="field field--select" id="budgetSelect">
               <svg className="field-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm.75 5v1.1c1.2.2 2.25.85 2.25 2.15 0 1.1-.85 1.85-2 2.15v2.1c.55.1 1 .35 1 .85 0 .6-.65.95-1.75.95s-1.75-.35-1.75-.95c0-.5.45-.75 1-.85v-2c-1.2-.2-2.3-.85-2.3-2.2h1.55c0 .55.5.9 1.25.9.65 0 1.05-.3 1.05-.7 0-.4-.35-.6-1.15-.8-1.35-.35-2.4-.85-2.4-2.15 0-1.15.9-1.85 2.05-2.05V7Z"/></svg>
-              <select id="budget" defaultValue="" aria-label="Budget range">
-                <option value="" disabled>Budget range (optional)</option>
-                <option value="under-5k">Under $5k</option>
-                <option value="5k-15k">$5k – $15k</option>
-                <option value="15k-50k">$15k – $50k</option>
-                <option value="50k-plus">$50k+</option>
-                <option value="not-sure">Not sure yet</option>
-              </select>
+              <button
+                type="button"
+                className="reason-trigger"
+                id="budgetTrigger"
+                aria-haspopup="listbox"
+                aria-expanded="false"
+              >
+                <span className="placeholder">Budget range (optional)</span>
+                <svg className="reason-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10l5 5 5-5z"/></svg>
+              </button>
+              <ul className="reason-list" role="listbox" aria-label="Budget range">
+                <li role="option" aria-selected="false" data-value="under-5k">Under $5k</li>
+                <li role="option" aria-selected="false" data-value="5k-15k">$5k – $15k</li>
+                <li role="option" aria-selected="false" data-value="15k-50k">$15k – $50k</li>
+                <li role="option" aria-selected="false" data-value="50k-plus">$50k+</li>
+                <li role="option" aria-selected="false" data-value="not-sure">Not sure yet</li>
+              </ul>
             </div>
 
             <label className="field field--textarea">

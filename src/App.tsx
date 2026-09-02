@@ -2,7 +2,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import Navbar from './components/layout/Navbar'
 import BottomNav from './components/layout/BottomNav'
 import Footer from './components/layout/Footer'
-import ChatWidget from './components/chat/ChatWidget'
+import NilaCompanion from './components/robot/NilaCompanion'
 import Home from './pages/Home'
 import AboutUs from './pages/AboutUs'
 import ContactUs from './pages/ContactUs'
@@ -24,7 +24,7 @@ function App() {
         <Route path="*" element={<Home />} />
       </Routes>
       <Footer />
-      <ChatWidget />
+      <NilaCompanion />
       <BottomNav />
     </BrowserRouter>
   )

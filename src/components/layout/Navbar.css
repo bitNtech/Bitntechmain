@@ -87,7 +87,13 @@
   pointer-events: none;
   border-radius: inherit;
   opacity: 1;
-  border: 1px solid black;
+  /* A hairline, not a black box: solid black read as an exposed dark rectangle
+     wherever the pill crossed a light card (Contact). Tint it to the ground. */
+  border: 1px solid rgba(0, 0, 0, .14);
+}
+
+.nav-05__bar--on-dark .nav-05__glass::before {
+  border-color: rgba(255, 255, 255, .16);
 }
 
 .nav-05__glass-inner {
@@ -314,37 +320,57 @@
   background: var(--pill-text);
 }
 
-.nav-05__bar--on-dark:not(.is-scrolled) .nav-05__mark {
+/* On a dark ground the wordmark is white with an orange "Tech" — no longer
+   gated on `:not(.is-scrolled)`, because the flag is now measured from what is
+   actually behind the bar rather than guessed from the route. These sit after
+   the `.is-scrolled` block on purpose: same specificity, so the ground wins. */
+.nav-05__bar--on-dark .nav-05__mark {
   background: #fff;
   color: var(--pill-bg);
 }
 
-.nav-05__bar--on-dark:not(.is-scrolled) .nav-05__logo {
+.nav-05__bar--on-dark .nav-05__logo {
   color: #fff;
 }
 
-.nav-05__bar--on-dark:not(.is-scrolled) .nav-05__links a {
-  color: rgba(255, 255, 255, .72);
+/* The accent never leaves the bar: "Tech" is orange on every ground, light or
+   dark, scrolled or not. Links keep their accent colour too — the on-dark
+   variant used to wash them out to white, which spent the one bit of brand
+   colour the nav has. */
+.nav-05__logo em,
+.nav-05__bar--on-dark .nav-05__logo em,
+.nav-05__bar.is-scrolled .nav-05__logo em {
+  color: var(--accent);
 }
 
-.nav-05__bar--on-dark:not(.is-scrolled) .nav-05__links a:hover,
-.nav-05__bar--on-dark:not(.is-scrolled) .nav-05__links a.is-active {
-  color: #fff;
-  background: rgba(255, 255, 255, .1);
+.nav-05__bar--on-dark .nav-05__links a {
+  color: var(--accent);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, .35);
 }
 
-.nav-05__bar--on-dark:not(.is-scrolled) .nav-05__cta {
+.nav-05__bar--on-dark .nav-05__links a:hover,
+.nav-05__bar--on-dark .nav-05__links a.is-active {
+  color: var(--accent2);
+  background: rgba(255, 255, 255, .12);
+}
+
+.nav-05__bar--on-dark .nav-05__cta {
   background: #fff;
   color: var(--pill-bg);
 }
 
-.nav-05__bar--on-dark:not(.is-scrolled) .nav-05__btn {
+.nav-05__bar--on-dark .nav-05__btn {
   background: rgba(255, 255, 255, .09);
   border-color: rgba(255, 255, 255, .18);
 }
 
-.nav-05__bar--on-dark:not(.is-scrolled) .nav-05__btn span {
+.nav-05__bar--on-dark .nav-05__btn span {
   background: #fff;
+}
+
+/* ...and on a light ground it is the ink half that has to hold up. */
+.nav-05__bar:not(.nav-05__bar--on-dark) .nav-05__logo {
+  color: var(--text);
 }
 
 /* full-screen overlay */

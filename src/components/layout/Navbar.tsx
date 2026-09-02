@@ -11,13 +11,49 @@ const PAGE_LABELS: Record<string, string> = {
   '/get-started': 'Get Started',
 }
 
+/**
+ * Whether the page's own ground under a point is dark, or null if nothing
+ * opaque is there. `elementsFromPoint` hands back the stack topmost-first,
+ * ancestors included, so the first opaque background it finds is the one you
+ * would actually see through the bar.
+ */
+function isDark(color: string): boolean | null {
+  const rgb = color.match(/[\d.]+/g)
+  if (!rgb || rgb.length < 3 || Number(rgb[3] ?? 1) < 0.5) return null
+  const [r, g, b] = rgb.map(Number)
+  return (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255 < 0.55
+}
+
+function groundIsDark(x: number, y: number): boolean | null {
+  for (const el of document.elementsFromPoint(x, y)) {
+    if (el.closest('.nav-05')) continue
+    const style = getComputedStyle(el)
+    // Decorative washes (glows, grids) sit above the ground but aren't it.
+    if (style.mixBlendMode !== 'normal' || Number(style.opacity) < 0.9) continue
+    const flat = isDark(style.backgroundColor)
+    if (flat !== null) return flat
+    /* Several heroes paint themselves with a gradient and no background-color;
+       reading only backgroundColor fell through them to the cream body and left
+       the wordmark black on dark. Computed gradients list their stops as rgb(),
+       so the first opaque stop is a good enough sample. */
+    for (const stop of style.backgroundImage.match(/rgba?\([^)]*\)/g) ?? []) {
+      const g = isDark(stop)
+      if (g !== null) return g
+    }
+  }
+  return null
+}
+
 export default function Navbar() {
   const toggleRef = useRef<HTMLInputElement>(null)
+  const brandRef = useRef<HTMLAnchorElement>(null)
   const progressSegmentsRef = useRef<(HTMLDivElement | null)[]>([])
   const { pathname } = useLocation()
-  // Every page whose first screen is a dark ground — the bar sits on top of it.
-  const isDarkPage = pathname === '/hardware' || pathname === '/software'
-    || pathname === '/contact' || pathname === '/about' || pathname === '/get-started'
+  /* What is behind the wordmark, measured rather than listed. A list of "dark
+     routes" is wrong twice over: it missed Home, whose hero is dark, and it
+     cannot know that scrolling Home moves the bar off that hero and onto a
+     cream section. So sample the ground under the wordmark itself. */
+  const [onDark, setOnDark] = useState(true)
   const [isScrolled, setIsScrolled] = useState(false)
   const [sectionsCount, setSectionsCount] = useState(1)
 
@@ -59,6 +95,31 @@ export default function Navbar() {
     }
   }, [pathname, sectionsCount])
 
+  useEffect(() => {
+    let frame = 0
+    const probe = () => {
+      frame = 0
+      const box = brandRef.current?.getBoundingClientRect()
+      if (!box) return
+      const dark = groundIsDark(box.left + box.width / 2, box.top + box.height / 2)
+      if (dark !== null) setOnDark(dark)
+    }
+    const onScroll = () => {
+      if (!frame) frame = requestAnimationFrame(probe)
+    }
+    probe()
+    // The route's first paint has not landed on the frame this runs in.
+    const settle = window.setTimeout(probe, 220)
+    window.addEventListener('scroll', onScroll, { passive: true })
+    window.addEventListener('resize', onScroll)
+    return () => {
+      if (frame) cancelAnimationFrame(frame)
+      window.clearTimeout(settle)
+      window.removeEventListener('scroll', onScroll)
+      window.removeEventListener('resize', onScroll)
+    }
+  }, [pathname])
+
   const closeAfterNavigate = () => {
     setTimeout(() => {
       if (toggleRef.current) toggleRef.current.checked = false
@@ -67,7 +128,7 @@ export default function Navbar() {
 
   return (
     <div className="nav-05">
-      <div className={`nav-05__progress${isDarkPage ? ' nav-05__progress--on-dark' : ''}`} aria-hidden="true">
+      <div className={`nav-05__progress${onDark ? ' nav-05__progress--on-dark' : ''}`} aria-hidden="true">
         <div className="nav-05__progress-track">
           {Array.from({ length: sectionsCount }).map((_, i) => (
             <div key={i} className="nav-05__progress-segment">
@@ -80,11 +141,11 @@ export default function Navbar() {
         </div>
       </div>
       <input ref={toggleRef} type="checkbox" id="nav-05-toggle" />
-      <nav className={`nav-05__bar${isScrolled ? ' is-scrolled' : ''}${isDarkPage ? ' nav-05__bar--on-dark' : ''}`}>
+      <nav className={`nav-05__bar${isScrolled ? ' is-scrolled' : ''}${onDark ? ' nav-05__bar--on-dark' : ''}`}>
         <div className="nav-05__glass" aria-hidden="true">
           <div className="nav-05__glass-inner"></div>
         </div>
-        <Link to="/" className="nav-05__brand">
+        <Link to="/" className="nav-05__brand" ref={brandRef}>
           <span className="nav-05__logo">BitN<em>Tech</em></span>
         </Link>
 

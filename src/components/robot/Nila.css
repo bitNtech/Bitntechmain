@@ -113,9 +113,8 @@
   z-index: 300;
   width: 84px;
   height: 84px;
-  /* Driven from JS so she can drift toward the pointer; the transition is what
-     makes the drift read as swimming rather than snapping. */
-  transition: transform .9s cubic-bezier(.22, 1, .36, 1);
+  /* Position is set from JS; the trip between two perches is animated there
+     as an arc, so no transition here — it would flatten the arc back out. */
   pointer-events: none;
 }
 
@@ -126,10 +125,11 @@
   border: 0;
   padding: 0;
   background: transparent;
-  cursor: pointer;
+  cursor: grab;
   pointer-events: auto;
   -webkit-tap-highlight-color: transparent;
-  touch-action: manipulation;
+  /* Without this the page scrolls out from under her the moment you drag. */
+  touch-action: none;
 }
 
 .nila-companion .nila-bubble {
@@ -153,25 +153,37 @@
   right: 26px;
 }
 
-.nila-companion__ping {
-  position: absolute;
-  right: 10px;
-  top: 8px;
-  width: 11px;
-  height: 11px;
-  border-radius: 50%;
-  background: var(--nb-orange-3, #ff6e42);
-  box-shadow: 0 0 0 3px rgba(255, 110, 66, .28);
-  animation: nila-ping 2.4s ease-in-out infinite;
+/* ...and on the left rail the mirror of that: centred on her, a 260px bubble
+   ran off the left edge every time she perched there. */
+.nila-companion[data-side='left'] .nila-bubble {
+  left: 0;
+  right: auto;
+  transform: translate(0, 8px) scale(.94);
 }
 
-@keyframes nila-ping {
-  0%, 100% { transform: scale(1); opacity: 1; }
-  50% { transform: scale(1.35); opacity: .65; }
+.nila-companion[data-side='left'] .nila-bubble.is-on {
+  transform: translate(0, 0) scale(1);
+}
+
+.nila-companion[data-side='left'] .nila-bubble::after {
+  left: 26px;
+  right: auto;
+  transform: rotate(45deg);
 }
 
 @media (max-width: 860px) {
   .nila-companion { width: 68px; height: 68px; }
+}
+
+/* Phones: she gets smaller, her bubbles get wider, and the ask field is 16px
+   so iOS does not zoom the whole page the moment you tap it. */
+@media (max-width: 560px) {
+  .nila-companion { width: 56px; height: 56px; }
+  .nila-companion .nila-bubble { max-width: min(220px, 62vw); font-size: 12px; padding: 8px 11px; }
+  .nila-ask { max-width: min(280px, 78vw); }
+  .nila-ask__input { font-size: 16px; padding: 8px 13px; }
+  .nila-ask__answer { font-size: 12.5px; padding: 9px 12px; }
+  .nila-ask__said { font-size: 12px; }
 }
 
 /* --- contact page ------------------------------------------------------- */
@@ -187,8 +199,99 @@
   .nila-contact { width: 190px; height: 190px; }
 }
 
+.nila-companion.is-pinned .nila-companion__hit { cursor: grabbing; }
+
+/* --- ask box ------------------------------------------------------------ */
+
+/* Her chat is two speech bubbles and a field, stacked over her head — no
+   panel, no window chrome. She answers where she is standing. */
+.nila-ask {
+  position: absolute;
+  bottom: calc(100% - 6px);
+  left: 0;
+  width: max-content;
+  max-width: min(300px, 74vw);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  pointer-events: auto;
+}
+
+.nila-companion[data-side='right'] .nila-ask {
+  left: auto;
+  right: 0;
+  align-items: flex-end;
+}
+
+.nila-ask form { width: 100%; }
+
+.nila-ask__input {
+  width: 100%;
+  border: 2px solid #1c1917;
+  border-radius: 999px;
+  padding: 9px 14px;
+  font: 600 13px/1.35 var(--sans);
+  background: #fff;
+  color: #14100e;
+  box-shadow: 2px 2px 0 rgba(28, 25, 23, .9);
+  outline-offset: 2px;
+}
+
+/* What you asked, in your own bubble, so the reply has something to answer. */
+.nila-ask__said {
+  margin: 0;
+  align-self: flex-end;
+  max-width: 90%;
+  border-radius: 14px 14px 4px 14px;
+  padding: 8px 12px;
+  background: var(--nb-orange-3, #ff6e42);
+  color: #fff;
+  font: 600 12.5px/1.4 var(--sans);
+}
+
+.nila-ask__answer {
+  max-width: 100%;
+  border-radius: 14px 14px 14px 4px;
+  padding: 10px 14px;
+  font: 600 13px/1.45 var(--sans);
+  background: #fffdf8;
+  border: 2px solid #1c1917;
+  box-shadow: 3px 3px 0 rgba(28, 25, 23, .9);
+  color: #1c1917;
+  animation: nila-pop .26s cubic-bezier(.34, 1.4, .64, 1);
+}
+
+@keyframes nila-pop {
+  from { opacity: 0; transform: translateY(6px) scale(.94); }
+  to { opacity: 1; transform: none; }
+}
+
+/* She is never quite still while she waits. */
+.nila-companion__float {
+  position: absolute;
+  inset: 0;
+  animation: nila-bob 4.5s ease-in-out infinite;
+}
+
+/* A second loop on a period that does not divide the first: the two together
+   never quite repeat, which is what stops her reading as a looping GIF. */
+.nila-companion__float > * {
+  animation: nila-sway 7.3s ease-in-out infinite;
+}
+
+@keyframes nila-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+@keyframes nila-sway {
+  0%, 100% { transform: translateX(-5px) rotate(-2.5deg); }
+  50% { transform: translateX(5px) rotate(2.5deg); }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .nila-companion { transition: none; }
+  .nila-companion__float,
+  .nila-companion__float > * { animation: none; }
   .nila-bubble { transition: opacity .2s ease; }
-  .nila-companion__ping { animation: none; }
 }

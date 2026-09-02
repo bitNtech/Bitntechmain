@@ -69,10 +69,14 @@
 
 .contact-us .left-pane {
   min-width: 0;
+  width: min(560px, 100%);
+  justify-self: center;
   display: flex;
   justify-content: center;
   position: relative;
   z-index: 1;
+  /* Nudged off dead-centre of its column, towards the middle of the page. */
+  margin-left: clamp(0px, 10vw, 150px);
 }
 
 .contact-us .stage {
@@ -82,6 +86,9 @@
   justify-self: center;
   position: relative;
   z-index: 1;
+  width: min(560px, 100%);
+  /* Mirrors the info card's nudge, so the two panes stay symmetrical. */
+  margin-right: clamp(0px, 10vw, 150px);
 }
 
 @media (max-width: 900px) {
@@ -89,6 +96,8 @@
     grid-template-columns: 1fr;
     gap: 40px;
   }
+  .contact-us .left-pane { margin-left: 0; }
+  .contact-us .stage { margin-right: 0; }
 }
 
 /* robot */
@@ -179,16 +188,17 @@
 
 .contact-us .ear {
   position: absolute;
-  top: 48px;
-  width: 16px;
-  height: 40px;
-  background: #220934;
+  top: 46px;
+  width: 18px;
+  height: 44px;
+  /* OREJA nodes wear the accent material on the 3D Nila — match it here. */
+  background: var(--cu-accent);
   border: var(--cu-line);
   border-radius: 8px;
   transform: translateZ(0);
 }
-.contact-us .ear--l { left: -10px; }
-.contact-us .ear--r { right: -10px; }
+.contact-us .ear--l { left: -14px; }
+.contact-us .ear--r { right: -14px; }
 
 .contact-us .face {
   position: absolute;
@@ -326,7 +336,7 @@
 .contact-us .card {
   position: relative;
   z-index: 2;
-  width: min(344px, calc(100vw - 48px));
+  width: 100%;
   background: linear-gradient(165deg, #fffefb 0%, #fdfaf3 45%, var(--cu-field) 100%);
   border: var(--cu-line);
   border-radius: 20px;
@@ -427,8 +437,8 @@
   z-index: 3;
   transition: transform .25s ease;
 }
-.contact-us .hand--l { left: 36px; }
-.contact-us .hand--r { right: 36px; }
+.contact-us .hand--l { left: calc(50% - 136px); }
+.contact-us .hand--r { right: calc(50% - 136px); }
 .contact-us .is-hyped ~ .card .hand { transform: translateY(-3px) scaleY(1.08); }
 
 .contact-us .foot {
@@ -442,8 +452,8 @@
   box-shadow: inset 0 -9px 0 rgba(28, 25, 23, .12);
   z-index: -1;
 }
-.contact-us .foot--l { left: 62px; }
-.contact-us .foot--r { right: 62px; }
+.contact-us .foot--l { left: calc(50% - 110px); }
+.contact-us .foot--r { right: calc(50% - 110px); }
 
 .contact-us .field {
   display: flex;
@@ -489,24 +499,6 @@
   position: relative;
   padding: 0 0 0 14px;
   cursor: pointer;
-}
-.contact-us .field--select select {
-  flex: 1;
-  min-width: 0;
-  height: 100%;
-  padding: 0 14px 0 0;
-  border: none;
-  outline: none;
-  background: transparent;
-  font: inherit;
-  font-size: 14.5px;
-  font-weight: 600;
-  color: var(--cu-ink);
-  cursor: pointer;
-}
-.contact-us .field--select select:invalid,
-.contact-us .field--select select option[value=""] {
-  color: var(--cu-muted);
 }
 .contact-us .reason-trigger {
   flex: 1;
@@ -554,15 +546,16 @@
   pointer-events: none;
   transition: opacity .15s ease, transform .15s ease;
 }
+.contact-us .field--select.open { z-index: 6; }
 .contact-us .field--select.open .reason-list {
   opacity: 1;
   transform: translateY(0);
   pointer-events: auto;
 }
 .contact-us .reason-list li {
-  padding: 7px 10px;
+  padding: 9px 12px;
   border-radius: 8px;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
   color: var(--cu-ink);
   cursor: pointer;
@@ -592,7 +585,7 @@
 .contact-us .field--textarea textarea {
   flex: 1;
   min-width: 0;
-  min-height: 64px;
+  min-height: 96px;
   resize: vertical;
   border: none;
   outline: none;
@@ -683,7 +676,6 @@
   }
 
   .contact-us .card {
-    width: min(400px, calc(100vw - 32px));
     padding: 28px 20px 32px;
   }
 
@@ -691,7 +683,6 @@
      control text is the only way to keep the form from yanking the layout. */
   .contact-us .field input,
   .contact-us .field textarea,
-  .contact-us .field select,
   .contact-us .reason-trigger {
     font-size: 16px;
   }
@@ -735,6 +726,4 @@
 
 @media (max-width: 560px) {
   .contact-us .stage { padding-top: 78px; }
-  /* Nila already owns this page; the floating copy of her is noise here. */
-  body:has(.contact-us) .chat-widget { display: none; }
 }

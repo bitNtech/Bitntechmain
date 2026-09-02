@@ -7,6 +7,8 @@ type Talk = {
   /** True while she is pitching the Get Started button. */
   nudging: boolean
   say: (event: NilaEvent) => void
+  /** Speak a line built at runtime — what she reads off the page, or a reply. */
+  sayText: (text: string, mood?: NilaMood, ms?: number) => void
 }
 
 /**
@@ -18,23 +20,32 @@ export function useNilaTalk(active: boolean, firstEvent: NilaEvent = 'greet', be
   const [text, setText] = useState<string | null>(null)
   const [mood, setMood] = useState<NilaMood>('idle')
   const [nudging, setNudging] = useState(false)
-  const lastText = useRef<string>()
+  const lastText = useRef<string>(undefined)
   const idleCount = useRef(0)
-  const hideTimer = useRef<number>()
+  const hideTimer = useRef<number>(undefined)
 
-  const say = useCallback((event: NilaEvent) => {
-    const line = pickLine(event, lastText.current)
-    lastText.current = line.text
-    setText(line.text)
-    setMood(line.mood)
-    setNudging(event === 'nudge' || event === 'cta-near')
+  const speak = useCallback((text: string, mood: NilaMood, ms: number, nudge: boolean) => {
+    lastText.current = text
+    setText(text)
+    setMood(mood)
+    setNudging(nudge)
     window.clearTimeout(hideTimer.current)
     hideTimer.current = window.setTimeout(() => {
       setText(null)
       setMood('idle')
       setNudging(false)
-    }, line.ms ?? DEFAULT_MS)
+    }, ms)
   }, [])
+
+  const say = useCallback((event: NilaEvent) => {
+    const line = pickLine(event, lastText.current)
+    speak(line.text, line.mood, line.ms ?? DEFAULT_MS, event === 'nudge' || event === 'cta-near')
+  }, [speak])
+
+  // Longer lines need longer on screen, or she cuts herself off mid-sentence.
+  const sayText = useCallback((text: string, mood: NilaMood = 'happy', ms?: number) => {
+    speak(text, mood, ms ?? Math.min(4200 + text.length * 55, 14000), false)
+  }, [speak])
 
   useEffect(() => {
     if (!active) {
@@ -56,19 +67,18 @@ export function useNilaTalk(active: boolean, firstEvent: NilaEvent = 'greet', be
 
   useEffect(() => () => window.clearTimeout(hideTimer.current), [])
 
-  return { text, mood, nudging, say }
+  return { text, mood, nudging, say, sayText }
 }
 
-/** Pointer in -1..1 view space, shared by every Nila on the page. */
-export function useViewportPointer() {
-  const pointer = useRef({ x: 0, y: 0 })
+/** Live media-query match — used to keep a second WebGL canvas off phones. */
+export function useMediaQuery(query: string): boolean {
+  const [matches, setMatches] = useState(() => window.matchMedia(query).matches)
   useEffect(() => {
-    const onMove = (e: PointerEvent) => {
-      pointer.current.x = (e.clientX / window.innerWidth) * 2 - 1
-      pointer.current.y = (e.clientY / window.innerHeight) * 2 - 1
-    }
-    window.addEventListener('pointermove', onMove, { passive: true })
-    return () => window.removeEventListener('pointermove', onMove)
-  }, [])
-  return pointer
+    const mq = window.matchMedia(query)
+    const onChange = () => setMatches(mq.matches)
+    onChange()
+    mq.addEventListener('change', onChange)
+    return () => mq.removeEventListener('change', onChange)
+  }, [query])
+  return matches
 }

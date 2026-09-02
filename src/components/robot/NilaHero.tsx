@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import NilaScene from './NilaScene'
-import { useNilaTalk, useViewportPointer } from './useNilaTalk'
+import { useMediaQuery, useNilaTalk } from './useNilaTalk'
 import './Nila.css'
 
 /**
@@ -9,8 +9,12 @@ import './Nila.css'
  * so the pitch is clickable rather than decorative.
  */
 export default function NilaHero({ active = true }: { active?: boolean }) {
-  const pointer = useViewportPointer()
-  const { text, mood, nudging } = useNilaTalk(active, 'greet')
+  // One Nila per phone. The floating companion is the one you can talk to and
+  // carry around, so on a small screen the hero copy of her stands down rather
+  // than paying for a second WebGL context nobody can interact with.
+  const phone = useMediaQuery('(max-width: 720px)')
+  const { text, mood, nudging } = useNilaTalk(active && !phone, 'greet')
+  if (phone) return null
 
   return (
     <div className="nila-hero">
@@ -20,7 +24,7 @@ export default function NilaHero({ active = true }: { active?: boolean }) {
           <Link className="nila-bubble__cta" to="/get-started">Get Started →</Link>
         )}
       </div>
-      <NilaScene pointerRef={pointer} mood={mood} waving={nudging} className="nila-scene--hero" />
+      <NilaScene mood={mood} waving={nudging} className="nila-scene--hero" />
     </div>
   )
 }
