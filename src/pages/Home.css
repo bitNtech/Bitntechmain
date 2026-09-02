@@ -1,7 +1,6 @@
-.home-experience{--ink:#220934;--paper:#f7f4ee;--orange:#ff6e42;overflow:hidden;background:var(--paper);color:var(--ink);text-align:left}.home-hero{--hero-shadow-lift:0px;min-height:100svh;position:relative;display:grid;place-items:center;isolation:isolate;background:var(--paper);overflow:hidden}.home-kicker{font:700 .68rem/1.2 var(--mono);letter-spacing:.18em;text-transform:uppercase;color:var(--orange);margin:0 0 1.4rem}.home-experience h2,.home-experience h3{font-family:var(--heading);color:var(--ink)}em{color:var(--orange);font-style:normal}.home-closing a{text-decoration:none;padding:.9rem 1.2rem;border-radius:999px;font-weight:750;font-size:.85rem;background:var(--ink);color:#fff;box-shadow:5px 5px 0 var(--orange);transition:transform .25s var(--ease),box-shadow .25s var(--ease)}.home-closing a:hover{transform:translate(-3px,-3px);box-shadow:8px 8px 0 var(--orange)}.home-closing span{color:var(--orange);margin-left:.5rem}.home-manifesto,.home-solutions,.home-process,.home-worlds,.home-closing{padding:clamp(5rem,12vw,10rem) max(1.5rem,calc((100vw - 1100px)/2))}.home-manifesto{background:var(--ink);color:#fff}.home-manifesto h2{color:#fff;font-size:clamp(2.5rem,6.1vw,6rem);max-width:1000px;margin:0;line-height:.96;letter-spacing:-.065em}.home-manifesto__footer{display:flex;justify-content:space-between;align-items:end;margin-top:4rem;gap:2rem;color:#bdd0d7}.home-manifesto__footer p{max-width:360px;line-height:1.55}.home-manifesto__footer span{font:600 .7rem var(--mono);color:var(--orange)}.home-section-head{display:grid;grid-template-columns:1fr 1fr;align-items:end;margin-bottom:3rem}.home-section-head .home-kicker{grid-column:1/-1}.home-section-head h2{font-size:clamp(2.7rem,5vw,5rem);line-height:.88;letter-spacing:-.07em;margin:0}.home-section-head>p:last-child{max-width:300px;color:#42606a;line-height:1.55;justify-self:end}.home-service-grid{display:grid;grid-template-columns:repeat(2,1fr);perspective:1000px;border-top:1px solid #22093433;border-left:1px solid #22093433}.home-service{min-height:230px;position:relative;overflow:hidden;padding:1.5rem;border-right:1px solid #22093433;border-bottom:1px solid #22093433;background:#faf9f5;transition:transform .45s var(--ease),background .3s var(--ease),box-shadow .45s var(--ease);text-decoration:none;display:block}.home-service:hover{z-index:1;background:var(--orange);transform:translateZ(45px) rotateX(5deg) rotateY(-5deg);box-shadow:16px 18px 0 #1b5e3f}.home-service__number{position:absolute;right:1rem;top:1rem;font:600 .68rem var(--mono);color:#6b8087}.home-service svg{color:var(--orange)}.home-service h3{font-size:1.35rem;margin:3rem 0 .5rem;letter-spacing:-.05em}.home-service p{color:#4e6870;font-size:.84rem;max-width:200px}.home-service__arrow{position:absolute;bottom:1rem;right:1rem;font-size:1.4rem;color:var(--orange)}.home-service:hover *{color:var(--ink)}.home-process{display:grid;grid-template-columns:.85fr 1.15fr;gap:5rem;background:#e9e7df}.home-process__sticky{position:sticky;top:9rem;align-self:start}.home-process h2{font-size:clamp(2.7rem,5vw,5rem);line-height:.88;letter-spacing:-.07em;margin:0 0 1.5rem}.home-process__sticky>p:last-child{max-width:330px;color:#42606a;line-height:1.55}.home-process ol{margin:0;padding:0;list-style:none}.home-process li{display:grid;grid-template-columns:50px 1fr auto;gap:1rem;padding:2rem 0;border-top:1px solid #22093438;align-items:start}.home-process li span{color:var(--orange);font:700 .7rem var(--mono)}.home-process li h3{margin:0 0 .5rem;font-size:clamp(1.5rem,2.4vw,2.3rem);letter-spacing:-.06em}.home-process li p{max-width:390px;color:#42606a;line-height:1.55;font-size:.9rem}.home-process li b{color:var(--orange);font-size:1.25rem;font-weight:400}.home-worlds{background:var(--ink);color:#fff;padding-right:0}.home-worlds h2{color:#fff}.home-worlds__track{display:flex;gap:1rem;overflow-x:auto;padding:1rem 2rem 1.5rem 0;scrollbar-width:none}.home-worlds__track::-webkit-scrollbar{display:none}.home-worlds__scrollbar{display:flex;align-items:center;gap:1rem;margin-top:.5rem;padding-right:2rem}.home-worlds__scrollbar button{flex:none;width:2.25rem;height:2.25rem;border-radius:50%;border:1px solid #ffffff40;background:transparent;color:#fff;font-size:1.1rem;line-height:1;cursor:pointer;transition:background .2s var(--ease),color .2s var(--ease)}.home-worlds__scrollbar button:hover{background:#fff;color:var(--ink)}.home-worlds__scrollbar-track{flex:1;height:4px;border-radius:999px;background:#ffffff26;position:relative;overflow:hidden}.home-worlds__scrollbar-thumb{position:absolute;top:0;left:0;height:100%;width:20%;border-radius:999px;background:var(--orange);cursor:grab;touch-action:none}.home-worlds__scrollbar-thumb:active{cursor:grabbing}.home-world{flex:0 0 min(42vw,420px);aspect-ratio:1.24;padding:1.5rem;position:relative;overflow:hidden;border:1px solid #ffffff40;background:linear-gradient(135deg,#163c4a,#220934);transition:transform .35s var(--ease)}.home-world:nth-child(even){background:linear-gradient(135deg,#fc825d,#d64a2a)}.home-world:hover{transform:translateY(-13px) rotate(-2deg)}.home-world span{color:#a5bdc4;font:600 .7rem var(--mono)}.home-world h3{position:absolute;left:1.5rem;bottom:1.2rem;margin:0;color:#fff;font-size:clamp(1.5rem,3vw,2.8rem);letter-spacing:-.07em}.home-world i{position:absolute;width:70%;aspect-ratio:1;right:-24%;top:-20%;border:1px solid #ffffff80;border-radius:50%}.home-world:nth-child(even) i{border-radius:0;transform:rotate(45deg)}.home-closing{text-align:center;min-height:65vh;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--paper)}.home-closing h2{max-width:850px;font-size:clamp(3rem,6.5vw,6.8rem);line-height:.86;letter-spacing:-.08em;margin:0 0 2.3rem}.reveal{opacity:0;transform:translateY(28px)}@media(max-width:720px){.home-section-head,.home-process{grid-template-columns:1fr;gap:2rem}.home-section-head>p:last-child{justify-self:start}.home-service-grid{grid-template-columns:1fr}.home-process__sticky{position:static}.home-world{flex-basis:75vw}.home-manifesto__footer{display:block}.home-manifesto__footer span{display:block;margin-top:1.5rem}}@media(prefers-reduced-motion:reduce){.reveal,.home-hero__stacked-text{opacity:1;transform:none}}.home-process__list-wrap{--process-badge-size:38px;position:relative;isolation:isolate}.home-process__line{position:absolute;z-index:0;left:calc(var(--process-badge-size) / 2);top:0;bottom:0;width:3px;overflow:hidden;pointer-events:none;transform:translateX(-50%)}.home-process__line-progress{width:100%;height:100%;transform-origin:top;transform:scaleY(0);will-change:transform}.home-process li{position:relative;z-index:1}.process-number{position:relative;z-index:1;display:inline-flex;align-items:center;justify-content:center;width:var(--process-badge-size);height:var(--process-badge-size);border-radius:8px;border:1px solid #2209341a;background:var(--paper);transition:color .35s cubic-bezier(0.2,.8,.2,1),background .35s cubic-bezier(0.2,.8,.2,1),border-color .35s cubic-bezier(0.2,.8,.2,1),box-shadow .35s cubic-bezier(0.2,.8,.2,1),transform .35s cubic-bezier(0.2,.8,.2,1)}
+.home-experience{--ink:#220934;--paper:#f7f4ee;--orange:#ff6e42;overflow:hidden;background:var(--paper);color:var(--ink);text-align:left}.home-kicker{font:700 .68rem/1.2 var(--mono);letter-spacing:.18em;text-transform:uppercase;color:var(--orange);margin:0 0 1.4rem}.home-experience h2,.home-experience h3{font-family:var(--heading);color:var(--ink)}em{color:var(--orange);font-style:normal}.home-closing a{text-decoration:none;padding:.9rem 1.2rem;border-radius:999px;font-weight:750;font-size:.85rem;background:var(--ink);color:#fff;box-shadow:5px 5px 0 var(--orange);transition:transform .25s var(--ease),box-shadow .25s var(--ease)}.home-closing a:hover{transform:translate(-3px,-3px);box-shadow:8px 8px 0 var(--orange)}.home-closing span{color:var(--orange);margin-left:.5rem}.home-manifesto,.home-solutions,.home-process,.home-worlds,.home-closing{padding:clamp(5rem,12vw,10rem) max(1.5rem,calc((100vw - 1100px)/2))}.home-manifesto{background:var(--ink);color:#fff}.home-manifesto h2{color:#fff;font-size:clamp(2.5rem,6.1vw,6rem);max-width:1000px;margin:0;line-height:.96;letter-spacing:-.065em}.home-manifesto__footer{display:flex;justify-content:space-between;align-items:end;margin-top:4rem;gap:2rem;color:#bdd0d7}.home-manifesto__footer p{max-width:360px;line-height:1.55}.home-manifesto__footer span{font:600 .7rem var(--mono);color:var(--orange)}.home-section-head{display:grid;grid-template-columns:1fr 1fr;align-items:end;margin-bottom:3rem}.home-section-head .home-kicker{grid-column:1/-1}.home-section-head h2{font-size:clamp(2.7rem,5vw,5rem);line-height:.88;letter-spacing:-.07em;margin:0}.home-section-head>p:last-child{max-width:300px;color:#42606a;line-height:1.55;justify-self:end}.home-service-grid{display:grid;grid-template-columns:repeat(2,1fr);perspective:1000px;border-top:1px solid #22093433;border-left:1px solid #22093433}.home-service{min-height:230px;position:relative;overflow:hidden;padding:1.5rem;border-right:1px solid #22093433;border-bottom:1px solid #22093433;background:#faf9f5;transition:transform .45s var(--ease),background .3s var(--ease),box-shadow .45s var(--ease);text-decoration:none;display:block}.home-service:hover{z-index:1;background:var(--orange);transform:translateZ(45px) rotateX(5deg) rotateY(-5deg);box-shadow:16px 18px 0 #1b5e3f}.home-service__number{position:absolute;right:1rem;top:1rem;font:600 .68rem var(--mono);color:#6b8087}.home-service svg{color:var(--orange)}.home-service h3{font-size:1.35rem;margin:3rem 0 .5rem;letter-spacing:-.05em}.home-service p{color:#4e6870;font-size:.84rem;max-width:200px}.home-service__arrow{position:absolute;bottom:1rem;right:1rem;font-size:1.4rem;color:var(--orange)}.home-service:hover *{color:var(--ink)}.home-process{display:grid;grid-template-columns:.85fr 1.15fr;gap:5rem;background:#e9e7df}.home-process__sticky{position:sticky;top:9rem;align-self:start}.home-process h2{font-size:clamp(2.7rem,5vw,5rem);line-height:.88;letter-spacing:-.07em;margin:0 0 1.5rem}.home-process__sticky>p:last-child{max-width:330px;color:#42606a;line-height:1.55}.home-process ol{margin:0;padding:0;list-style:none}.home-process li{display:grid;grid-template-columns:50px 1fr auto;gap:1rem;padding:2rem 0;border-top:1px solid #22093438;align-items:start}.home-process li span{color:var(--orange);font:700 .7rem var(--mono)}.home-process li h3{margin:0 0 .5rem;font-size:clamp(1.5rem,2.4vw,2.3rem);letter-spacing:-.06em}.home-process li p{max-width:390px;color:#42606a;line-height:1.55;font-size:.9rem}.home-process li b{color:var(--orange);font-size:1.25rem;font-weight:400}.home-worlds{background:var(--ink);color:#fff;padding-right:0}.home-worlds h2{color:#fff}.home-worlds__track{display:flex;gap:1rem;overflow-x:auto;padding:1rem 2rem 1.5rem 0;scrollbar-width:none}.home-worlds__track::-webkit-scrollbar{display:none}.home-worlds__scrollbar{display:flex;align-items:center;gap:1rem;margin-top:.5rem;padding-right:2rem}.home-worlds__scrollbar button{flex:none;width:2.25rem;height:2.25rem;border-radius:50%;border:1px solid #ffffff40;background:transparent;color:#fff;font-size:1.1rem;line-height:1;cursor:pointer;transition:background .2s var(--ease),color .2s var(--ease)}.home-worlds__scrollbar button:hover{background:#fff;color:var(--ink)}.home-worlds__scrollbar-track{flex:1;height:4px;border-radius:999px;background:#ffffff26;position:relative;overflow:hidden}.home-worlds__scrollbar-thumb{position:absolute;top:0;left:0;height:100%;width:20%;border-radius:999px;background:var(--orange);cursor:grab;touch-action:none}.home-worlds__scrollbar-thumb:active{cursor:grabbing}.home-world{flex:0 0 min(42vw,420px);aspect-ratio:1.24;padding:1.5rem;position:relative;overflow:hidden;border:1px solid #ffffff40;background:linear-gradient(135deg,#163c4a,#220934);transition:transform .35s var(--ease)}.home-world:nth-child(even){background:linear-gradient(135deg,#fc825d,#d64a2a)}.home-world:hover{transform:translateY(-13px) rotate(-2deg)}.home-world span{color:#a5bdc4;font:600 .7rem var(--mono)}.home-world h3{position:absolute;left:1.5rem;bottom:1.2rem;margin:0;color:#fff;font-size:clamp(1.5rem,3vw,2.8rem);letter-spacing:-.07em}.home-world i{position:absolute;width:70%;aspect-ratio:1;right:-24%;top:-20%;border:1px solid #ffffff80;border-radius:50%}.home-world:nth-child(even) i{border-radius:0;transform:rotate(45deg)}.home-closing{text-align:center;min-height:65vh;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--paper)}.home-closing h2{max-width:850px;font-size:clamp(3rem,6.5vw,6.8rem);line-height:.86;letter-spacing:-.08em;margin:0 0 2.3rem}.reveal{opacity:0;transform:translateY(28px)}@media(max-width:720px){.home-section-head,.home-process{grid-template-columns:1fr;gap:2rem}.home-section-head>p:last-child{justify-self:start}.home-service-grid{grid-template-columns:1fr}.home-process__sticky{position:static}.home-world{flex-basis:75vw}.home-manifesto__footer{display:block}.home-manifesto__footer span{display:block;margin-top:1.5rem}}@media(prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none}}.home-process__list-wrap{--process-badge-size:38px;position:relative;isolation:isolate}.home-process__line{position:absolute;z-index:0;left:calc(var(--process-badge-size) / 2);top:0;bottom:0;width:3px;overflow:hidden;pointer-events:none;transform:translateX(-50%)}.home-process__line-progress{width:100%;height:100%;transform-origin:top;transform:scaleY(0);will-change:transform}.home-process li{position:relative;z-index:1}.process-number{position:relative;z-index:1;display:inline-flex;align-items:center;justify-content:center;width:var(--process-badge-size);height:var(--process-badge-size);border-radius:8px;border:1px solid #2209341a;background:var(--paper);transition:color .35s cubic-bezier(0.2,.8,.2,1),background .35s cubic-bezier(0.2,.8,.2,1),border-color .35s cubic-bezier(0.2,.8,.2,1),box-shadow .35s cubic-bezier(0.2,.8,.2,1),transform .35s cubic-bezier(0.2,.8,.2,1)}
 .home-process__line{background:#22093438}.home-process__line-progress{background:var(--orange)}.process-number{--process-box-progress:0;color:var(--orange);isolation:isolate;transition:box-shadow .2s cubic-bezier(.2,.8,.2,1),transform .2s cubic-bezier(.2,.8,.2,1)}.process-number::before,.process-number::after{content:"";position:absolute;border-radius:inherit;pointer-events:none}.process-number::before{z-index:-1;inset:0;background:var(--orange);opacity:var(--process-box-progress)}.process-number::after{inset:-1px;padding:2px;background:conic-gradient(from -90deg,var(--orange) calc(var(--process-box-progress) * 1turn),transparent 0);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude}.home-process li.is-active .process-number{border-color:#2209341a;background:var(--paper);color:color-mix(in srgb,var(--orange) calc((1 - var(--process-box-progress)) * 100%),#fff calc(var(--process-box-progress) * 100%));box-shadow:calc(4px * var(--process-box-progress)) calc(4px * var(--process-box-progress)) 0 #220934;transform:translate(calc(-2px * var(--process-box-progress)),calc(-2px * var(--process-box-progress)))}
 .home-process__list-wrap{--process-badge-size:52px}.home-process li{grid-template-columns:64px 1fr}.process-number{border-color:transparent;background:color-mix(in srgb,var(--orange) calc(var(--process-box-progress) * 100%),var(--paper));color:color-mix(in srgb,var(--orange) calc((1 - var(--process-box-progress)) * 100%),#fff calc(var(--process-box-progress) * 100%))}.process-number::before{display:none}.process-number::after{z-index:1;inset:-2px;padding:2px;border-radius:7px;background:conic-gradient(from -90deg,var(--orange) calc(var(--process-box-progress) * 1turn),transparent 0)}.home-process li.is-active .process-number{border-color:transparent;background:color-mix(in srgb,var(--orange) calc(var(--process-box-progress) * 100%),var(--paper));color:color-mix(in srgb,var(--orange) calc((1 - var(--process-box-progress)) * 100%),#fff calc(var(--process-box-progress) * 100%))}
-.home-hero__text-stage{width:min(1500px,calc(100% - 5rem));padding:4rem 0;position:relative;z-index:1}.home-hero h1.home-hero__stacked-text{display:flex;flex-direction:column;align-items:center;max-width:none;margin:0;font-family:var(--heading);font-size:clamp(3.6rem,8vw,9rem);font-weight:900;line-height:.78;letter-spacing:-.045em;word-spacing:.08em;text-align:center;text-transform:uppercase;color:var(--orange);text-shadow:2px calc(4px - var(--hero-shadow-lift)) 0 #3e1650,4px calc(8px - var(--hero-shadow-lift)) 0 #3e1650,6px calc(12px - var(--hero-shadow-lift)) 0 #3e1650,8px calc(16px - var(--hero-shadow-lift)) 0 #3e1650,10px calc(20px - var(--hero-shadow-lift)) 0 #3e1650,12px calc(24px - var(--hero-shadow-lift)) 0 #3e1650,14px calc(28px - var(--hero-shadow-lift)) 0 #3e1650,16px calc(32px - var(--hero-shadow-lift)) 0 #3e1650,18px calc(36px - var(--hero-shadow-lift)) 0 #3e1650,20px calc(40px - var(--hero-shadow-lift)) 0 #3e1650,22px calc(44px - var(--hero-shadow-lift)) 0 #3e1650,24px calc(48px - var(--hero-shadow-lift)) 0 #3e1650,26px calc(52px - var(--hero-shadow-lift)) 0 #3e1650,28px calc(56px - var(--hero-shadow-lift)) 0 #3e1650,30px calc(60px - var(--hero-shadow-lift)) 0 #3e1650}.home-hero__stacked-text>span{display:block;white-space:nowrap}.home-hero__word{display:inline-block;white-space:nowrap}.home-hero__char{display:inline-block;text-align:center}@media(max-width:720px){.home-hero__text-stage{width:calc(100% - 2rem)}.home-hero h1.home-hero__stacked-text{font-size:clamp(2rem,11.3vw,5.8rem);line-height:.84;letter-spacing:-.02em;word-spacing:.05em;text-shadow:1px calc(3px - var(--hero-shadow-lift)) 0 #3e1650,3px calc(7px - var(--hero-shadow-lift)) 0 #3e1650,5px calc(11px - var(--hero-shadow-lift)) 0 #3e1650,7px calc(15px - var(--hero-shadow-lift)) 0 #3e1650,9px calc(19px - var(--hero-shadow-lift)) 0 #3e1650,11px calc(23px - var(--hero-shadow-lift)) 0 #3e1650,13px calc(27px - var(--hero-shadow-lift)) 0 #3e1650,15px calc(31px - var(--hero-shadow-lift)) 0 #3e1650}.home-hero__stacked-text>span{white-space:normal}}
 
 /* --- Phones: same composition as desktop, tightened -------------------- */
 @media (max-width: 720px) {
@@ -48,4 +47,393 @@
 
   .home-closing { min-height: auto; padding-block: 4rem; }
   .home-closing h2 { font-size: clamp(2.1rem, 10vw, 3.2rem); margin-bottom: 1.75rem; }
+}
+
+/* ======================================================================
+   HERO — "the signal lands"
+
+   The hero is a lit bench in a dark room, and the one thing on it is a
+   signal: it comes in at the left as an unruly analog wave out of the
+   physical world, settles through a short transition, and leaves at the
+   right as an even pulse train. That is the studio's job stated once, in
+   the only picture that says it — and everything else in the section is
+   hung off that line. Nila stands on the clean end of it. The three stops
+   under it name the layers in the order the signal crosses them.
+
+   The tagline is set twice: an outline, and a filled copy clipped to
+   nothing. As the signal sweeps left to right the fill is uncovered behind
+   it, so the word is built rather than merely shown. It is the only motion
+   in the hero that nobody asked for, it happens once, and it stops.
+
+   Dark on purpose. The rest of the page is cream; the model is a white
+   figure that only reads as lit against something darker, and one orange
+   spends much better on ink than on paper. The navbar samples the ground
+   under itself, so it flips to its light treatment here on its own.
+   ====================================================================== */
+
+.home-hero {
+  --display: 'Archivo', 'Archivo Expanded', system-ui, sans-serif;
+  --support: 'DM Sans', system-ui, sans-serif;
+  /* The hero does not use the page's fixed 1100px measure: held to it, the
+     type is starved on anything above a laptop and the composition becomes
+     an island in the middle of the screen. Proportional instead, turning
+     into a fixed measure past 1700px so the tagline cannot run away on a
+     monitor. */
+  --gutter: max(clamp(1.25rem, 8vw, 9rem), calc((100vw - 1700px) / 2));
+  /* Square, and both axes stated: a <canvas> reports a 300x150 intrinsic
+     size, which wins an auto track and leaves aspect-ratio with nothing to
+     do. Capped against viewport height too, or a short window puts her head
+     through the tagline. */
+  --nila-size: clamp(200px, min(38vh, 22vw), 440px);
+  --sig-h: clamp(52px, 7vh, 76px);
+  --paper-w: #f8f5f0;
+  --dim: #b3a0c6;
+  position: relative;
+  /* Padding is inside the 100svh, or the section grows past the viewport and
+     the block it centres sits a padding's worth too low. */
+  box-sizing: border-box;
+  min-height: 100svh;
+  display: grid;
+  align-content: center;
+  isolation: isolate;
+  overflow: hidden;
+  color: var(--paper-w);
+  /* Three layers, painted top down: a vignette that closes the corners, the
+     stage light behind Nila, and the room itself. */
+  background:
+    radial-gradient(115% 85% at 50% 50%, rgba(7, 2, 13, 0) 38%, rgba(7, 2, 13, .62) 100%),
+    radial-gradient(52% 44% at 71% 56%, rgba(139, 84, 184, .32) 0%, rgba(139, 84, 184, 0) 72%),
+    radial-gradient(125% 105% at 18% -8%, #2a1440 0%, #1a0b2c 46%, #110619 100%);
+  /* Top padding clears the fixed navbar; the hero is the only section whose
+     content would otherwise start underneath it. */
+  padding: clamp(5.5rem, 13vh, 8.5rem) var(--gutter) clamp(2.25rem, 5vh, 3.5rem);
+}
+
+/* The bench grid. Faint, square, and masked to the middle so it never reaches
+   the edges — it should read as the surface the signal is drawn on, not as a
+   pattern laid over the section. */
+.home-hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image:
+    linear-gradient(to right, rgba(233, 220, 255, .05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(233, 220, 255, .05) 1px, transparent 1px);
+  background-size: 74px 74px;
+  -webkit-mask-image: radial-gradient(66% 58% at 52% 48%, #000 0%, transparent 80%);
+  mask-image: radial-gradient(66% 58% at 52% 48%, #000 0%, transparent 80%);
+}
+
+/* Grain. A flat dark field this large bands on a good screen; a couple of
+   percent of noise gives it tooth. Overlay rather than multiply — on ink,
+   multiply has nothing left to take away. */
+.home-hero::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: .34;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='.18'/%3E%3C/svg%3E");
+}
+
+.home-hero__inner {
+  display: grid;
+  /* Nila's track is stated, not auto: the tagline sizes itself off the track
+     it is given, so the track cannot be allowed to size itself off her. */
+  grid-template-columns: minmax(0, 1fr) var(--nila-size);
+  grid-template-areas:
+    'head nila'
+    'sig  sig'
+    'foot foot';
+  column-gap: clamp(1rem, 3vw, 2.75rem);
+  /* No row gap: the head's own bottom padding is the air over the signal,
+     which leaves the row edge exactly on the line — so anything bottom
+     aligned in that row is standing on it. */
+  row-gap: 0;
+}
+
+/* --- the tagline ------------------------------------------------------- */
+
+.hero-head {
+  grid-area: head;
+  align-self: end;
+  margin: 0;
+  padding-bottom: clamp(1rem, 3.5vh, 2.25rem);
+  font-family: var(--display);
+  /* The two lines size themselves off this box rather than off the viewport,
+     so the block tracks its own column instead of guessing at it. Container
+     query units resolve against an ancestor container and never against the
+     element itself — which is why the sizes live on the lines, not here. */
+  container-type: inline-size;
+}
+
+/* The lead-in. Condensed, light, sentence case: it has to be unmistakably the
+   smaller of the two registers, or the jump to the word below does nothing. */
+.hero-head__lead {
+  display: block;
+  font-size: 5.99cqi;
+  font-stretch: 72%;
+  font-weight: 400;
+  letter-spacing: -.005em;
+  line-height: 1.05;
+  color: rgba(248, 245, 240, .68);
+  margin-bottom: clamp(.3rem, 1.2vh, .75rem);
+}
+
+/* 7.518 is the measured width, in ems, of EVOLUTION set at 125% width, 900
+   weight and -.03em tracking; 100 / 7.518 = 13.30. Dividing the column by it
+   lands the word exactly flush with both edges of its column at every
+   viewport. Re-measure if the word or its axis values change. */
+.hero-head__word {
+  display: block;
+  position: relative;
+  font-size: 13.3cqi;
+  font-stretch: 125%;
+  font-weight: 900;
+  letter-spacing: -.03em;
+  line-height: .9;
+  text-transform: uppercase;
+}
+
+/* The unbuilt state, and the copy that carries the text for a reader. */
+.hero-head__outline {
+  color: transparent;
+  -webkit-text-stroke: 1.5px rgba(248, 245, 240, .36);
+}
+
+/* The built state, laid exactly over it and clipped to nothing until the
+   signal sweeps past. The overshoot on the right keeps the last stem from
+   being shaved by its own clip. */
+.hero-head__fill {
+  position: absolute;
+  inset: 0;
+  color: var(--paper-w);
+  clip-path: inset(0 100% 0 0);
+  animation: hero-fill .8s linear .35s forwards;
+}
+
+@keyframes hero-fill {
+  to { clip-path: inset(0 -.06em 0 0); }
+}
+
+/* --- the signal --------------------------------------------------------- */
+
+.hero-signal {
+  grid-area: sig;
+  /* Full bleed: the line leaves the container and runs off both edges of the
+     screen, while its stops stay on the page's grid. The section clips it. */
+  margin-inline: calc(var(--gutter) * -1);
+  /* Half of it sits above the row edge, so the baseline of the wave — not the
+     top of its box — is the line Nila stands on. */
+  margin-top: calc(var(--sig-h) / -2);
+  pointer-events: none;
+}
+
+.hero-signal__wave {
+  display: block;
+  width: 100%;
+  height: var(--sig-h);
+}
+
+.hero-signal__wave path {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: hero-trace 1.5s linear .15s forwards;
+}
+
+@keyframes hero-trace {
+  to { stroke-dashoffset: 0; }
+}
+
+/* Three stops: what the studio spans, in the order the signal crosses them.
+   No tick marks — the wave is already the busiest thing on the page, and a
+   second set of verticals under it just fights the pulse train. */
+.hero-signal__stops {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  margin: 0;
+  /* The wave's own lower half is already the clearance; this is only the
+     air under it. */
+  padding: .9rem var(--gutter) 0;
+  list-style: none;
+  font: 500 .84rem/1 var(--support);
+  letter-spacing: .01em;
+  color: #ab97c4;
+}
+
+.hero-signal__stops li:nth-child(2) { justify-self: center; }
+.hero-signal__stops li:nth-child(3) { justify-self: end; }
+
+/* --- Nila, standing on the clean end ------------------------------------ */
+
+.home-hero .nila-hero {
+  grid-area: nila;
+  align-self: end;
+  justify-self: end;
+  position: relative;
+  width: var(--nila-size);
+  height: var(--nila-size);
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* The stage light she is standing in. Wider than she is and centred on her
+   feet, so it reads as light falling on the bench rather than as a halo cut
+   around the figure. */
+.home-hero .nila-hero::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  left: 50%;
+  bottom: -14%;
+  width: 190%;
+  height: 108%;
+  transform: translateX(-50%);
+  background: radial-gradient(50% 50% at 50% 50%, rgba(255, 236, 214, .16) 0%, rgba(255, 236, 214, 0) 70%);
+}
+
+/* Where she meets the line: the signal is already orange under her feet, so
+   this is a highlight rather than a mark — the contact, not a label. */
+.home-hero .nila-hero::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: -3px;
+  width: 42%;
+  height: 6px;
+  transform: translateX(-50%);
+  background: radial-gradient(50% 50% at 50% 50%, rgba(255, 173, 138, .55) 0%, rgba(255, 173, 138, 0) 75%);
+}
+
+/* --- what it says -------------------------------------------------------
+   Two columns on one baseline: the sentence under the tagline it finishes,
+   the two ways in under Nila. Stacked on the left instead, the entire right
+   half of the hero below the signal is empty. */
+
+.hero-foot {
+  grid-area: foot;
+  padding-top: clamp(1.75rem, 10vh, 6.5rem);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  column-gap: clamp(2rem, 6vw, 5rem);
+  row-gap: clamp(1.5rem, 3vh, 2rem);
+  animation: hero-arrive .7s var(--ease) .75s both;
+}
+
+@keyframes hero-arrive {
+  from { opacity: 0; transform: translateY(14px); }
+}
+
+.hero-lede {
+  margin: 0;
+  /* Set to speak, not to caption: at body size under display type this big
+     the sentence reads as a footnote to the tagline instead of finishing it. */
+  max-width: 30ch;
+  font-size: clamp(1.05rem, 1.9vw, 1.6rem);
+  text-wrap: pretty;
+  line-height: 1.4;
+  color: var(--dim);
+}
+
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: end;
+  gap: clamp(1rem, 2.5vw, 2rem);
+}
+
+/* The one filled thing in the section, in the one accent colour, at the end
+   of the line the signal is travelling along. */
+.hero-cta {
+  padding: .9rem 1.5rem;
+  border-radius: 999px;
+  background: var(--orange);
+  color: #1b0a2c;
+  font-family: var(--support);
+  font-weight: 700;
+  font-size: .92rem;
+  text-decoration: none;
+  box-shadow: 0 0 0 rgba(255, 110, 66, 0);
+  transition: transform .25s var(--ease), box-shadow .25s var(--ease);
+}
+
+.hero-cta:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 32px rgba(255, 110, 66, .34);
+}
+
+.hero-quiet-cta {
+  color: #efe7f5;
+  font-family: var(--support);
+  font-weight: 600;
+  font-size: .92rem;
+  text-decoration: none;
+  border-bottom: 2px solid rgba(239, 231, 245, .28);
+  padding-bottom: 2px;
+  transition: border-color .25s var(--ease);
+}
+
+.hero-quiet-cta:hover { border-color: var(--orange); }
+
+.hero-cta:focus-visible,
+.hero-quiet-cta:focus-visible {
+  outline: 2px solid var(--orange);
+  outline-offset: 4px;
+  border-radius: 4px;
+}
+
+/* --- portrait ----------------------------------------------------------
+   Keyed to shape, not to width: on any screen taller than it is wide — a
+   phone, a tablet on its end, a narrow window — side by side sizes the type
+   off a half-width column and strands the composition in the middle of a
+   tall viewport. Stacked, the tagline gets the full measure and Nila still
+   stands on the signal at the end of it. The type needs no size override
+   either way; it measures off its own column. */
+@media (max-aspect-ratio: 4 / 5) {
+  .home-hero { --nila-size: min(26vh, 40vw); }
+
+  .home-hero__inner {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: 'head' 'nila' 'sig' 'foot';
+  }
+}
+
+/* --- phones ------------------------------------------------------------ */
+@media (max-width: 720px) {
+  .home-hero {
+    /* The gutter itself, not just the padding: the signal bleeds by exactly
+       one gutter and its stops come back in by one, so the two have to be
+       told the same number or the stops sit off the tagline's edge. */
+    --gutter: 1.25rem;
+    --nila-size: min(26vh, 44vw);
+    --sig-h: 44px;
+    padding: clamp(5rem, 14vh, 7rem) var(--gutter) calc(clamp(2rem, 6vh, 3rem) + var(--app-bottom-nav, 0px));
+  }
+
+  .hero-head { padding-bottom: .85rem; }
+  .hero-head__outline { -webkit-text-stroke-width: 1px; }
+  .hero-signal__stops { font-size: .74rem; padding-top: .7rem; }
+  .hero-lede { font-size: clamp(1rem, 4.4vw, 1.25rem); max-width: 34ch; }
+
+  /* One column again: at this width a right-aligned pair of buttons orphans
+     the sentence rather than balancing it. */
+  .hero-foot {
+    grid-template-columns: minmax(0, 1fr);
+    padding-top: 1.5rem;
+  }
+
+  .hero-actions { justify-content: start; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-foot { animation: none; }
+  /* Both arrive built rather than being built. */
+  .hero-head__fill { animation: none; clip-path: none; }
+  .hero-signal__wave path { animation: none; stroke-dashoffset: 0; }
 }

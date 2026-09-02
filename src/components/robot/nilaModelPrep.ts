@@ -6,29 +6,49 @@ import {
   Mesh,
   MeshStandardMaterial,
   Object3D,
+  Shape,
+  ShapeGeometry,
+  TorusGeometry,
   Vector3,
 } from 'three'
 import type { NilaMood } from './nilaBrain'
 
-export const MODEL_URL = '/assets/happy_robot_button_copy.glb'
+export const MODEL_URL = '/assets/newrobo.glb'
 
-/* The Spline export carries geometry only — no materials, no textures, and the
-   two stacked "ESTADO" plates are identical rounded cubes that Spline used to
-   swap face art. So the shell gets materials here and the face is built from
-   flat discs parented to the visor, which also makes every expression ours to
-   animate rather than a baked texture we cannot change. */
+/* This export carries geometry only — no materials, no textures, no rig and no
+ * baked animation clips — so the shell is materialled here and every movement
+ * stays procedural.
+ *
+ * Two things about it drive the whole file:
+ *
+ * 1. It faces +X, and its ear-to-ear axis is Z. The camera looks down -Z, so
+ *    the model is yawed a quarter turn to face front. That rotation sits on an
+ *    inner group, leaving the outer wrapper free for the body animation.
+ *    Everything INSIDE keeps the model's own axes, which is why the head nods
+ *    around Z and the arms swing around X rather than the other way about.
+ * 2. It already has a usable hierarchy — one `Head` group holding shell and
+ *    face, and an `ARM_L`/`ARM_R` per side — so almost all of the joint
+ *    building an unrigged export needs is gone. The arms are the exception:
+ *    their origins sit at the middle of the arm, not the shoulder, so a raw
+ *    rotation would spin them about their own waist.
+ *
+ * The face is drawn here rather than used from the export. The authored eyes
+ * and mouth are fixed shapes; these are built from plain geometry so every
+ * expression is ours to animate, and so they can be the rounded-rectangle eyes
+ * and open smile the design asks for.
+ */
+
 const SHELL = '#faf7f0'
 const VISOR = '#14100e'
 const ACCENT = '#ff6e42'
+const FEATURE = '#faf7f0'
 
 export type Parts = {
-  root: Object3D
-  head: Object3D | null
-  /** Head shell, visor and ears on one hinge at the top of the neck. */
-  neck: Group | null
-  visor: Mesh | null
-  /** Half-width of the squared-off face screen, for anything laying out on it. */
-  faceHalf: number
+  /** Outer wrapper: normalised to a unit tall and centred. Body animation. */
+  root: Group
+  /** The head group. Its own origin already sits at the base of the neck. */
+  neck: Object3D | null
+  /** Holds both eyes, and carries the gaze wander. */
   eyes: Group
   eyeL: Mesh
   eyeR: Mesh
@@ -36,12 +56,12 @@ export type Parts = {
   cheeks: Group
   armL: Group | null
   armR: Group | null
+  /** One step of eye wander, in face units. */
+  gaze: number
+  /** Where the mouth sits at rest, and what one "drop" step is worth. */
+  mouthRestY: number
+  mouthDrop: number
 }
-
-/** Mouth and eye shape per mood, in visor-local units. */
-/** Feature radii, in plate units — the frame loop scales against these. */
-export const EYE = 20
-export const MOUTH = 16
 
 export const FACE: Record<NilaMood, { eye: number; mouthX: number; mouthY: number; mouthDrop: number; cheeks: number }> = {
   idle: { eye: 1, mouthX: 0.9, mouthY: 0.55, mouthDrop: 0, cheeks: 0 },
@@ -54,67 +74,34 @@ export const FACE: Record<NilaMood, { eye: number; mouthX: number; mouthY: numbe
   dizzy: { eye: 0.34, mouthX: 0.5, mouthY: 0.85, mouthDrop: 1, cheeks: 1 },
 }
 
-function buildFace(visor: Mesh | null) {
-  // One disc geometry, reused and scaled — eyes and cheeks are circles.
-  const disc = new CircleGeometry(1, 32)
-  // The mouth is the bottom half of a disc: a flat top with a round bottom
-  // reads as a smile at any size, where a full ellipse reads as a hole.
-  const smile = new CircleGeometry(1, 32, Math.PI, Math.PI)
-
-  // The face is a decal on a rounded plate: a couple of units of clearance is
-  // not enough to beat depth precision on its own, so the offset does it.
-  const decal = { polygonOffset: true, polygonOffsetFactor: -4, polygonOffsetUnits: -8 }
-  const light = new MeshStandardMaterial({ color: SHELL, emissive: new Color(SHELL), emissiveIntensity: 0.35, roughness: 0.9, ...decal })
-  const blush = new MeshStandardMaterial({ color: ACCENT, emissive: new Color(ACCENT), emissiveIntensity: 0.4, roughness: 1, transparent: true, opacity: 0.85, ...decal })
-
-  const mk = (mat: MeshStandardMaterial, r: number, x: number, y: number, geometry = disc) => {
-    const m = new Mesh(geometry, mat)
-    m.scale.setScalar(r)
-    m.position.set(x, y, 0)
-    m.renderOrder = 2
-    return m
-  }
-
-  /* The exported plate is a 211 x 142 rounded cube — a letterbox, not the
-     square screen this face wants. Narrowing the plate squares it off; the
-     face then hangs in a group that undoes that squash, so the eyes stay
-     round and can be laid out in plain square coordinates. */
-  const plate = visor?.geometry.boundingBox
-  const half = plate ? Math.min(plate.max.x, plate.max.y) : 71.1
-  const squash = plate ? half / plate.max.x : 1
-  if (visor) visor.scale.x *= squash
-
-  const face = new Group()
-  face.scale.x = 1 / squash
-  // Clear of the plate's rounded front, which sits at its z half-extent.
-  face.position.z = (plate?.max.z ?? 81.5) + 9
-
-  const eyes = new Group()
-  const eyeL = mk(light, EYE, -30, 10)
-  const eyeR = mk(light, EYE, 30, 10)
-  eyes.add(eyeL, eyeR)
-
-  const mouth = mk(light, MOUTH, 0, -24, smile)
-
-  const cheeks = new Group()
-  cheeks.add(mk(blush, 10, -52, -16), mk(blush, 10, 52, -16))
-  cheeks.position.z = -2
-  cheeks.visible = false
-
-  face.add(eyes, mouth, cheeks)
-  visor?.add(face)
-  return { eyes, eyeL, eyeR, mouth, cheeks, faceHalf: half }
+/* GLTFLoader does not hand back the names the exporter wrote: spaces become
+   underscores, and a repeated name gets a numeric suffix. Look nodes up by the
+   authored name and let the suffix float. */
+export function findAll(root: Object3D, name: string): Object3D[] {
+  const want = name.replace(/\s/g, '_')
+  const out: Object3D[] = []
+  root.traverse((child) => {
+    if (child.name === want) {
+      out.push(child)
+      return
+    }
+    /* The prefix has to be checked, not just the tail. Testing only
+       `slice(want.length)` matches any name of the right length ending in
+       "_1" — which is how looking for "Light" deleted "Scene_1", and with it
+       the entire robot. */
+    if (child.name.startsWith(want) && /^_\d+$/.test(child.name.slice(want.length))) out.push(child)
+  })
+  return out
 }
 
 /**
  * Hangs `nodes` off a fresh group whose origin sits at the top or bottom of
  * what they enclose, keeping their world transform.
  *
- * The export has no rig: the head shell (CABEZA) is a sibling of the ears and
- * visor (Compornentes), so turning the head used to leave the face behind, and
- * the hands live under MANOS, whose scale is (0.82, 1.01, 3.31) — rotating a
- * child of that shears it. A joint parented into uniformly-scaled space fixes
- * both: everything on the hinge turns as one solid piece.
+ * Only the arms need this. `ARM_L` and `ARM_R` have their origins at the
+ * centre of the arm, so rotating them directly swings the limb about its own
+ * middle — the hand goes up and the shoulder goes down. Re-hung from a joint
+ * at the top of their bounds, they pivot at the shoulder like a shoulder.
  */
 function joint(parent: Object3D, nodes: Object3D[], anchor: 'top' | 'bottom'): Group {
   parent.updateMatrixWorld(true)
@@ -129,75 +116,187 @@ function joint(parent: Object3D, nodes: Object3D[], anchor: 'top' | 'bottom'): G
   return g
 }
 
-/* GLTFLoader does not hand back the names Spline wrote: spaces become
-   underscores and a repeated name gets a numeric suffix, so this file's two
-   "NORMAL" plates arrive as NORMAL and NORMAL_1. Look them up by the exported
-   name and let the suffix float. */
-export function findAll(root: Object3D, name: string): Object3D[] {
-  const want = name.replace(/\s/g, '_')
-  const out: Object3D[] = []
-  root.traverse((child) => {
-    if (child.name === want || /^_\d+$/.test(child.name.slice(want.length))) out.push(child)
+/** A rounded rectangle, centred on its own origin. */
+function roundedRect(halfW: number, halfH: number, radius: number): Shape {
+  const r = Math.min(radius, halfW, halfH)
+  const s = new Shape()
+  s.moveTo(-halfW + r, -halfH)
+  s.lineTo(halfW - r, -halfH)
+  s.quadraticCurveTo(halfW, -halfH, halfW, -halfH + r)
+  s.lineTo(halfW, halfH - r)
+  s.quadraticCurveTo(halfW, halfH, halfW - r, halfH)
+  s.lineTo(-halfW + r, halfH)
+  s.quadraticCurveTo(-halfW, halfH, -halfW, halfH - r)
+  s.lineTo(-halfW, -halfH + r)
+  s.quadraticCurveTo(-halfW, -halfH, -halfW + r, -halfH)
+  return s
+}
+
+/**
+ * The face: two rounded-rectangle eyes and an open smile, laid out against the
+ * dark visor and sized from it, so a re-cut export still lands right.
+ *
+ * Everything is authored in world units and the group undoes the head's scale,
+ * which keeps the numbers below readable instead of being multiples of 98.
+ */
+function buildFace(head: Object3D, plate: Object3D | undefined) {
+  head.updateMatrixWorld(true)
+  const box = plate ? new Box3().setFromObject(plate) : new Box3().setFromObject(head)
+  const centre = box.getCenter(new Vector3())
+  // Pre-yaw the model still faces +X, so "across" is Z and depth is X.
+  const across = box.max.z - box.min.z
+  const tall = box.max.y - box.min.y
+
+  const decal = { polygonOffset: true, polygonOffsetFactor: -4, polygonOffsetUnits: -8 }
+  const feature = new MeshStandardMaterial({
+    color: FEATURE,
+    emissive: new Color(FEATURE),
+    emissiveIntensity: 0.4,
+    roughness: 0.9,
+    ...decal,
   })
-  return out
+  const blush = new MeshStandardMaterial({
+    color: ACCENT,
+    emissive: new Color(ACCENT),
+    emissiveIntensity: 0.4,
+    roughness: 1,
+    transparent: true,
+    opacity: 0.85,
+    ...decal,
+  })
+
+  const face = new Group()
+  head.add(face)
+  // A Shape lies in XY facing +Z; this model looks down +X.
+  face.rotation.y = Math.PI / 2
+  const headScale = head.getWorldScale(new Vector3()).x || 1
+  face.scale.setScalar(1 / headScale)
+  face.position.copy(head.worldToLocal(new Vector3(box.max.x + across * 0.012, centre.y, centre.z)))
+
+  /* Near-square with a generous corner radius, set wide enough apart to read
+     as two eyes rather than one visor slot, and lifted to leave the lower
+     third of the screen for the smile. */
+  const eyeW = across * 0.105
+  const eyeH = tall * 0.155
+  const eyeGap = across * 0.185
+  const eyeLift = tall * 0.1
+
+  const eyeGeometry = new ShapeGeometry(roundedRect(eyeW, eyeH, Math.min(eyeW, eyeH) * 0.66), 8)
+  const eyes = new Group()
+  eyes.position.y = eyeLift
+  const eyeL = new Mesh(eyeGeometry, feature)
+  const eyeR = new Mesh(eyeGeometry, feature)
+  eyeL.position.x = -eyeGap
+  eyeR.position.x = eyeGap
+  eyeL.renderOrder = 2
+  eyeR.renderOrder = 2
+  eyes.add(eyeL, eyeR)
+
+  /* An open smile: a tube bent through the bottom of a circle. TorusGeometry
+     always starts at angle 0, so the arc is rotated into place rather than
+     offset — and its round cross-section gives the stroke soft ends for free,
+     where a flat crescent would cut them square. */
+  const smileR = across * 0.12
+  const smileArc = Math.PI * 0.74
+  const mouth = new Mesh(new TorusGeometry(smileR, across * 0.028, 8, 28, smileArc), feature)
+  mouth.rotation.z = Math.PI + (Math.PI - smileArc) / 2
+  mouth.renderOrder = 2
+  const mouthRestY = -tall * 0.19
+
+  /* Under each eye and outside the smile's tips. There is only so much dark
+     screen to work with: further out and they spill onto the white shell,
+     higher and they hide behind the eye, lower and they meet the smile. */
+  const cheeks = new Group()
+  cheeks.visible = false
+  for (const side of [-1, 1]) {
+    const disc = new Mesh(new CircleGeometry(across * 0.045, 20), blush)
+    disc.position.set(side * across * 0.21, -tall * 0.175, -across * 0.004)
+    disc.renderOrder = 1
+    cheeks.add(disc)
+  }
+
+  face.add(eyes, mouth, cheeks)
+  return {
+    eyes,
+    eyeL,
+    eyeR,
+    mouth,
+    cheeks,
+    gaze: across * 0.012,
+    mouthRestY,
+    mouthDrop: tall * 0.014,
+  }
 }
 
 export function prepare(source: Object3D): Parts {
-  const root = source.clone(true)
+  const inner = source.clone(true)
 
-  // Drop the exporter's backdrop plane, camera rig and baked lights: the scene
-  // supplies its own so the robot lights the same on every page. The second
-  // ESTADO plate is the same cube at the same transform and would z-fight.
-  for (const name of ['REACCIONES', 'Directional Light', 'Default Ambient Light', 'feliz 3']) {
-    findAll(root, name).forEach((node) => node.removeFromParent())
+  // The exporter's own camera and lights: the scene supplies its own so she
+  // lights the same on every page, and a baked camera is dead weight.
+  for (const name of ['Camera', 'Light', 'Directional Light', 'Default Ambient Light']) {
+    findAll(inner, name).forEach((node) => node.removeFromParent())
   }
+  inner.traverse((node) => {
+    if ((node as { isCamera?: boolean }).isCamera || (node as { isLight?: boolean }).isLight) node.removeFromParent()
+  })
+
+  /* The headphone ears go, and so do the authored eyes and mouth that the
+     drawn face replaces. Between them that is over a quarter of the model's
+     vertices and five draw calls, on something that renders as a 56px puck on
+     a phone — the cheapest frame time available here. */
+  for (const name of ['New Headphone', 'Eyes', 'Mouth', 'Eyes Move', 'Mouth Move 2']) {
+    findAll(inner, name).forEach((node) => node.removeFromParent())
+  }
+
+  /* Everything below measures in world space — joint pivots, the face layout,
+     the final centring. A clone carries its source's world matrices, and
+     detaching nodes leaves them stale, so establish them once here rather than
+     letting each step trust whatever it happens to find. */
+  inner.updateMatrixWorld(true)
 
   const shell = new MeshStandardMaterial({ color: SHELL, roughness: 0.42, metalness: 0.04 })
   const visorMat = new MeshStandardMaterial({ color: VISOR, roughness: 0.28, metalness: 0.1 })
-  const accent = new MeshStandardMaterial({ color: ACCENT, roughness: 0.45, metalness: 0.05 })
 
-  // The surviving plate is the visor. Both NORMAL nodes are meshes, but the
-  // backdrop one went out with REACCIONES above.
-  const visor = (findAll(root, 'NORMAL').find((node) => (node as Mesh).isMesh) as Mesh) ?? null
+  const facePlate = inner.getObjectByName('Head_2')
 
-  root.traverse((child) => {
+  inner.traverse((child) => {
     if (!(child as Mesh).isMesh) return
     const mesh = child as Mesh
     mesh.castShadow = false
     mesh.receiveShadow = false
-    if (mesh === visor) mesh.material = visorMat
-    else if (mesh.name.startsWith('OREJA')) mesh.material = accent
-    else mesh.material = shell
+    mesh.material = mesh === facePlate ? visorMat : shell
   })
 
-  const face = buildFace(visor)
+  const robot = inner.getObjectByName('RoBOT_(Duplicate)') ?? inner
+  const neck = inner.getObjectByName('Head') ?? null
 
-  // The rig the export never had. Torso ("Robot") and body ("Cuerpo") are both
-  // uniformly scaled, so rotation applied at a joint stays rigid.
-  const head = root.getObjectByName('CABEZA') ?? null
-  const crown = root.getObjectByName('Compornentes')
-  const torso = root.getObjectByName('Robot')
-  const body = root.getObjectByName('Cuerpo')
-  const neck = torso && head && crown ? joint(torso, [head, crown], 'bottom') : null
-  const arm = (name: string) => {
-    const hand = root.getObjectByName(name)
-    return body && hand ? joint(body, [hand], 'top') : null
+  const armFor = (name: string) => {
+    const arm = inner.getObjectByName(name)
+    return arm ? joint(robot, [arm], 'top') : null
   }
-  const armL = arm('IZ')
-  const armR = arm('DER')
+  // Named from the robot's own point of view, which is why ARM_R ends up on
+  // the viewer's left once she has turned to face front.
+  const armR = armFor('ARM_R')
+  const armL = armFor('ARM_L')
+
+  const face = buildFace(neck ?? inner, facePlate)
+
+  // Face front. This lives on the inner group so the wrapper's rotation.y is
+  // free for the body turn that the frame loop drives.
+  inner.rotation.y = -Math.PI / 2
+  inner.updateMatrixWorld(true)
 
   // Normalise: the export is in centimetre-scale units with an arbitrary
-  // origin, so centre it and scale to roughly one unit tall.
-  const box = new Box3().setFromObject(root)
-  const size = new Vector3()
-  const centre = new Vector3()
-  box.getSize(size)
-  box.getCenter(centre)
+  // origin, so centre it and scale to roughly one unit tall. Measured after
+  // the yaw, so the box is the one that actually faces the camera.
+  const box = new Box3().setFromObject(inner)
+  const size = box.getSize(new Vector3())
+  const centre = box.getCenter(new Vector3())
   const wrapper = new Group()
-  root.position.sub(centre)
-  wrapper.add(root)
+  // Applied after the rotation in the local matrix, so this still centres it.
+  inner.position.sub(centre)
+  wrapper.add(inner)
   wrapper.scale.setScalar(1 / Math.max(size.y, 0.0001))
 
-  return { root: wrapper, head, neck, visor, armL, armR, ...face }
+  return { root: wrapper, neck, armL, armR, ...face }
 }
-

@@ -3,7 +3,7 @@ import { useLocation } from 'react-router-dom'
 import NilaScene from './NilaScene'
 import { useNilaTalk } from './useNilaTalk'
 import { besideBox, explainLine, perch, rails, routeEvent } from './nilaBrain'
-import type { NilaMood } from './nilaBrain'
+import type { NilaEvent, NilaMood } from './nilaBrain'
 import { matchFaq } from '../chat/chatFaq'
 import './Nila.css'
 
@@ -74,6 +74,8 @@ export default function NilaCompanion() {
   // language, so they belong to the model rather than to the layout.
   const [facing, setFacing] = useState(0)
   const [travelling, setTravelling] = useState(false)
+  const speech = useRef<HTMLDivElement>(null)
+  const [vside, setVside] = useState<'above' | 'below'>('above')
   const el = useRef<HTMLDivElement>(null)
   const from = useRef(pos)
   const drag = useRef({ active: false, moved: false })
@@ -188,6 +190,58 @@ export default function NilaCompanion() {
   useEffect(() => {
     if (!awake) entered.current = false
   }, [awake])
+
+  /* She reacts to you going for the button before you press it: reaching a
+     call to action gets an egging-on and a wave, landing in a form field gets
+     her reading over your shoulder. Delegated from the document, so it covers
+     every CTA on every route without each one having to opt in — and rate
+     limited, because a nudge every time the pointer crosses a link is not a
+     character, it is a fly. */
+  useEffect(() => {
+    if (pinned || asking) return
+    const CTA = 'a[href="/get-started"], a[href="/contact"], .nila-bubble__cta, .nav-05__cta, .nav-05__overlay-cta'
+    const FIELD = 'form input, form textarea, form select'
+    let last = 0
+    const react = (event: NilaEvent) => {
+      const now = Date.now()
+      if (now - last < 9000) return
+      last = now
+      say(event)
+    }
+    const onOver = (e: Event) => {
+      if ((e.target as HTMLElement | null)?.closest?.(CTA)) react('cta-near')
+    }
+    const onFocus = (e: FocusEvent) => {
+      const target = e.target as HTMLElement | null
+      if (target?.closest?.(CTA)) react('cta-near')
+      else if (target?.matches?.(FIELD)) react('form-focus')
+    }
+    document.addEventListener('pointerover', onOver, { passive: true })
+    document.addEventListener('focusin', onFocus)
+    return () => {
+      document.removeEventListener('pointerover', onOver)
+      document.removeEventListener('focusin', onFocus)
+    }
+  }, [pinned, asking, say])
+
+  /* Her speech sits above her head, which puts it off the top of the screen
+     whenever she perches high — the tour parks her within a rail's width of
+     the top edge, and the fixed header covers what is left. So measure what
+     she is actually saying and put it under her when it will not fit above.
+     Measured, not assumed: one line of greeting and a five-line explanation
+     need very different amounts of room. */
+  useLayoutEffect(() => {
+    const node = speech.current
+    if (!node) return
+    const height = node.offsetHeight
+    if (!height) return
+    // Clear of the fixed header, which would otherwise cover the bubble.
+    const headroom = window.innerWidth < 860 ? 64 : 76
+    const roomAbove = pos.y - HALF - height - headroom
+    const roomBelow = window.innerHeight - (pos.y + HALF + height) - 16
+    // Below only when above genuinely does not fit and below does better.
+    setVside(roomAbove < 0 && roomBelow > roomAbove ? 'below' : 'above')
+  }, [pos.y, text, asking, exchange])
 
   // The flight: one arc that bows above the straight line, timed by distance.
   // Dragging is exempt — under your finger she has to be where you put her.
@@ -361,10 +415,11 @@ export default function NilaCompanion() {
       ref={el}
       className={`nila-companion${pinned ? ' is-pinned' : ''}`}
       data-side={pos.x > window.innerWidth / 2 ? 'right' : 'left'}
+      data-vside={vside}
       style={{ left: 0, top: 0, transform: `translate(${pos.x - HALF}px, ${pos.y - HALF}px)` }}
     >
       {asking ? (
-        <div className="nila-ask">
+        <div className="nila-ask" ref={speech}>
           {exchange && (
             <>
               <p className="nila-ask__said">{exchange.q}</p>
@@ -395,7 +450,16 @@ export default function NilaCompanion() {
           </form>
         </div>
       ) : (
-        <div className={`nila-bubble${text ? ' is-on' : ''}${nudging ? ' is-nudge' : ''}`} role="status" aria-live="polite">
+        <div
+          ref={speech}
+          /* Nothing is said mid-flight. The trip arcs above the straight line
+             and can start from off screen, so a bubble left on during it rides
+             out of the viewport with her — which is how a message ends up
+             invisible. It also just reads better: she lands, then talks. */
+          className={`nila-bubble${text && !travelling ? ' is-on' : ''}${nudging ? ' is-nudge' : ''}`}
+          role="status"
+          aria-live="polite"
+        >
           <span>{text}</span>
         </div>
       )}

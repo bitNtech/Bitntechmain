@@ -69,16 +69,3 @@ export function useNilaTalk(active: boolean, firstEvent: NilaEvent = 'greet', be
 
   return { text, mood, nudging, say, sayText }
 }
-
-/** Live media-query match — used to keep a second WebGL canvas off phones. */
-export function useMediaQuery(query: string): boolean {
-  const [matches, setMatches] = useState(() => window.matchMedia(query).matches)
-  useEffect(() => {
-    const mq = window.matchMedia(query)
-    const onChange = () => setMatches(mq.matches)
-    onChange()
-    mq.addEventListener('change', onChange)
-    return () => mq.removeEventListener('change', onChange)
-  }, [query])
-  return matches
-}

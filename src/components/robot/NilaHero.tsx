@@ -1,30 +1,47 @@
-import { Link } from 'react-router-dom'
+import { useEffect, useRef } from 'react'
 import NilaScene from './NilaScene'
-import { useMediaQuery, useNilaTalk } from './useNilaTalk'
+import type { NilaLook } from './NilaModel'
 import './Nila.css'
 
 /**
- * The full-size Nila in the home hero. She introduces herself, makes small
- * talk, and every few beats points at Get Started — which is a real link here,
- * so the pitch is clickable rather than decorative.
+ * Nila in the home hero: all of her, planted bottom-centre of the section,
+ * waving. She is deliberately static otherwise — no float, no sway, no idle
+ * drift — so the only motion in the hero is the wave and the blink. She stays
+ * exactly there for as long as the hero is on the page; nothing here shrinks,
+ * fades or carries her off on scroll. Her eyes still track the pointer.
  */
-export default function NilaHero({ active = true }: { active?: boolean }) {
-  // One Nila per phone. The floating companion is the one you can talk to and
-  // carry around, so on a small screen the hero copy of her stands down rather
-  // than paying for a second WebGL context nobody can interact with.
-  const phone = useMediaQuery('(max-width: 720px)')
-  const { text, mood, nudging } = useNilaTalk(active && !phone, 'greet')
-  if (phone) return null
+export default function NilaHero() {
+  const box = useRef<HTMLDivElement>(null)
+  const look = useRef<NilaLook>({ x: 0, y: 0, active: false })
+
+  useEffect(() => {
+    const node = box.current
+    const hero = node?.closest<HTMLElement>('.home-hero')
+    if (!node || !hero) return
+
+    const onPointerMove = (event: PointerEvent) => {
+      const r = hero.getBoundingClientRect()
+      if (!r.width || !r.height) return
+      look.current.x = Math.max(-1, Math.min(1, ((event.clientX - r.left) / r.width) * 2 - 1))
+      // Screen y grows downward; her eyes do not.
+      look.current.y = Math.max(-1, Math.min(1, -(((event.clientY - r.top) / r.height) * 2 - 1)))
+      look.current.active = true
+    }
+    // Back to her own idle drift once you leave, rather than staring at the
+    // last place the pointer was.
+    const onPointerLeave = () => { look.current.active = false }
+
+    hero.addEventListener('pointermove', onPointerMove)
+    hero.addEventListener('pointerleave', onPointerLeave)
+    return () => {
+      hero.removeEventListener('pointermove', onPointerMove)
+      hero.removeEventListener('pointerleave', onPointerLeave)
+    }
+  }, [])
 
   return (
-    <div className="nila-hero">
-      <div className={`nila-bubble${text ? ' is-on' : ''}${nudging ? ' is-nudge' : ''}`} role="status" aria-live="polite">
-        <span>{text}</span>
-        {nudging && (
-          <Link className="nila-bubble__cta" to="/get-started">Get Started →</Link>
-        )}
-      </div>
-      <NilaScene mood={mood} waving={nudging} className="nila-scene--hero" />
+    <div className="nila-hero" ref={box} aria-hidden="true">
+      <NilaScene fit="hero" mood="happy" still waving lookRef={look} className="nila-scene--hero" />
     </div>
   )
 }

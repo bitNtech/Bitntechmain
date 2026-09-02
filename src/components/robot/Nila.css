@@ -58,6 +58,47 @@
   transform: translateX(-50%) rotate(45deg);
 }
 
+/* --- flipped under her -------------------------------------------------
+   When she perches high there is no room for speech above her head, and it
+   would render off the top of the screen or behind the fixed header. The
+   component measures the real bubble and flips it here; the tail flips with
+   it, or it points away from the thing that is talking. */
+.nila-companion[data-vside='below'] .nila-bubble,
+.nila-companion[data-vside='below'] .nila-ask {
+  bottom: auto;
+  top: calc(100% - 6px);
+}
+
+.nila-companion[data-vside='below'] .nila-bubble::after {
+  top: auto;
+  bottom: calc(100% - 6px);
+  border-right: 0;
+  border-bottom: 0;
+  border-left: 2px solid #1c1917;
+  border-top: 2px solid #1c1917;
+}
+
+/* The rest state slides down into place from above; flipped, it has to come
+   up from below or it moves the wrong way. */
+.nila-companion[data-vside='below'] .nila-bubble {
+  transform: translate(-50%, -8px) scale(0.94);
+}
+.nila-companion[data-vside='below'] .nila-bubble.is-on {
+  transform: translate(-50%, 0) scale(1);
+}
+.nila-companion[data-vside='below'][data-side='right'] .nila-bubble {
+  transform: translate(0, -8px) scale(0.94);
+}
+.nila-companion[data-vside='below'][data-side='right'] .nila-bubble.is-on {
+  transform: translate(0, 0) scale(1);
+}
+.nila-companion[data-vside='below'][data-side='left'] .nila-bubble {
+  transform: translate(0, -8px) scale(0.94);
+}
+.nila-companion[data-vside='below'][data-side='left'] .nila-bubble.is-on {
+  transform: translate(0, 0) scale(1);
+}
+
 .nila-bubble.is-nudge {
   border-color: var(--nb-orange-3, #ff6e42);
   box-shadow: 3px 3px 0 rgba(255, 110, 66, .85);
@@ -83,26 +124,15 @@
 
 /* --- home hero ---------------------------------------------------------- */
 
+/* Her slot in the home hero. Size and position belong to the hero's own
+   layout — she is one cell of its grid — so all this owns is the stacking
+   context the canvas needs. */
 .nila-hero {
-  position: absolute;
-  right: clamp(1rem, 5vw, 5rem);
-  bottom: clamp(1rem, 6vh, 4rem);
-  width: clamp(150px, 20vw, 260px);
-  height: clamp(150px, 20vw, 260px);
-  z-index: 3;
+  position: relative;
   pointer-events: none;
 }
 
-.nila-hero .nila-bubble { pointer-events: auto; }
-
 @media (max-width: 720px) {
-  .nila-hero {
-    right: 50%;
-    transform: translateX(50%);
-    bottom: 1.25rem;
-    width: 128px;
-    height: 128px;
-  }
   .nila-bubble { font-size: 12px; padding: 8px 12px; }
 }
 
@@ -182,7 +212,7 @@
 @media (max-width: 560px) {
   .nila-companion { width: 56px; height: 56px; }
   .nila-companion .nila-bubble { max-width: min(220px, 62vw); font-size: 12px; padding: 8px 11px; }
-  .nila-ask { max-width: min(280px, 78vw); }
+  .nila-ask { width: min(280px, 78vw); }
   .nila-ask__answer { font-size: 12.5px; padding: 9px 12px; }
   .nila-ask__said { font-size: 12px; }
 }
@@ -197,8 +227,10 @@
   position: absolute;
   bottom: calc(100% - 6px);
   left: 0;
-  width: max-content;
-  max-width: min(300px, 74vw);
+  /* Definite width, not max-content — the form/input below are 100% wide,
+     and percentages inside a max-content parent fall back to auto, which
+     left the pill short of the button and a gap trailing the row. */
+  width: min(300px, 74vw);
   display: flex;
   flex-direction: column;
   align-items: flex-start;
