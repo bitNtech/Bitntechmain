@@ -79,7 +79,7 @@ export default function Footer() {
             {WHAT_IF.map((line, i) => (
               <p key={i}>{line}</p>
             ))}
-            <p className="what-if-final">Let's build it.</p>
+            <p className="what-if-final">Engineering the next Evolution.</p>
             <Link className="what-if-cta" to="/contact">Start a Project</Link>
             <hr className="what-if-divider" />
           </div>

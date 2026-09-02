@@ -5,27 +5,29 @@ import './AboutUs.css'
 
 gsap.registerPlugin(ScrollTrigger)
 
-const CARDS = [
-  { rot: -9, depth: 14, img: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&h=600&fit=crop&crop=faces&q=80' },
-  { rot: -5, depth: 10, img: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=600&fit=crop&crop=faces&q=80' },
-  { rot: -2, depth: 8, img: '/assets/akashimg.png' },
-  { rot: 3, depth: 12, img: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=400&h=600&fit=crop&crop=faces&q=80' },
-  { rot: 0, depth: 6, img: 'https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=400&h=600&fit=crop&crop=faces&q=80' },
-  { rot: 4, depth: 11, img: 'https://images.unsplash.com/photo-1599566150163-29194dcaad36?w=400&h=600&fit=crop&crop=faces&q=80' },
-  { rot: 7, depth: 9, img: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=600&fit=crop&crop=faces&q=80' },
-  { rot: -4, depth: 13, img: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400&h=600&fit=crop&crop=faces&q=80' },
-]
-
+/* The seven. One source of truth: the hero's floating cards and the team grid
+   both read this list, so a person is added or removed in exactly one place.
+   `img: null` means we have no real portrait yet — the card falls back to
+   initials rather than a stock face. Hero geometry (rot/depth) lives here too;
+   the matching sizes/positions are .card-1..7 in AboutUs.css. */
 const TEAM = [
-  { img: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&h=540&fit=crop&crop=faces&q=80', name: 'Mateus Aldana', role: 'Creative Director' },
-  { img: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=540&fit=crop&crop=faces&q=80', name: 'Eli Ramirez', role: 'Design Lead' },
-  { img: '/assets/akashimg.png', name: 'Naomi Park', role: 'Brand Strategist' },
-  { img: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=400&h=540&fit=crop&crop=faces&q=80', name: 'Theo Vance', role: 'Senior Engineer' },
-  { img: 'https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=400&h=540&fit=crop&crop=faces&q=80', name: 'Kit Bellamy', role: 'Art Direction' },
-  { img: 'https://images.unsplash.com/photo-1599566150163-29194dcaad36?w=400&h=540&fit=crop&crop=faces&q=80', name: 'Ravi Saigal', role: 'Motion · 3D' },
-  { img: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=540&fit=crop&crop=faces&q=80', name: 'Iris Caldwell', role: 'Producer' },
-  { img: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400&h=540&fit=crop&crop=faces&q=80', name: 'Maya Okafor', role: 'Founder · CEO' },
-]
+  { name: 'Veeraragavan Natarajan', role: 'Founder & CEO', img: null, rot: -9, depth: 14 },
+  { name: 'Prem Kumar Ramamoorthy', role: 'Co-Founder & CTO', img: null, rot: -5, depth: 10 },
+  { name: 'Akash S', role: 'CSO', img: '/assets/akashimg.png', rot: -2, depth: 8 },
+  { name: 'Narendren S V', role: 'Chief AI Engineer', img: null, rot: 3, depth: 12 },
+  { name: 'Shashanth D', role: 'Finance & Marketing Manager', img: null, rot: 0, depth: 6 },
+  { name: 'Veronica T', role: 'COO', img: null, rot: 4, depth: 11 },
+  { name: 'Sri Hari Hara Pandiyan', role: 'Executive Assistant', img: null, rot: 7, depth: 9 },
+] as const
+
+/* Slot order for the hero row, as indices into TEAM. The slots are size-ranked
+   in AboutUs.css - .card-4 is the largest and sits dead centre, .card-3/.card-5
+   flank it - so this puts the founder in the middle and the co-founder beside
+   him, while TEAM itself stays in roster order for the grid below. */
+const HERO_ORDER = [4, 3, 2, 0, 1, 5, 6] as const
+
+const initials = (name: string) =>
+  name.split(' ').filter(Boolean).slice(0, 2).map((w) => w[0]).join('').toUpperCase()
 
 /* The real bitNtech journey. Order is the content here: the signal under the
    cards steps up once per entry, so adding or removing one means changing
@@ -71,9 +73,9 @@ const MILESTONES = [
 const WAVE_PATH = 'M0,110 H100 V90 H300 V70 H500 V50 H700 V30 H900 V10 H1000'
 
 const STATS = [
-  { count: 62, decimals: 0, suffix: '', label: 'Projects shipped' },
-  { count: 14, decimals: 0, suffix: 'yrs', label: 'Combined craft' },
-  { count: 9, decimals: 1, suffix: '', label: 'Avg NPS' },
+  { count: 30, decimals: 0, suffix: '+', label: 'Projects shipped' },
+  { count: 3, decimals: 0, suffix: 'yrs', label: 'Combined craft' },
+  { count: 7, decimals: 0, suffix: '', label: 'Core team' },
 ]
 
 export default function AboutUs() {
@@ -203,15 +205,15 @@ export default function AboutUs() {
           const p = self.progress
           gsap.set('.big-results', { scale: 1 + 0.15 * p, opacity: 1 - 0.4 * p })
           gsap.set('.small-team', { y: -60 * p, opacity: 1 - p * 1.5 })
+          /* One entry per team member — seven, fanning out symmetrically. */
           const moves = [
-            { x: -260, y: -40, rot: -25 },
-            { x: -200, y: 20, rot: -18 },
-            { x: -120, y: 80, rot: -10 },
-            { x: -40, y: 120, rot: -4 },
-            { x: 40, y: 120, rot: 4 },
-            { x: 120, y: 80, rot: 12 },
-            { x: 200, y: 20, rot: 22 },
-            { x: 260, y: -40, rot: 28 },
+            { x: -270, y: -40, rot: -26 },
+            { x: -180, y: 40, rot: -16 },
+            { x: -80, y: 110, rot: -7 },
+            { x: 0, y: 130, rot: 0 },
+            { x: 80, y: 110, rot: 7 },
+            { x: 180, y: 40, rot: 16 },
+            { x: 270, y: -40, rot: 26 },
           ]
           cards.forEach((card, i) => {
             const m = moves[i]
@@ -288,23 +290,49 @@ export default function AboutUs() {
         scrollTrigger: { trigger: '.team-head', start: 'top 80%' },
       })
 
-      gsap.to('.t-card', {
-        opacity: 1,
-        y: 0,
-        duration: 1,
-        stagger: 0.08,
-        ease: 'power3.out',
-        scrollTrigger: { trigger: '.team-grid', start: 'top 80%' },
+      /* Each portrait rests at a slight tilt and unwinds to 0deg on hover, so
+         the grid keeps the hero's floating-card feel without a static look.
+         One fromTo rather than a to + a from: both used to write the same
+         transform, and the second left every card at rotation 0. */
+      const teamCards = gsap.utils.toArray<HTMLElement>('.t-card')
+      teamCards.forEach((card, i) => {
+        const rest = (i - (teamCards.length - 1) / 2) * 1.4
+        card.dataset.restRot = String(rest)
+
+        const enter = () => {
+          gsap.to(card, { rotation: 0, y: -14, scale: 1.03, duration: 0.5, ease: 'power3.out', overwrite: 'auto' })
+          /* The neighbours give way a little, which is what reads as depth. */
+          teamCards.forEach((other, j) => {
+            if (other === card) return
+            const d = j - i
+            if (Math.abs(d) > 2) return
+            gsap.to(other, { x: Math.sign(d) * (8 / Math.abs(d)), duration: 0.5, ease: 'power3.out', overwrite: 'auto' })
+          })
+        }
+        const leave = () => {
+          gsap.to(card, { rotation: rest, y: 0, scale: 1, duration: 0.7, ease: 'power2.out', overwrite: 'auto' })
+          teamCards.forEach((other) => {
+            if (other !== card) gsap.to(other, { x: 0, duration: 0.7, ease: 'power2.out', overwrite: 'auto' })
+          })
+        }
+        card.addEventListener('mouseenter', enter)
+        card.addEventListener('mouseleave', leave)
       })
-      gsap.from('.t-card', {
-        y: 80,
-        scale: 0.9,
-        rotation: (i: number) => (i % 2 === 0 ? -3 : 3),
-        duration: 1,
-        stagger: 0.08,
-        ease: 'back.out(1.3)',
-        scrollTrigger: { trigger: '.team-grid', start: 'top 80%' },
-      })
+
+      gsap.fromTo(
+        '.t-card',
+        { opacity: 0, y: 80, scale: 0.9, rotation: (i: number) => (i % 2 === 0 ? -6 : 6) },
+        {
+          opacity: 1,
+          y: 0,
+          scale: 1,
+          rotation: (_i, el) => parseFloat((el as HTMLElement).dataset.restRot || '0'),
+          duration: 1,
+          stagger: 0.08,
+          ease: 'back.out(1.3)',
+          scrollTrigger: { trigger: '.team-grid', start: 'top 80%' },
+        },
+      )
 
       gsap.to('.stats-inner', {
         opacity: 1,
@@ -368,36 +396,48 @@ export default function AboutUs() {
 
       <section className="hero">
         <h1 className="small-team">
-          <span className="word"><span>Small</span></span>&nbsp;<span className="word"><span>team,</span></span>
+          <span className="word"><span>Seven</span></span>&nbsp;<span className="word"><span>minds,</span></span>
         </h1>
 
         <div className="big-results-wrap">
           <div className="big-results">
-            {'big results'.split('').map((ch, i) => (
+            {'one direction.'.split('').map((ch, i) => (
               <span className="letter" key={i}>{ch === ' ' ? ' ' : ch}</span>
             ))}
           </div>
         </div>
 
         <div className="cards-row">
-          {CARDS.map((c, i) => (
-            <div key={i} className={`card card-${i + 1}`} data-rot={c.rot} data-depth={c.depth}>
-              <img src={c.img} alt="" />
+          {HERO_ORDER.map((t) => TEAM[t]).map((m, i) => (
+            <div key={m.name} className={`card card-${i + 1}`} data-rot={m.rot} data-depth={m.depth} title={`${m.name} — ${m.role}`}>
+              {m.img ? <img src={m.img} alt={m.name} /> : <span className="card-initials" aria-hidden="true">{initials(m.name)}</span>}
             </div>
           ))}
         </div>
 
         <div className="subline nb-subline">
-          <div className="subline-text">8 people. 60+ shipped projects. Zero filler.</div>
+          <div className="subline-text">Seven people. 30+ projects shipped. One shared vision.</div>
+          <div className="subline-note">Including work from our VR Creations journey.</div>
         </div>
       </section>
 
       <section className="company-brief">
         <p>
-          bitNtech is a technology and engineering company building intelligent solutions for an evolving world.
-          We work across software, artificial intelligence, robotics, embedded systems, IoT and digital products
-          to transform ideas and real-world problems into practical technology.
+          bitNtech is an engineering-driven technology company working across hardware, AI and software.
+          We turn ideas into working technology — from software and intelligent systems to physical
+          products and connected hardware.
         </p>
+        {/* The positioning, drawn as one stack rather than three columns: these
+            are connected parts of the same engineering ecosystem, not separate
+            departments. */}
+        <div className="triad" aria-label="Hardware, AI and software">
+          <span>Hardware</span>
+          <i aria-hidden="true">+</i>
+          <span>AI</span>
+          <i aria-hidden="true">+</i>
+          <span>Software</span>
+        </div>
+        <p className="brief-motto">Engineering the next Evolution.</p>
       </section>
 
       {/* The milestones, drawn as a signal that steps up once per entry: the
@@ -458,15 +498,16 @@ export default function AboutUs() {
         <div className="team-head">
           <div>
             
-            <h2>Designers, builders<br />and the <em>quietly brilliant</em>.</h2>
+            <h2>Seven people,<br />one <em>engineering team</em>.</h2>
           </div>
           <p>Every person you see here touches every project we ship. No middle layer, no handoffs to strangers — just direct work with the people doing it.</p>
         </div>
 
         <div className="team-grid">
-          {TEAM.map((m) => (
-            <div className="t-card" key={m.name}>
-              <img src={m.img} alt="" />
+          {TEAM.map((m, i) => (
+            /* --t-i drives the resting tilt; hover unwinds it to 0deg. */
+            <div className="t-card" key={m.name} style={{ '--t-i': String(i) } as React.CSSProperties}>
+              {m.img ? <img src={m.img} alt={m.name} /> : <span className="t-initials" aria-hidden="true">{initials(m.name)}</span>}
               <div className="t-meta">
                 <div className="nm">{m.name}</div>
                 <div className="rl">{m.role}</div>
@@ -478,13 +519,15 @@ export default function AboutUs() {
 
       <section className="stats">
         <div className="stats-inner">
-          <h3>Eight humans.<br />One <em>tight ship</em>.</h3>
+          <h3>Seven humans.<br />One <em>tight ship</em>.</h3>
           {STATS.map((s) => (
             <div className="stat-block" key={s.label}>
               <div className="num" data-count={s.count}>
                 <span>0</span>
                 {s.decimals > 0 && <small>.{'0'.repeat(s.decimals)}</small>}
-                {s.suffix && <small>{s.suffix}</small>}
+                {/* '+' is part of the figure, not a unit — it keeps the big
+                    ink instead of the muted unit styling. */}
+                {s.suffix && <small className={s.suffix === '+' ? 'sym' : undefined}>{s.suffix}</small>}
               </div>
               <div className="lbl">{s.label}</div>
             </div>
