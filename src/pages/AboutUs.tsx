@@ -8,16 +8,18 @@ gsap.registerPlugin(ScrollTrigger)
 /* The seven. One source of truth: the hero's floating cards and the team grid
    both read this list, so a person is added or removed in exactly one place.
    `img: null` means we have no real portrait yet — the card falls back to
-   initials rather than a stock face. Hero geometry (rot/depth) lives here too;
+   initials rather than a stock face. Paths are lower-case and hyphenated on
+   purpose: two of these arrived with spaces and a capital, which survives a
+   Windows dev server (case-insensitive) and then 404s on a Linux host. Hero geometry (rot/depth) lives here too;
    the matching sizes/positions are .card-1..7 in AboutUs.css. */
 const TEAM = [
-  { name: 'Veeraragavan Natarajan', role: 'Founder & CEO', img: null, rot: -9, depth: 14 },
-  { name: 'Prem Kumar Ramamoorthy', role: 'Co-Founder & CTO', img: null, rot: -5, depth: 10 },
+  { name: 'Veeraragavan Natarajan', role: 'Founder & CEO', img: '/assets/veera.jpg', rot: -9, depth: 14 },
+  { name: 'Prem Kumar Ramamoorthy', role: 'Co-Founder & CTO', img: '/assets/prem-kumar.jpg', rot: -5, depth: 10 },
   { name: 'Akash S', role: 'CSO', img: '/assets/akashimg.png', rot: -2, depth: 8 },
-  { name: 'Narendren S V', role: 'Chief AI Engineer', img: null, rot: 3, depth: 12 },
+  { name: 'Narendren S V', role: 'Chief AI Engineer', img: '/assets/narendren.jpg', rot: 3, depth: 12 },
   { name: 'Shashanth D', role: 'Finance & Marketing Manager', img: null, rot: 0, depth: 6 },
-  { name: 'Veronica T', role: 'COO', img: null, rot: 4, depth: 11 },
-  { name: 'Sri Hari Hara Pandiyan', role: 'Executive Assistant', img: null, rot: 7, depth: 9 },
+  { name: 'Veronica T', role: 'COO', img: '/assets/veronica.jpg', rot: 4, depth: 11 },
+  { name: 'Sri Hari Hara Pandiyan', role: 'Executive Assistant', img: '/assets/sri-hari.jpg', rot: 7, depth: 9 },
 ] as const
 
 /* Slot order for the hero row, as indices into TEAM. The slots are size-ranked

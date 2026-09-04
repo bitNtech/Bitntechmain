@@ -176,3 +176,39 @@ export const GlyphCompass = (p: GlyphProps) => (
     </g>
   </Frame>
 )
+
+/** 13 — Healthcare: a trace crossing the monitor, with the beat on it. */
+export const GlyphPulse = (p: GlyphProps) => (
+  <Frame {...p}>
+    <g className="glyph-draw" opacity={0.9}>
+      <path d="M6 32h12l5-12 7 24 6-16 5 4h17" />
+    </g>
+    <circle cx="30" cy="44" r="2.5" fill="currentColor" className="glyph-blink" />
+    <path d="M8 12v40M56 12v40" opacity={0.35} />
+  </Frame>
+)
+
+/** 14 — Agriculture: a sprout that leans in the wind. */
+export const GlyphSprout = (p: GlyphProps) => (
+  <Frame {...p}>
+    <path d="M12 54h40" />
+    <g className="glyph-swing" style={{ transformOrigin: '32px 54px' }}>
+      <path d="M32 54V22" />
+      <path d="M32 34c-10 0-14-6-14-13 8 0 14 4 14 13Z" />
+      <path d="M32 28c9 0 13-5 13-12-7 0-13 4-13 12Z" />
+      <circle cx="32" cy="20" r="2.5" fill="currentColor" className="glyph-blink" />
+    </g>
+  </Frame>
+)
+
+/** 15 — Education: a cap, and the idea leaving it. */
+export const GlyphLearn = (p: GlyphProps) => (
+  <Frame {...p}>
+    <path d="M32 20 8 30l24 10 24-10-24-10Z" />
+    <path d="M18 35v11c0 4 6 7 14 7s14-3 14-7V35" opacity={0.7} />
+    <g className="glyph-lift">
+      <circle cx="52" cy="20" r="2.5" fill="currentColor" />
+    </g>
+    <path d="M52 22v10" opacity={0.5} />
+  </Frame>
+)

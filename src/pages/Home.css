@@ -48,3 +48,50 @@
   .home-closing { min-height: auto; padding-block: 4rem; }
   .home-closing h2 { font-size: clamp(2.1rem, 10vw, 3.2rem); margin-bottom: 1.75rem; }
 }
+
+
+/* ---------- headline word split ----------------------------------------
+   Home.tsx wraps each word of every h2 in one of these after mount. They must
+   be inline-block or the transform does nothing, and they start hidden so a
+   heading above the fold cannot flash before its observer fires. Reduced
+   motion never runs the split's animation, so it resets them below. */
+.home-word {
+  display: inline-block;
+  opacity: 0;
+  will-change: transform, opacity;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-word { opacity: 1; transform: none; filter: none; }
+}
+
+/* ---------- industry marks ----------------------------------------------
+   The sector's own glyph, between the index above it and the name below. It
+   animates itself — the glyph system carries the draw/spin/blink and pauses
+   whatever is off-screen — so the card needs only to place it and react on
+   hover. */
+.home-world__mark {
+  position: absolute;
+  left: 1.5rem;
+  bottom: 4.6rem;
+  overflow: visible;
+  transition: transform .45s var(--ease), opacity .3s var(--ease);
+  opacity: .92;
+}
+.home-world:hover .home-world__mark {
+  transform: translateY(-6px) scale(1.08);
+  opacity: 1;
+}
+
+/* The glyphs default to the brand orange, which vanishes on the orange cards.
+   Higher specificity than .text-signal, so the alternating cards each get the
+   one that reads. */
+.home-world:nth-child(even) .vr-glyph { color: #fff; }
+
+@media (max-width: 720px) {
+  .home-world__mark { bottom: 3.9rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-world__mark { transition: none; }
+}

@@ -1,573 +1,420 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { CONTACT } from '../contact'
 import './ContactUs.css'
 
-type ReasonKey = 'hardware' | 'software'
+/**
+ * The contact page, as a piece of the same machine the landing hero is.
+ *
+ * It shares that page's system — the near-black ground, the mono micro-labels,
+ * the staggered blur-to-sharp build driven by one `--i` per element, the eased
+ * pointer written to `--mx`/`--my` for every layer to read at its own rate —
+ * without repeating its composition. The home board's traces and pads are
+ * deliberately absent: the visual here is the reaching hands behind the panel,
+ * and the page is led by the brief rather than by the headline.
+ *
+ * The form is React-controlled, which is what makes the signal panel cheap:
+ * it is a render of the same state the fields write, not a second copy kept in
+ * sync by hand. Field names, validation rules and the success flow are the
+ * ones the previous page had.
+ */
 
-const REASONS: Record<ReasonKey, { label: string; mood: string; lines: string[] }> = {
-  hardware: {
-    label: 'Hardware',
-    mood: 'excited',
-    lines: ['Hardware! Boards, sensors, things that move.', 'Something real and physical. Beep boop, my kind of build.'],
-  },
-  software: {
-    label: 'Software',
-    mood: 'excited',
-    lines: ['Software! My favorite kind of building.', "A platform, an app — go on, I'm listening."],
-  },
-}
+const PROJECT_TYPES = [
+  'Website', 'Web app', 'Mobile app', 'AI / AICA', 'Hardware',
+  'Embedded system', 'Automation', 'Software', 'Other',
+] as const
+
+/* Value carries the machine-readable key, label the rupee string. INR only —
+   there is no dollar figure anywhere on this page by design. */
+const BUDGETS = [
+  { value: '25k-50k', label: '₹25K – ₹50K', scale: 'Pilot' },
+  { value: '50k-1l', label: '₹50K – ₹1L', scale: 'Growth' },
+  { value: '1l-2.5l', label: '₹1L – ₹2.5L', scale: 'Growth' },
+  { value: '2.5l-5l', label: '₹2.5L – ₹5L', scale: 'Scale' },
+  { value: '5l-plus', label: '₹5L+', scale: 'Platform' },
+  { value: 'not-sure', label: 'Not sure yet', scale: 'To scope' },
+] as const
+
+const CHANNELS = [
+  { key: 'phone', label: 'Phone', value: CONTACT.phone, href: CONTACT.phoneHref, external: false },
+  { key: 'email', label: 'Email', value: CONTACT.email, href: CONTACT.emailHref, external: false },
+  { key: 'instagram', label: 'Instagram', value: CONTACT.instagram.handle, href: CONTACT.instagram.url, external: true },
+  { key: 'linkedin', label: 'LinkedIn', value: CONTACT.linkedin.handle, href: CONTACT.linkedin.url, external: true },
+  { key: 'github', label: 'GitHub', value: CONTACT.github.handle, href: CONTACT.github.url, external: true },
+] as const
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/
+
+type Field = 'name' | 'email' | 'phone' | 'company' | 'details'
 
 export default function ContactUs() {
-  const rootRef = useRef<HTMLDivElement>(null)
+  const rootRef = useRef<HTMLElement>(null)
+  const budgetRef = useRef<HTMLDivElement>(null)
 
+  const [values, setValues] = useState<Record<Field, string>>({
+    name: '', email: '', phone: '', company: '', details: '',
+  })
+  const [projectType, setProjectType] = useState('')
+  const [budget, setBudget] = useState('')
+  const [budgetOpen, setBudgetOpen] = useState(false)
+  /* One message at a time, against the field it belongs to — the same
+     one-complaint-at-a-time rule the page had before. */
+  const [error, setError] = useState<{ field: string; message: string } | null>(null)
+  const [sent, setSent] = useState(false)
+
+  const set = (field: Field) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setValues((v) => ({ ...v, [field]: e.target.value }))
+    setError((err) => (err?.field === field ? null : err))
+  }
+
+  const budgetEntry = useMemo(() => BUDGETS.find((b) => b.value === budget), [budget])
+
+  /* Written by the eased pointer loop and read by every layer at its own rate:
+     the traces move furthest, the panel barely at all. */
   useEffect(() => {
     const root = rootRef.current
     if (!root) return
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
 
-    const $ = <T extends HTMLElement>(s: string) => root.querySelector<T>(s)!
+    let tmx = 0, tmy = 0, mx = 0, my = 0
+    let raf = 0
+    let running = false
 
-    const robot = $<HTMLDivElement>('#robot')
-    const eyes = $<HTMLDivElement>('#eyes')
-    const bubble = $<HTMLDivElement>('#bubble')
-    const bubbleText = $<HTMLSpanElement>('#bubbleText')
-    const form = $<HTMLFormElement>('#form')
-    const nameI = $<HTMLInputElement>('#name')
-    const emailI = $<HTMLInputElement>('#email')
-    const detailsI = $<HTMLTextAreaElement>('#details')
-    const btn = $<HTMLButtonElement>('#sendBtn')
-    const btnLabel = $<HTMLSpanElement>('#btnLabel')
-    const head3d = $<HTMLDivElement>('.head3d')
-    const scene = $<HTMLDivElement>('.scene')
-
-    const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches
-    const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/
-
-    let done = false
-    let lastSaid = ''
-    const timers: number[] = []
-    const schedule = (fn: () => void, ms: number) => {
-      const id = window.setTimeout(fn, ms)
-      timers.push(id)
-      return id
-    }
-
-    const pick = <T,>(arr: T[]) => arr[Math.floor(Math.random() * arr.length)]
-
-    function setMood(mood: string) {
-      if (!done) robot.dataset.mood = mood
-    }
-
-    function say(text: string) {
-      if (text === lastSaid) return
-      lastSaid = text
-      bubbleText.textContent = text
-      bubble.classList.remove('pop')
-      void bubble.offsetWidth
-      bubble.classList.add('pop')
-    }
-
-    function look(x: number, y: number) {
-      eyes.style.setProperty('--lx', `${x}px`)
-      eyes.style.setProperty('--ly', `${y}px`)
-    }
-
-    function tilt(ry: number, rx: number) {
-      head3d.style.setProperty('--ry', `${ry}deg`)
-      head3d.style.setProperty('--rx', `${rx}deg`)
-    }
-
-    function followTyping(input: HTMLInputElement | HTMLTextAreaElement) {
-      const ratio = Math.min(input.value.length / 22, 1)
-      look(-6 + 12 * ratio, 5)
-      tilt(-5 + 10 * ratio, -8)
-    }
-
-    const onNameFocus = () => {
-      setMood('watching')
-      say(pick(['A visitor. State your name.', "Typing detected. Go on, I'm watching.", 'Hii! Tell me who you are 🩵']))
-      followTyping(nameI)
-    }
-    const onNameInput = () => {
-      followTyping(nameI)
-      const v = nameI.value.trim()
-      if (v.length >= 2) say(pick([`${v}. Solid name. Filed forever.`, `Aww, hi ${v}! Cute name.`]))
-      else if (v.length === 0) say("Deleted. I've already forgotten it. Mostly.")
-    }
-    nameI.addEventListener('focus', onNameFocus)
-    nameI.addEventListener('input', onNameInput)
-
-    const onEmailFocus = () => {
-      setMood('watching')
-      say("Email next. I don't do spam — I don't even have an inbox.")
-      followTyping(emailI)
-    }
-    const onEmailInput = () => {
-      followTyping(emailI)
-      if (EMAIL_RE.test(emailI.value.trim())) {
-        setMood('happy')
-        say(pick(['Now that is a proper email. Respect.', 'Valid address detected. Quietly delighted.', 'Yay, a real email! *sparkle*']))
-      } else {
-        setMood('watching')
-        if (emailI.value.includes('@')) say('Close. My sensors say: not yet.')
-      }
-    }
-    emailI.addEventListener('focus', onEmailFocus)
-    emailI.addEventListener('input', onEmailInput)
-
-    /* Native <select> renders its popup with the OS, which ignores every style
-       on this page. Both dropdowns are listboxes we draw ourselves instead. */
-    function customSelect(
-        wrapId: string,
-        onPick: (value: string, label: string) => void,
-        onFocus: () => void,
-      ) {
-      const wrap = $<HTMLDivElement>(`#${wrapId}`)
-      const trigger = wrap.querySelector<HTMLButtonElement>('.reason-trigger')!
-      const label = trigger.querySelector<HTMLSpanElement>('span')!
-      const options = [...wrap.querySelectorAll<HTMLLIElement>('li')]
-      const hidden = wrap.querySelector<HTMLInputElement>('input[type="hidden"]')
-      let value = ''
-
-      const close = () => {
-        wrap.classList.remove('open')
-        trigger.setAttribute('aria-expanded', 'false')
-      }
-      const onTriggerClick = () => {
-        // Only one list open at a time, or they overlap each other.
-        document.querySelectorAll('.contact-us .field--select.open').forEach((o) => {
-          if (o !== wrap) {
-            o.classList.remove('open')
-            o.querySelector('.reason-trigger')?.setAttribute('aria-expanded', 'false')
-          }
-        })
-        const open = wrap.classList.toggle('open')
-        trigger.setAttribute('aria-expanded', String(open))
-      }
-      const onOptionClick = (li: HTMLLIElement) => {
-        value = li.dataset.value!
-        if (hidden) hidden.value = value
-        label.textContent = li.textContent
-        label.classList.remove('placeholder')
-        options.forEach((o) => o.setAttribute('aria-selected', String(o === li)))
-        close()
-        trigger.focus()
-        onPick(value, li.textContent ?? '')
-      }
-      const onKeydown = (e: KeyboardEvent) => {
-        if (e.key === 'Escape') {
-          close()
-          trigger.focus()
-        }
-      }
-      const onDocClick = (e: MouseEvent) => {
-        if (!wrap.contains(e.target as Node)) close()
-      }
-      const clickHandlers = options.map((li) => () => onOptionClick(li))
-
-      trigger.addEventListener('click', onTriggerClick)
-      trigger.addEventListener('focus', onFocus)
-      options.forEach((li, i) => li.addEventListener('click', clickHandlers[i]))
-      wrap.addEventListener('keydown', onKeydown)
-      document.addEventListener('click', onDocClick)
-
-      return {
-        trigger,
-        get value() {
-          return value
-        },
-        destroy() {
-          trigger.removeEventListener('click', onTriggerClick)
-          trigger.removeEventListener('focus', onFocus)
-          options.forEach((li, i) => li.removeEventListener('click', clickHandlers[i]))
-          wrap.removeEventListener('keydown', onKeydown)
-          document.removeEventListener('click', onDocClick)
-        },
-      }
-    }
-
-    const reason = customSelect(
-      'reasonSelect',
-      (key) => {
-        const r = REASONS[key as ReasonKey]
-        look(0, -4)
-        tilt(0, -6)
-        setMood(r.mood)
-        say(pick(r.lines))
-      },
-      () => {
-        setMood('watching')
-        say('Hardware or software? Pick one. I promise not to judge. Much.')
-      },
-    )
-
-    const budget = customSelect(
-      'budgetSelect',
-      () => {
-        setMood('happy')
-        say(pick(['Noted. Numbers help more than you think.', 'Budget logged. No judgement, promise.']))
-      },
-      () => {
-        setMood('watching')
-        say(pick(["Ballpark is fine. I'm not an accountant.", 'Optional, but it helps us scope it.']))
-      },
-    )
-
-    const onDetailsFocus = () => {
-      setMood('watching')
-      say(pick(['Extra details. My favorite kind of gossip.', "Go on, I'm all ears. Well, antenna."]))
-      followTyping(detailsI)
-    }
-    const onDetailsInput = () => {
-      followTyping(detailsI)
-      const len = detailsI.value.length
-      if (len > 160) say("That's a lot of detail. I respect it.")
-      else if (len > 0) setMood('happy')
-    }
-    detailsI.addEventListener('focus', onDetailsFocus)
-    detailsI.addEventListener('input', onDetailsInput)
-
-    function hype(on: boolean) {
-      if (done) return
-      if (on && robot.classList.contains('is-pressed')) return
-      robot.classList.toggle('is-hyped', on)
-      if (on) {
-        setMood('excited')
-        say(pick(['Ooh. Do it. Send it.', 'This is my favorite part.', 'Eeep, so exciting!']))
-      } else {
-        setMood('idle')
-        say('The button misses you already.')
-      }
-    }
-    const onBtnEnter = () => hype(true)
-    const onBtnLeave = () => hype(false)
-    const onBtnFocus = () => hype(true)
-    const onBtnBlur = () => hype(false)
-    btn.addEventListener('mouseenter', onBtnEnter)
-    btn.addEventListener('mouseleave', onBtnLeave)
-    btn.addEventListener('focus', onBtnFocus)
-    btn.addEventListener('blur', onBtnBlur)
-
-    let pressTimer: number | undefined
-    const onPointerDown = () => {
-      window.clearTimeout(pressTimer)
-      robot.classList.add('is-pressed')
-      robot.dataset.mood = 'pressed'
-      say(pick(['Ahh. That’s the stuff.', 'Mmm. Satisfying.', 'Beep. Do that again.', 'Eep! *giggle*']))
-    }
-    const releasePress = () => {
-      window.clearTimeout(pressTimer)
-      pressTimer = schedule(() => {
-        robot.classList.remove('is-pressed')
-        if (robot.dataset.mood === 'pressed') {
-          robot.dataset.mood = done ? 'success' : 'excited'
-        }
-      }, 340)
-    }
-    const onPointerLeave = () => {
-      if (robot.classList.contains('is-pressed')) releasePress()
-    }
-    btn.addEventListener('pointerdown', onPointerDown)
-    btn.addEventListener('pointerup', releasePress)
-    btn.addEventListener('pointercancel', releasePress)
-    btn.addEventListener('pointerleave', onPointerLeave)
-
-    function confetti() {
-      const colors = ['#ff6e42', '#2ec4b6', '#ffc53d', '#1c1917', '#fffdf8']
-      const origin = btn.getBoundingClientRect()
-      const hostRect = scene.getBoundingClientRect()
-      const ox = origin.left - hostRect.left + origin.width / 2
-      const oy = origin.top - hostRect.top
-
-      for (let i = 0; i < 70; i++) {
-        const bit = document.createElement('span')
-        bit.className = 'confetti'
-        bit.style.background = pick(colors)
-        if (Math.random() > 0.5) bit.style.borderRadius = '50%'
-        scene.appendChild(bit)
-
-        const angle = -Math.PI / 2 + (Math.random() - 0.5) * 1.6
-        const speed = 240 + Math.random() * 380
-        const tx = Math.cos(angle) * speed
-        const ty = Math.sin(angle) * speed
-
-        bit
-          .animate(
-            [
-              { transform: `translate(${ox}px, ${oy}px) rotate(0deg) scale(1)`, opacity: 1 },
-              {
-                transform: `translate(${ox + tx}px, ${oy + ty + 320}px) rotate(${540 * (Math.random() > 0.5 ? 1 : -1)}deg) scale(.6)`,
-                opacity: 0,
-              },
-            ],
-            { duration: 1100 + Math.random() * 700, easing: 'cubic-bezier(.15,.6,.35,1)' },
-          )
-          .addEventListener('finish', () => bit.remove())
-      }
-    }
-
-    function reset() {
-      done = false
-      robot.dataset.mood = 'idle'
-      btn.classList.remove('is-success')
-      btnLabel.textContent = 'START A CONVERSATION ↗'
-      say('Again? I could do this all day. *happy beep*')
-    }
-
-    const onSubmit = (e: SubmitEvent) => {
-      e.preventDefault()
-      if (done) return
-
-      const complaints: [string, HTMLElement][] = []
-      if (!nameI.value.trim()) complaints.push(["Still don't know your name.", nameI])
-      else if (!EMAIL_RE.test(emailI.value.trim())) complaints.push(["That email isn't a real place.", emailI])
-      else if (!reason.value) complaints.push(["Pick a project type, I'm dying of suspense.", reason.trigger])
-
-      if (complaints.length) {
-        const [msg, field] = complaints[0]
-        schedule(() => {
-          say(msg)
-          setMood('watching')
-        }, 380)
-        form.classList.remove('shake')
-        void form.offsetWidth
-        form.classList.add('shake')
-        field.focus()
+    const tick = () => {
+      mx += (tmx - mx) * 0.06
+      my += (tmy - my) * 0.06
+      root.style.setProperty('--mx', mx.toFixed(4))
+      root.style.setProperty('--my', my.toFixed(4))
+      // Parks itself once it has caught up; the next move wakes it again.
+      if (Math.abs(tmx - mx) < 0.0004 && Math.abs(tmy - my) < 0.0004) {
+        running = false
+        raf = 0
         return
       }
-
-      done = true
-      robot.classList.remove('is-hyped')
-
-      const reasonLabel = REASONS[reason.value as ReasonKey].label
-
-      schedule(() => {
-        robot.dataset.mood = 'success'
-        say(`Filed under ${reasonLabel}. On it, ${nameI.value.trim()}! 🩵`)
-        btn.classList.add('is-success')
-        btnLabel.textContent = 'SENT ✓'
-        look(0, 0)
-        tilt(0, 0)
-
-        if (!reduceMotion) {
-          robot.classList.add('is-spinning')
-          schedule(() => robot.classList.remove('is-spinning'), 950)
-          confetti()
-        }
-      }, 420)
-
-      schedule(reset, 5600)
+      raf = requestAnimationFrame(tick)
     }
-    form.addEventListener('submit', onSubmit)
-
-    const blinkLoop = () => {
-      schedule(() => {
-        if (robot.dataset.mood !== 'success') {
-          eyes.classList.add('blink')
-          schedule(() => eyes.classList.remove('blink'), 150)
-        }
-        blinkLoop()
-      }, 2600 + Math.random() * 2600)
+    const wake = () => {
+      if (running) return
+      running = true
+      raf = requestAnimationFrame(tick)
     }
-    blinkLoop()
-
-    let rafPending = false
-    let rafId = 0
-    const onMouseMove = (e: MouseEvent) => {
-      const active = document.activeElement
-      if (done || (active && ['INPUT', 'BUTTON', 'TEXTAREA'].includes(active.tagName))) return
-      if (rafPending) return
-      rafPending = true
-      rafId = requestAnimationFrame(() => {
-        rafPending = false
-        const rect = robot.getBoundingClientRect()
-        const cx = rect.left + rect.width / 2
-        const cy = rect.top + rect.height / 2
-        const dx = Math.max(-1, Math.min(1, (e.clientX - cx) / 260))
-        const dy = Math.max(-1, Math.min(1, (e.clientY - cy) / 260))
-        look(dx * 7, dy * 6)
-        tilt(dx * 12, -dy * 9)
-      })
+    const onMove = (e: PointerEvent) => {
+      const r = root.getBoundingClientRect()
+      if (!r.width || !r.height) return
+      tmx = Math.max(-1, Math.min(1, ((e.clientX - r.left) / r.width) * 2 - 1))
+      tmy = Math.max(-1, Math.min(1, ((e.clientY - r.top) / r.height) * 2 - 1))
+      wake()
     }
-    document.addEventListener('mousemove', onMouseMove)
-
+    const onLeave = () => {
+      tmx = 0
+      tmy = 0
+      wake()
+    }
+    root.addEventListener('pointermove', onMove)
+    root.addEventListener('pointerleave', onLeave)
     return () => {
-      nameI.removeEventListener('focus', onNameFocus)
-      nameI.removeEventListener('input', onNameInput)
-      emailI.removeEventListener('focus', onEmailFocus)
-      emailI.removeEventListener('input', onEmailInput)
-      reason.destroy()
-      budget.destroy()
-      detailsI.removeEventListener('focus', onDetailsFocus)
-      detailsI.removeEventListener('input', onDetailsInput)
-      btn.removeEventListener('mouseenter', onBtnEnter)
-      btn.removeEventListener('mouseleave', onBtnLeave)
-      btn.removeEventListener('focus', onBtnFocus)
-      btn.removeEventListener('blur', onBtnBlur)
-      btn.removeEventListener('pointerdown', onPointerDown)
-      btn.removeEventListener('pointerup', releasePress)
-      btn.removeEventListener('pointercancel', releasePress)
-      btn.removeEventListener('pointerleave', onPointerLeave)
-      form.removeEventListener('submit', onSubmit)
-      document.removeEventListener('mousemove', onMouseMove)
-      cancelAnimationFrame(rafId)
-      timers.forEach((id) => window.clearTimeout(id))
+      root.removeEventListener('pointermove', onMove)
+      root.removeEventListener('pointerleave', onLeave)
+      if (raf) cancelAnimationFrame(raf)
     }
   }, [])
 
+  /* Sections build as they arrive rather than all at once on load. */
+  useEffect(() => {
+    const root = rootRef.current
+    if (!root) return
+    const io = new IntersectionObserver(
+      (entries) => entries.forEach((entry) => {
+        if (!entry.isIntersecting) return
+        entry.target.classList.add('is-in')
+        io.unobserve(entry.target)
+      }),
+      { threshold: 0.12, rootMargin: '0px 0px -8% 0px' },
+    )
+    root.querySelectorAll('[data-build]').forEach((el) => io.observe(el))
+    return () => io.disconnect()
+  }, [])
+
+  // The custom listbox closes on an outside click, like the page's old one.
+  useEffect(() => {
+    if (!budgetOpen) return
+    const onDoc = (e: MouseEvent) => {
+      if (!budgetRef.current?.contains(e.target as Node)) setBudgetOpen(false)
+    }
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setBudgetOpen(false)
+    }
+    document.addEventListener('click', onDoc)
+    document.addEventListener('keydown', onKey)
+    return () => {
+      document.removeEventListener('click', onDoc)
+      document.removeEventListener('keydown', onKey)
+    }
+  }, [budgetOpen])
+
+  const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    if (sent) return
+
+    // Same three rules as before, reported one at a time.
+    if (!values.name.trim()) return fail('name', 'A name is needed before we can reply.')
+    if (!EMAIL_RE.test(values.email.trim())) return fail('email', 'That address will not reach you.')
+    if (!projectType) return fail('projectType', 'Pick the kind of project this is.')
+
+    setError(null)
+    setSent(true)
+  }
+
+  const fail = (field: string, message: string) => {
+    setError({ field, message })
+    const el = rootRef.current?.querySelector<HTMLElement>(`[data-focus="${field}"]`)
+    el?.focus()
+  }
+
+  const signal = [
+    { label: 'Type', value: projectType },
+    { label: 'Scale', value: budgetEntry?.scale ?? '' },
+    { label: 'Budget', value: budgetEntry?.label ?? '' },
+  ]
+  const ready = Boolean(projectType && values.name.trim() && EMAIL_RE.test(values.email.trim()))
+
   return (
-    <main className="contact-us" ref={rootRef}>
-      <div className="scene">
-        <div className="left-pane">
-          <div className="card info-card">
-            <h2 className="info-title">Have an idea? Let's engineer it.</h2>
-            <p className="info-sub">Tell us what you're building, and let's figure out the next step.</p>
+    <main className="cx" ref={rootRef}>
+      {/* ---- the ground: the hero's scene, quieter ---- */}
+      <div className="cx-scene" aria-hidden="true">
+        {/* The reach. Inverted, because the plate is cut on white and this page
+            is not — see ContactUs.css. It is the whole visual: this page does
+            not repeat the home board, it answers it. */}
+        <div className="cx-bg" />
+        <div className="cx-spark" />
+        <div className="cx-haze" />
+        <div className="cx-vignette" />
+      </div>
 
-            <p className="info-eyebrow">Get in touch</p>
-            <div className="info-list">
-              <a className="info-row" href={CONTACT.phoneHref}>
-                <svg className="field-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6.6 10.8c1.4 2.8 3.8 5.2 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.2.5 2.5.8 3.9.9.6 0 1 .5 1 1V21c0 .6-.5 1-1 1C10.8 22 2 13.2 2 2.7c0-.5.5-1 1-1h4.1c.6 0 1 .4 1 1 .1 1.4.4 2.7.9 3.9.1.4 0 .8-.2 1L6.6 10.8Z"/></svg>
-                <span className="info-label">Phone</span>
-                <span className="info-value">{CONTACT.phone}</span>
-              </a>
-              <a className="info-row" href={CONTACT.emailHref}>
-                <svg className="field-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Zm8 7.3L4.4 7h15.2L12 12.3ZM4 9.2V17h16V9.2l-8 5.3-8-5.3Z"/></svg>
-                <span className="info-label">Email</span>
-                <span className="info-value">{CONTACT.email}</span>
-              </a>
-              <a className="info-row" href={CONTACT.instagram.url} target="_blank" rel="noreferrer">
-                <svg className="field-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2c2.72 0 3.06.01 4.12.06 1.06.05 1.79.22 2.43.46.66.25 1.22.6 1.77 1.15.5.5.85 1.02 1.15 1.77.24.64.41 1.37.46 2.43.05 1.06.06 1.4.06 4.12s-.01 3.06-.06 4.12c-.05 1.06-.22 1.79-.46 2.43a4.9 4.9 0 0 1-1.15 1.77c-.5.5-1.02.85-1.77 1.15-.64.24-1.37.41-2.43.46-1.06.05-1.4.06-4.12.06s-3.06-.01-4.12-.06c-1.06-.05-1.79-.22-2.43-.46a4.9 4.9 0 0 1-1.77-1.15 4.9 4.9 0 0 1-1.15-1.77c-.24-.64-.41-1.37-.46-2.43C2.01 15.06 2 14.72 2 12s.01-3.06.06-4.12c.05-1.06.22-1.79.46-2.43.25-.66.6-1.22 1.15-1.77.5-.5 1.02-.85 1.77-1.15.64-.24 1.37-.41 2.43-.46C8.94 2.01 9.28 2 12 2Zm0 5a5 5 0 1 0 0 10 5 5 0 0 0 0-10Zm0 8.2a3.2 3.2 0 1 1 0-6.4 3.2 3.2 0 0 1 0 6.4Zm5.4-9.6a1.2 1.2 0 1 0 0 2.4 1.2 1.2 0 0 0 0-2.4Z"/></svg>
-                <span className="info-label">Instagram</span>
-                <span className="info-value">{CONTACT.instagram.handle}</span>
-              </a>
-              <a className="info-row" href={CONTACT.linkedin.url} target="_blank" rel="noreferrer">
-                <svg className="field-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4.98 3.5A2.5 2.5 0 1 0 5 8.5a2.5 2.5 0 0 0-.02-5ZM3 9.98h4V21H3V9.98Zm7 0h3.83v1.51h.05c.53-1 1.85-2.06 3.8-2.06 4.07 0 4.82 2.68 4.82 6.16V21h-4v-4.9c0-1.17-.02-2.67-1.63-2.67-1.64 0-1.89 1.28-1.89 2.59V21h-4V9.98Z"/></svg>
-                <span className="info-label">LinkedIn</span>
-                <span className="info-value">{CONTACT.linkedin.handle}</span>
-              </a>
-              <a className="info-row" href={CONTACT.github.url} target="_blank" rel="noreferrer">
-                <svg className="field-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 0 0-3.16 19.49c.5.09.68-.22.68-.48l-.01-1.7c-2.78.6-3.37-1.34-3.37-1.34-.45-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.61.07-.61 1 .07 1.53 1.03 1.53 1.03.89 1.53 2.34 1.09 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.56-1.11-4.56-4.95 0-1.09.39-1.99 1.03-2.69-.1-.25-.45-1.27.1-2.65 0 0 .84-.27 2.75 1.03a9.5 9.5 0 0 1 5 0c1.91-1.3 2.75-1.03 2.75-1.03.55 1.38.2 2.4.1 2.65.64.7 1.03 1.6 1.03 2.69 0 3.85-2.34 4.7-4.57 4.95.36.31.68.92.68 1.85l-.01 2.75c0 .26.18.58.69.48A10 10 0 0 0 12 2Z"/></svg>
-                <span className="info-label">GitHub</span>
-                <span className="info-value">{CONTACT.github.handle}</span>
-              </a>
-            </div>
-          </div>
-        </div>
-        {/* Was a second <main> nested inside the page's own; only one is valid,
-            and screen readers pick one landmark arbitrarily when there are two. */}
-        <section className="stage" id="stage">
-          <div className="robot" id="robot" data-mood="idle">
-            <div className="bubble" id="bubble" role="status" aria-live="polite">
-              <span id="bubbleText">Hi. I'm Nila. Tell me why you're here! 🩵</span>
-            </div>
+      {/* ---- hero ---- */}
+      <header className="cx-hero">
+        <p className="cx-label cx-build" style={{ '--i': 0 } as React.CSSProperties}>
+          BitNTech <i>/</i> Project inquiry
+        </p>
+        <h1 className="cx-head">
+          <span className="cx-line">
+            <span className="cx-build" style={{ '--i': 1.4 } as React.CSSProperties}>Let&rsquo;s build</span>
+          </span>
+          <span className="cx-line cx-line--hero">
+            <span className="cx-build" style={{ '--i': 2.6 } as React.CSSProperties}>What&rsquo;s next.</span>
+          </span>
+        </h1>
+        <p className="cx-lead cx-build" style={{ '--i': 4.4 } as React.CSSProperties}>
+          Have an idea, product, system or problem worth engineering? Tell us what
+          you&rsquo;re building and let&rsquo;s figure out the next step.
+        </p>
+      </header>
 
-            <div className="antenna" aria-hidden="true">
-              <span className="antenna-rod"></span>
-              <span className="antenna-tip"></span>
+      {/* ---- one interface, two halves ---- */}
+      <section className="cx-panel" id="start" data-build>
+        <div className="cx-panel__side cx-panel__side--form">
+          <p className="cx-label">Start a project</p>
+
+          <form className="cx-form" onSubmit={onSubmit} noValidate>
+            <p className="cx-group"><b>01</b><span>Who you are</span></p>
+
+            <div className={`cx-field${error?.field === 'name' ? ' has-error' : ''}`}>
+              <label htmlFor="cx-name">Name</label>
+              <input
+                id="cx-name" name="name" type="text" autoComplete="name"
+                data-focus="name" value={values.name} onChange={set('name')}
+              />
+              <i className="cx-field__signal" aria-hidden="true" />
             </div>
 
-            <div className="head3d" aria-hidden="true">
-              <div className="head" id="head">
-                <span className="ear ear--l"></span>
-                <span className="ear ear--r"></span>
+            <div className={`cx-field${error?.field === 'email' ? ' has-error' : ''}`}>
+              <label htmlFor="cx-email">Email</label>
+              <input
+                id="cx-email" name="email" type="email" autoComplete="email"
+                data-focus="email" value={values.email} onChange={set('email')}
+              />
+              <i className="cx-field__signal" aria-hidden="true" />
+            </div>
 
-                <div className="face face--front">
-                  <div className="visor">
-                    <div className="eyes" id="eyes">
-                      <span className="eye eye--l"></span>
-                      <span className="eye eye--r"></span>
-                    </div>
-                    <span className="cheek cheek--l"></span>
-                    <span className="cheek cheek--r"></span>
-                    <span className="mouth"></span>
-                  </div>
-                </div>
+            <div className="cx-field">
+              <label htmlFor="cx-phone">Phone <em>optional</em></label>
+              <input
+                id="cx-phone" name="phone" type="tel" autoComplete="tel"
+                value={values.phone} onChange={set('phone')}
+              />
+              <i className="cx-field__signal" aria-hidden="true" />
+            </div>
+
+            <div className="cx-field">
+              <label htmlFor="cx-company">Company <em>optional</em></label>
+              <input
+                id="cx-company" name="company" type="text" autoComplete="organization"
+                value={values.company} onChange={set('company')}
+              />
+              <i className="cx-field__signal" aria-hidden="true" />
+            </div>
+
+            <p className="cx-group"><b>02</b><span>What you&rsquo;re building</span></p>
+
+            {/* Chips rather than a dropdown: nine options is a set to scan, not
+                a list to open, and the choice stays visible while the rest of
+                the brief is filled in. */}
+            <div
+              className={`cx-chips cx-span${error?.field === 'projectType' ? ' has-error' : ''}`}
+              role="group"
+              aria-labelledby="cx-type-label"
+            >
+              <span className="cx-field__legend" id="cx-type-label">Project type</span>
+              <div className="cx-chips__row">
+                {PROJECT_TYPES.map((t, i) => (
+                  <button
+                    key={t}
+                    type="button"
+                    className={`cx-chip${projectType === t ? ' is-on' : ''}`}
+                    aria-pressed={projectType === t}
+                    {...(i === 0 ? { 'data-focus': 'projectType' } : {})}
+                    onClick={() => {
+                      setProjectType(t)
+                      setError((err) => (err?.field === 'projectType' ? null : err))
+                    }}
+                  >
+                    {t}
+                  </button>
+                ))}
               </div>
+              <input type="hidden" name="projectType" value={projectType} />
             </div>
-          </div>
 
-          <form className="card" id="form" noValidate>
-            <span className="hand hand--l" aria-hidden="true"></span>
-            <span className="hand hand--r" aria-hidden="true"></span>
-
-            <label className="field">
-              <svg className="field-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 12a4.5 4.5 0 1 0-4.5-4.5A4.5 4.5 0 0 0 12 12Zm0 2c-3.9 0-8 2-8 5v1.5h16V19c0-3-4.1-5-8-5Z"/></svg>
-              <input id="name" name="name" type="text" placeholder="Your name" autoComplete="name" aria-label="Your name" />
-            </label>
-
-            <label className="field">
-              <svg className="field-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Zm8 7.3L4.4 7h15.2L12 12.3ZM4 9.2V17h16V9.2l-8 5.3-8-5.3Z"/></svg>
-              <input id="email" name="email" type="email" placeholder="Your email" autoComplete="email" aria-label="Your email" />
-            </label>
-
-            <label className="field">
-              <svg className="field-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6.6 10.8c1.4 2.8 3.8 5.2 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.2.5 2.5.8 3.9.9.6 0 1 .5 1 1V21c0 .6-.5 1-1 1C10.8 22 2 13.2 2 2.7c0-.5.5-1 1-1h4.1c.6 0 1 .4 1 1 .1 1.4.4 2.7.9 3.9.1.4 0 .8-.2 1L6.6 10.8Z"/></svg>
-              <input id="phone" name="phone" type="tel" placeholder="Your phone (optional)" autoComplete="tel" aria-label="Your phone" />
-            </label>
-
-            <label className="field">
-              <svg className="field-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 21V8l8-5 8 5v13h-6v-7H10v7H4Z"/></svg>
-              <input id="company" name="company" type="text" placeholder="Company / organization (optional)" autoComplete="organization" aria-label="Company or organization" />
-            </label>
-
-            <div className="field field--select" id="reasonSelect">
-              <svg className="field-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16v2H4V6Zm0 5h16v2H4v-2Zm0 5h16v2H4v-2Z"/></svg>
+            {/* A native <select> draws its popup with the OS, which ignores
+                every style on this page — so the listbox is ours, as before. */}
+            <div className={`cx-field cx-field--select${budgetOpen ? ' is-open' : ''}`} ref={budgetRef}>
+              <span className="cx-field__legend">Budget <em>optional</em></span>
               <button
                 type="button"
-                className="reason-trigger"
-                id="reasonTrigger"
+                className="cx-select"
                 aria-haspopup="listbox"
-                aria-expanded="false"
+                aria-expanded={budgetOpen}
+                onClick={() => setBudgetOpen((o) => !o)}
               >
-                <span id="reasonTriggerLabel" className="placeholder">Project type</span>
-                <svg className="reason-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10l5 5 5-5z"/></svg>
+                <span className={budgetEntry ? '' : 'is-placeholder'}>
+                  {budgetEntry?.label ?? 'Select a range'}
+                </span>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10l5 5 5-5z" /></svg>
               </button>
-              {/* The listbox is drawn by hand, so the chosen value rides along in a
-                  hidden input rather than in a <select>. */}
-              <input type="hidden" name="projectType" id="reasonValue" />
-              <ul className="reason-list" id="reasonList" role="listbox" aria-label="Project type">
-                <li role="option" aria-selected="false" data-value="hardware">Hardware</li>
-                <li role="option" aria-selected="false" data-value="software">Software</li>
+              <ul className="cx-options" role="listbox" aria-label="Budget range">
+                {BUDGETS.map((b) => (
+                  <li key={b.value} role="option" aria-selected={budget === b.value}>
+                    <button type="button" onClick={() => { setBudget(b.value); setBudgetOpen(false) }}>
+                      {b.label}
+                    </button>
+                  </li>
+                ))}
               </ul>
+              <input type="hidden" name="budget" value={budget} />
             </div>
 
-            <div className="field field--select" id="budgetSelect">
-              <svg className="field-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm0 1.8a8.2 8.2 0 1 1 0 16.4 8.2 8.2 0 0 1 0-16.4Z"/><text x="12" y="16.6" textAnchor="middle" fontSize="11" fontWeight="700">₹</text></svg>
-              <button
-                type="button"
-                className="reason-trigger"
-                id="budgetTrigger"
-                aria-haspopup="listbox"
-                aria-expanded="false"
-              >
-                <span className="placeholder">Budget range (optional)</span>
-                <svg className="reason-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10l5 5 5-5z"/></svg>
-              </button>
-              <input type="hidden" name="budget" id="budgetValue" />
-              <ul className="reason-list" role="listbox" aria-label="Budget range">
-                <li role="option" aria-selected="false" data-value="25k-50k">₹25,000 – ₹50,000</li>
-                <li role="option" aria-selected="false" data-value="50k-1l">₹50,000 – ₹1,00,000</li>
-                <li role="option" aria-selected="false" data-value="1l-2.5l">₹1,00,000 – ₹2,50,000</li>
-                <li role="option" aria-selected="false" data-value="2.5l-5l">₹2,50,000 – ₹5,00,000</li>
-                <li role="option" aria-selected="false" data-value="5l-plus">₹5,00,000+</li>
-                <li role="option" aria-selected="false" data-value="not-sure">Not sure yet</li>
-              </ul>
+            {(projectType || budgetEntry) && (
+              <aside className="cx-signal">
+                <p className="cx-label">Project signal</p>
+                <dl>
+                  {signal.filter((s) => s.value).map((s) => (
+                    <div key={s.label}>
+                      <dt>{s.label}</dt>
+                      <dd>{s.value}</dd>
+                    </div>
+                  ))}
+                  <div>
+                    <dt>Status</dt>
+                    <dd className={ready ? 'is-ready' : ''}>
+                      {ready ? 'Ready to engineer' : 'Awaiting brief'}
+                      <i aria-hidden="true" />
+                    </dd>
+                  </div>
+                </dl>
+              </aside>
+            )}
+
+            <div className="cx-field cx-field--area cx-span">
+              <label htmlFor="cx-details">The idea</label>
+              <textarea
+                id="cx-details" name="details" rows={5}
+                placeholder="What are you trying to build, solve, automate or improve?"
+                value={values.details} onChange={set('details')}
+              />
+              <i className="cx-field__signal" aria-hidden="true" />
             </div>
 
-            <label className="field field--textarea">
-              <svg className="field-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16a1 1 0 0 1 1 1v11a1 1 0 0 1-1 1H9l-4.5 4.2A1 1 0 0 1 3 20.4V5a1 1 0 0 1 1-1Zm2 4v2h12V8H6Zm0 4v2h8v-2H6Z"/></svg>
-              <textarea id="details" name="details" placeholder="Anything else? (optional)" aria-label="Extra details" rows={3}></textarea>
-            </label>
+            {/* One live region for the whole form: the complaint and the
+                receipt land in the same place, so nothing is announced twice. */}
+            <p className="cx-note cx-span" role="status" aria-live="polite">
+              {error ? <span className="cx-note__err">{error.message}</span> : null}
+            </p>
 
-            <button className="btn" id="sendBtn" type="submit">
-              <span className="btn-bolt" aria-hidden="true">⚡</span>
-              <span className="btn-label" id="btnLabel">START A CONVERSATION ↗</span>
+            <button className={`cx-send cx-span${sent ? ' is-sent' : ''}`} type="submit" disabled={sent}>
+              <span className="cx-send__wash" aria-hidden="true" />
+              <span className="cx-send__label">
+                {sent ? 'Project brief received ✓' : 'Send project brief'}
+              </span>
+              {!sent && <span className="cx-send__go" aria-hidden="true">↗</span>}
             </button>
 
-            <span className="foot foot--l" aria-hidden="true"></span>
-            <span className="foot foot--r" aria-hidden="true"></span>
+            {sent && (
+              <div className="cx-receipt cx-span" role="status">
+                <p className="cx-receipt__head">Project brief received ✓</p>
+                <p>Your signal has reached BitNTech. We&rsquo;ll get back to you soon.</p>
+              </div>
+            )}
           </form>
-        </section>
-      </div>
+        </div>
+
+        <div className="cx-panel__side cx-panel__side--info">
+          <p className="cx-label">Get in touch</p>
+
+          <ul className="cx-channels">
+            {CHANNELS.map((c) => (
+              <li key={c.key}>
+                <a
+                  className="cx-channel"
+                  href={c.href}
+                  {...(c.external ? { target: '_blank', rel: 'noreferrer' } : {})}
+                >
+                  <span className="cx-channel__label">{c.label}</span>
+                  <span className="cx-channel__value">{c.value}</span>
+                  <span className="cx-channel__go" aria-hidden="true">↗</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+
+          {/* The status block: a readout, not a badge. The line under it is
+              live — a trace with a charge running it, the site's own way of
+              saying a channel is open, and the only thing here that moves. */}
+          <div className="cx-status">
+            <p className="cx-label">BitNTech <i>/</i> Contact node</p>
+            <span className="cx-wire" aria-hidden="true"><i /></span>
+            <p className="cx-status__live"><i aria-hidden="true" />Available for new projects</p>
+            <dl className="cx-status__row">
+              <dt>Response time</dt>
+              <dd>Usually within 24–48 hours</dd>
+            </dl>
+          </div>
+        </div>
+
+      </section>
+
+      {/* ---- closing ---- */}
+      <section className="cx-closing" data-build>
+        <h2>
+          <span className="cx-line"><span>Have an idea?</span></span>
+          <span className="cx-line cx-line--hero"><span>Let&rsquo;s engineer it.</span></span>
+        </h2>
+        <p className="cx-closing__span">Hardware · AI · Software</p>
+        {/* Already on the contact page, so this goes to the form rather than
+            re-routing to the page you are standing on. */}
+        <a className="cx-closing__go" href="#start">
+          <span>Start a conversation</span>
+          <i aria-hidden="true" />
+        </a>
+      </section>
     </main>
   )
 }

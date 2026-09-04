@@ -1,0 +1,926 @@
+/* ======================================================================
+   LANDING HERO — "the board"
+
+   Split composition. Type holds the left ~57%, a luminous curled form the
+   right ~43%, and circuit traces run out of the middle distance to land on
+   the form's near edge. Near-black throughout; the orange is spent only on
+   interface details.
+
+   The form is /assets/hero-embryo.png, screen-blended over the board so the
+   black it was cut on drops out and the traces read through its edge instead
+   of stopping at a rectangle. It is absolutely positioned and never enters the
+   flow; its width is capped so its left edge always lands past the headline's
+   gutter, and `object-fit: contain` against the height cap is what keeps it
+   whole rather than cropped on a short screen.
+
+   TYPE
+   The headline sizes itself in `cqi` against .bh-copy, not in `vw` against the
+   viewport. That is the whole fix for EVOLUTION running off the screen: the
+   word measures against the column it actually lives in, so it stays inside
+   its own gutters at every width instead of being clipped by the section.
+
+   DEPTH
+   The scene is six layers, and the only thing that makes them read as depth
+   is that each one answers the pointer at its own rate. Nearest moves most:
+
+     .bh-haze        atmosphere        3px   (and the ambient glow behind it)
+     .bh-board       circuit traces    7px   under the figure
+     .bh-embryo      the figure       13px   screen-blended, masked, breathing
+     .bh-board--fore the landing pads  7px   over the figure, welded to (2)
+     .bh-dust        motes            17px   nearest of all, over everything
+     .bh-copy        typography        3px   barely moves; it is the anchor
+
+   The pads sit in a second SVG *in front of* the image on purpose. The traces
+   run in from the middle distance, pass under the figure and their nodes come
+   back out on top of it — which is what makes the board look like it feeds the
+   embryo rather than like a picture laid over a drawing. Both SVGs share the
+   viewBox and the offset, so a node never leaves its own trace.
+
+   PERFORMANCE
+   This is the first paint of the site, so it is deliberately cheap: no
+   backdrop-filter, no mix-blend-mode, no filter on anything that moves. Every
+   animation is transform, opacity or stroke-dashoffset. The pointer loop parks
+   itself when the scene settles and stops dead when the hero leaves the
+   viewport — see .is-off below and the IntersectionObserver in HeroScene.tsx.
+
+   Two phases.
+
+   BOOT   a panel counts 000 → 100, then splits and retracts to both edges.
+          Once per tab session (sessionStorage), never under reduced motion.
+   LIVE   [data-ready] lands on the section and the type builds out of its
+          masks, glyph by glyph, blur to sharp. After that everything moves
+          off four numbers written on .bh by HeroScene.tsx:
+
+            --mx, --my   eased pointer, -1..1
+            --near       0..1, pointer proximity to the form
+            --sc         0..1, scroll progress through the hero
+   ====================================================================== */
+
+.bh {
+  --mx: 0;
+  --my: 0;
+  --near: 0;
+  --sc: 0;
+
+  --ink: #f4f2ef;
+  --ink-2: rgba(244, 242, 239, .66);
+  --ink-3: rgba(244, 242, 239, .38);
+  --accent: #ff6e42;
+  --pad: clamp(1.25rem, 4vw, 4.5rem);
+  /* The board's own mapping, in CSS. `preserveAspectRatio="xMidYMid slice"`
+     scales the 1600x900 viewBox by max(W/1600, H/900) and centres it; this is
+     that number, so anything sized and placed with it lands in the same space
+     the traces are drawn in — at every viewport, not just the one it was
+     eyeballed at. It is the whole reason the pads can meet the figure's rim. */
+  --slice: max(calc(100vw / 1600), calc(100svh / 900));
+  /* One beat, reused by every staggered element via --i. */
+  --beat: 62ms;
+
+  position: relative;
+  box-sizing: border-box;
+  isolation: isolate;
+  overflow: hidden;
+  min-height: 100svh;
+  /* The reserved right-hand track is what keeps the type off the form: the
+     copy can never grow into the space the figure occupies. */
+  display: grid;
+  /* 55 / 45. The reserved right track is what keeps the type off the form:
+     the copy cannot grow into the space the figure occupies. */
+  grid-template-columns: minmax(0, 1.22fr) minmax(0, 1fr);
+  align-content: center;
+  padding: clamp(6rem, 14vh, 9rem) var(--pad)
+    calc(clamp(6rem, 14vh, 8.5rem) + var(--app-bottom-nav, 0px));
+  color: var(--ink);
+  background: #05060a;
+}
+
+/* Everything decorative stops when the hero is off screen. One class, set by
+   the observer, rather than a listener per animation. */
+.bh.is-off .bh-pulse,
+.bh.is-off .bh-pads g,
+.bh.is-off .bh-dust span,
+.bh.is-off .bh-rail i,
+.bh.is-off .bh-rail i {
+  animation-play-state: paused;
+}
+
+/* ======================================================================
+   BOOT
+   ====================================================================== */
+
+.bh-boot {
+  position: absolute;
+  inset: 0;
+  z-index: 9;
+  display: grid;
+  place-items: center;
+  padding-inline: var(--pad);
+  background: #05060a;
+  /* Splits at the middle and retracts to both edges, which is what makes it
+     read as a shutter opening onto the scene rather than a fade. */
+  -webkit-mask-image: linear-gradient(#000 0 0), linear-gradient(#000 0 0);
+  mask-image: linear-gradient(#000 0 0), linear-gradient(#000 0 0);
+  -webkit-mask-size: 100% 50%;
+  mask-size: 100% 50%;
+  -webkit-mask-position: 0 0, 0 100%;
+  mask-position: 0 0, 0 100%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  transition: -webkit-mask-size .8s cubic-bezier(.76, 0, .24, 1), mask-size .8s cubic-bezier(.76, 0, .24, 1);
+}
+.bh-boot.is-out {
+  -webkit-mask-size: 100% 0%;
+  mask-size: 100% 0%;
+}
+.bh-boot.is-out .bh-boot__inner {
+  opacity: 0;
+  transform: translateY(-8px);
+  transition: opacity .35s ease, transform .35s ease;
+}
+
+.bh-boot__inner {
+  width: min(520px, 100%);
+  display: grid;
+  gap: .8rem;
+}
+.bh-boot__mark {
+  margin: 0;
+  font-family: 'Archivo', var(--heading);
+  font-weight: 300;
+  font-stretch: 118%;
+  font-size: clamp(1.3rem, 3.2vw, 2rem);
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+.bh-boot__mark em {
+  font-style: normal;
+  font-weight: 600;
+  color: var(--accent);
+}
+.bh-boot__meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+  margin: 0;
+  font: 500 .58rem var(--mono);
+  letter-spacing: .24em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+/* Tabular figures, or the count jitters the row as the digits change. */
+.bh-boot__count {
+  font-variant-numeric: tabular-nums;
+  font-size: .82rem;
+  letter-spacing: .12em;
+  color: var(--accent);
+}
+.bh-boot__rail {
+  height: 1px;
+  background: rgba(244, 242, 239, .16);
+  overflow: hidden;
+}
+.bh-boot__rail i {
+  display: block;
+  height: 100%;
+  transform-origin: left;
+  background: linear-gradient(90deg, rgba(244, 242, 239, .5), var(--accent));
+}
+
+/* ======================================================================
+   THE SCENE
+   ====================================================================== */
+
+.bh-scene {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  /* The scene's own stacking context is what `mix-blend-mode: screen` on the
+     figure blends against, and a transparent backdrop would leave the asset's
+     black exactly as black. Painting the hero's ground here — the same colour
+     it already sits on, so nothing changes visually — gives the blend
+     something to drop out against. */
+  background: #05060a;
+}
+
+/* Atmosphere. Two still gradients rather than an animated blend layer — the
+   form and the pads carry the motion, and this only has to give the black
+   some depth. */
+.bh-haze {
+  position: absolute;
+  inset: -10%;
+  background:
+    /* The atmosphere the figure is embedded in: wide, soft, and nowhere near
+       a visible disc. The near-white core sits behind the embryo itself and
+       lifts a touch as the pointer approaches. */
+    radial-gradient(30% 34% at 73% 42%, rgba(176, 184, 214, calc(.1 + var(--near) * .05)), transparent 72%),
+    radial-gradient(54% 60% at 76% 46%, rgba(126, 140, 186, .12), transparent 74%),
+    radial-gradient(42% 40% at 46% 76%, rgba(92, 80, 120, .1), transparent 72%);
+  transform: translate3d(calc(var(--mx) * -3px), calc(var(--my) * -2px), 0);
+}
+
+/* Faint circuit geometry under everything, masked so it never reaches an
+   edge and never sits under the headline. */
+.bh-scene::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(to right, rgba(190, 205, 255, .05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(190, 205, 255, .05) 1px, transparent 1px);
+  background-size: 78px 78px;
+  -webkit-mask-image: radial-gradient(50% 56% at 72% 48%, #000 0%, transparent 78%);
+  mask-image: radial-gradient(50% 56% at 72% 48%, #000 0%, transparent 78%);
+}
+
+/* ---------- the figure --------------------------------------------------
+   /assets/hero-embryo.png, over the board rather than beside it.
+
+   `mix-blend-mode: screen` is the one exception to the no-blend rule at the
+   top of this file, and it is worth it: the asset is cut on black, so screen
+   drops that black to nothing and the traces underneath read straight through
+   the figure's edge. Without it this is a rectangle sitting on the scene.
+
+   It never enters the flow, and it never reaches the copy column: the width is
+   capped so its left edge lands past the headline's gutter at every size. */
+.bh-embryo {
+  position: absolute;
+  /* Placed in board coordinates: a 518x680 box at 1002,120 of the 1600x900
+     viewBox. Positioning it in vw/% instead is what kept the traces from ever
+     meeting it — the two boxes rescaled against each other on every resize. */
+  left: calc((100vw - 1600 * var(--slice)) / 2 + 1002 * var(--slice));
+  top: calc((100svh - 900 * var(--slice)) / 2 + 120 * var(--slice));
+  width: calc(518 * var(--slice));
+  height: calc(680 * var(--slice));
+  object-fit: contain;
+  /* Two things have to happen or the asset reads as a pasted rectangle, and
+     `screen` alone does only the first.
+
+     `screen` drops the black it was cut on: over the scene's #05060a ground a
+     source black lands back on the ground exactly. What it cannot fix is that
+     the source's "black" is not 0 — it is a shade or two up — so screening the
+     whole frame lifts a faintly paler rectangle out of the page. `contrast`
+     crushes that shade back down to the ground while leaving the luminous form
+     where it is, and the radial mask feathers what little survives out of
+     existence well before the frame's own edge. After the three of them there
+     is no boundary to find. */
+  mix-blend-mode: screen;
+  filter: contrast(1.24) brightness(calc(1.03 + var(--near) * .1));
+  /* Two layers, multiplied.
+
+     The first is the frame feather and nothing else: `farthest-side`, so its
+     radii reach the frame's actual edges rather than stopping at the nearest
+     one — the closest-side version was fading from a third of the way in and
+     took the bottom of the bead rim with it.
+
+     The second cuts everything the asset has printed down its left side: the
+     circuit fan, the spikes it throws off the back of the form, and the chain
+     of thirty-odd static bead nodes along the rim. All of it is a still
+     picture of what the live board beside it is already doing — and nine
+     animated pads landing on the form say it better than thirty drawn rings.
+
+     The cut has to follow that chain, not a vertical line: it bulges left to
+     18% of the frame at mid-height but sits out at 32-34% top and bottom, so
+     any straight cut either leaves the ends behind or eats into the form in
+     the middle. It did both. This ellipse is fitted to the chain's inner edge
+     — eight points off the asset, residuals inside 2% — then taken in 2% so
+     the beads themselves fall outside it. Everything from the luminous body
+     inward is untouched; everything printed outside it goes. */
+  -webkit-mask-image:
+    radial-gradient(farthest-side ellipse at 52% 47%, #000 80%, rgba(0, 0, 0, .55) 92%, transparent 100%),
+    radial-gradient(52.7% 35.73% at 72% 58.2%, #000 94%, transparent 102%);
+  mask-image:
+    radial-gradient(farthest-side ellipse at 52% 47%, #000 80%, rgba(0, 0, 0, .55) 92%, transparent 100%),
+    radial-gradient(52.7% 35.73% at 72% 58.2%, #000 94%, transparent 102%);
+  -webkit-mask-composite: source-in;
+  mask-composite: intersect;
+  pointer-events: none;
+  opacity: 0;
+  /* The deepest parallax layer in the scene — see the depth ladder at the top
+     of the file. The float below moves it with the independent `translate` and
+     `scale` properties, so the two never overwrite each other and no wrapper
+     element is needed to hold them apart. */
+  transform: translate3d(calc(var(--mx) * -13px), calc(var(--my) * -9px), 0);
+  transition: opacity 1.6s ease .35s;
+}
+.bh[data-ready] .bh-embryo {
+  opacity: 1;
+  /* Starts after the fade has finished, so the two never argue over opacity. */
+  animation: bh-breathe 9s ease-in-out 2s infinite;
+}
+/* Almost still: six pixels and 1.2%. Anything more and it reads as a floating
+   sticker rather than something the scene is holding in place. */
+@keyframes bh-breathe {
+  0%, 100% { translate: 0 0; scale: 1; opacity: .94; }
+  50% { translate: 0 -6px; scale: 1.012; opacity: 1; }
+}
+
+.bh-board {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+/* The foreground copy needs nothing of its own: it inherits the box and the
+   viewBox above, and DOM order is what puts it in front of the figure. */
+
+/* ---------- the board -------------------------------------------------- */
+
+/* The board is the layer between the atmosphere and the figure, and it moves
+   like it: further than the ground, nowhere near as far as the embryo. Both
+   groups take the same offset, in both SVGs, or the pads leave their traces. */
+.bh-traces,
+.bh-pads {
+  transform: translate(calc(var(--mx) * -7px), calc(var(--my) * -4px));
+}
+
+.bh-trace,
+.bh-pulse {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+
+/* The routing. Drawn once on reveal, then still. */
+.bh-trace {
+  stroke: url(#bhTraceInk);
+  stroke-width: 1;
+  opacity: calc(.42 + var(--near) * .3);
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+}
+.bh[data-ready] .bh-trace {
+  animation: bh-draw 1.6s cubic-bezier(.5, 0, .25, 1) .35s forwards;
+}
+@keyframes bh-draw {
+  to { stroke-dashoffset: 0; }
+}
+
+.bh-stub {
+  fill: #e6ecff;
+  opacity: calc(.4 + var(--near) * .35);
+}
+
+/* The charge: one short dash travelling the same route, over and over. */
+.bh-pulse {
+  stroke: #f2f5ff;
+  stroke-width: 1.6;
+  stroke-dasharray: .04 .96;
+  stroke-dashoffset: 1;
+  opacity: 0;
+}
+.bh[data-ready] .bh-pulse {
+  opacity: calc(.5 + var(--near) * .5);
+  animation-name: bh-flow;
+  animation-timing-function: cubic-bezier(.4, 0, .5, 1);
+  animation-iteration-count: infinite;
+}
+@keyframes bh-flow {
+  to { stroke-dashoffset: 0; }
+}
+
+/* The pads the traces land on. */
+.bh-pads g { opacity: 0; }
+.bh[data-ready] .bh-pads g {
+  animation: bh-land 4.1s ease-in-out 1.2s infinite;
+}
+@keyframes bh-land {
+  0%, 100% { opacity: .48; }
+  46% { opacity: 1; }
+}
+.bh-pad__ring {
+  fill: none;
+  stroke: rgba(226, 233, 255, .72);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+.bh-pad__core { fill: #ffffff; }
+.bh-pad__halo { opacity: calc(.4 + var(--near) * .6); }
+
+/* ---------- motes and vignette ----------------------------------------- */
+
+.bh-dust {
+  position: absolute;
+  inset: 0;
+  opacity: calc(.5 + var(--near) * .5);
+  transform: translate3d(calc(var(--mx) * 17px), calc(var(--my) * 11px), 0);
+}
+.bh-dust span {
+  position: absolute;
+  left: var(--x);
+  top: var(--y);
+  width: var(--s);
+  height: var(--s);
+  border-radius: 50%;
+  background: rgba(226, 233, 255, .85);
+  animation: bh-float var(--dur) linear var(--delay) infinite;
+}
+@keyframes bh-float {
+  0% { transform: translate(0, 0); opacity: 0; }
+  14% { opacity: .8; }
+  85% { opacity: .35; }
+  100% { transform: translate(var(--drift), -190px); opacity: 0; }
+}
+
+/* Holds the left third dark so the headline always has ground under it, and
+   closes the corners so the composition ends in black rather than at an edge. */
+.bh-vignette {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, rgba(5, 6, 10, .92) 0%, rgba(5, 6, 10, .72) 26%, transparent 52%),
+    radial-gradient(84% 74% at 66% 46%, transparent 46%, rgba(5, 6, 10, .78) 100%);
+}
+
+/* ======================================================================
+   THE COPY — left column
+
+   The build: each line rides in an overflow mask and rises into it from below,
+   blurred at the start and sharp by the end; the word is split per glyph so it
+   builds across the column instead of arriving whole. Every element carries
+   --i, and every delay is that index times one --beat, which keeps the whole
+   cascade in step from a single number.
+   ====================================================================== */
+
+.bh-copy {
+  grid-column: 1;
+  position: relative;
+  z-index: 2;
+  display: grid;
+  justify-items: start;
+  gap: clamp(.7rem, 1.8vh, 1.35rem);
+  /* The headline measures against this box, not the viewport — see the TYPE
+     note at the top of the file. */
+  container-type: inline-size;
+  transform: translate3d(calc(var(--mx) * 3px), calc(var(--my) * 2px), 0);
+}
+
+.bh-span {
+  margin: 0;
+  overflow: hidden;
+  font: 500 .62rem var(--mono);
+  letter-spacing: .32em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+}
+.bh-span {
+  letter-spacing: .38em;
+  color: var(--ink-3);
+}
+
+.bh-head {
+  margin: 0;
+  display: grid;
+  justify-items: start;
+  font-family: 'Archivo', var(--heading);
+  font-weight: 200;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+
+.bh-line {
+  display: block;
+  overflow: hidden;
+  padding-bottom: .1em;
+}
+/* The ramp the brief asks for: the label, then a step up, then the word. */
+.bh-line--1 .bh-line__in {
+  font-size: clamp(.85rem, 5.4cqi, 2.6rem);
+  letter-spacing: .2em;
+  line-height: 1.05;
+  color: var(--ink-2);
+}
+.bh-line--2 .bh-line__in {
+  font-size: clamp(1rem, 7cqi, 3.6rem);
+  letter-spacing: .14em;
+  line-height: 1.05;
+}
+
+/* The dominant word, and the fix for it being clipped.
+
+   It sizes in `cqi` against .bh-copy — the column it actually lives in — not
+   in `vw` against a viewport it only occupies half of. That is the whole bug:
+   a viewport-relative size can always outgrow a narrower column. Nine glyphs
+   plus .02em of tracking come to about 6.2em, so 14cqi sets the word to ~87%
+   of its column, and because the unit is container-relative that ratio holds
+   identically from desktop to phone. The clamp only guards the extremes. */
+.bh-word {
+  display: flex;
+  white-space: nowrap;
+  overflow: hidden;
+  font-size: clamp(2rem, 14cqi, 8.5rem);
+  letter-spacing: .02em;
+  line-height: 1.02;
+  padding-bottom: .06em;
+  margin-right: -.02em;
+  text-shadow: 0 4px 60px rgba(5, 6, 10, .9);
+}
+.bh-glyph { display: block; }
+
+/* Off-screen but readable: the split word's text for assistive tech. */
+.bh-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* The unbuilt state. Held here rather than only in the keyframe so a page that
+   never reaches [data-ready] still has somewhere sane to sit. */
+.bh-line__in {
+  display: block;
+  transform: translateY(105%);
+  opacity: 0;
+  filter: blur(14px);
+}
+.bh-glyph {
+  transform: translateY(105%);
+  opacity: 0;
+  filter: blur(14px);
+}
+.bh[data-ready] .bh-line__in,
+.bh[data-ready] .bh-glyph {
+  animation: bh-build 1.05s cubic-bezier(.16, 1, .3, 1) calc(var(--i) * var(--beat)) forwards;
+}
+@keyframes bh-build {
+  from { transform: translateY(105%); opacity: 0; filter: blur(14px); }
+  55% { opacity: 1; }
+  to { transform: translateY(0); opacity: 1; filter: blur(0); }
+}
+
+/* ---------- the two ways in -------------------------------------------- */
+
+.bh-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .7rem;
+  margin-top: .5rem;
+  opacity: 0;
+}
+.bh[data-ready] .bh-actions {
+  animation: bh-arrive .9s var(--ease) .95s forwards;
+}
+@keyframes bh-arrive {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Both buttons share the label swap: the text is set twice, stacked in a
+   one-line mask, and the pair slides up on hover so the first copy leaves as
+   the second arrives. It reads as a mechanism rather than a colour change, and
+   it costs one transform. */
+.bh-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: .7rem;
+  padding: .95rem 1.5rem;
+  border-radius: 999px;
+  overflow: hidden;
+  text-decoration: none;
+  color: var(--ink-2);
+  font: 500 .62rem var(--mono);
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  transition: color .35s var(--ease), border-color .35s var(--ease);
+}
+.bh-btn__swap {
+  position: relative;
+  z-index: 1;
+  display: block;
+  overflow: hidden;
+  /* One line tall, so the second copy is out of frame until it is wanted. */
+  height: 1em;
+  line-height: 1em;
+  transition: transform .45s cubic-bezier(.65, 0, .35, 1);
+}
+.bh-btn__swap > span { display: block; }
+.bh-btn:hover .bh-btn__swap { transform: translateY(-1em); }
+
+.bh-btn:focus-visible {
+  outline: 1px solid var(--ink);
+  outline-offset: 4px;
+}
+
+/* --- primary: the wash and the arrow's flight ---
+   The fill wipes in from the left rather than fading, and the arrow leaves to
+   the right while a second one enters behind it from the left. */
+.bh-btn--go {
+  border: 1px solid rgba(255, 110, 66, .5);
+  color: var(--accent);
+  padding-right: 1.25rem;
+}
+.bh-btn__wash {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: var(--accent);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform .5s cubic-bezier(.65, 0, .35, 1);
+}
+.bh-btn--go:hover {
+  color: #1a0a04;
+  border-color: var(--accent);
+}
+.bh-btn--go:hover .bh-btn__wash { transform: scaleX(1); }
+
+.bh-btn__fly {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: 1em;
+  height: 1em;
+  overflow: hidden;
+  font-style: normal;
+}
+.bh-btn__fly i {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-style: normal;
+  transition: transform .45s cubic-bezier(.65, 0, .35, 1);
+}
+/* The one that leaves, and the one that arrives. */
+.bh-btn__fly i:last-child { transform: translateX(-160%); }
+.bh-btn--go:hover .bh-btn__fly i:first-child { transform: translateX(160%); }
+.bh-btn--go:hover .bh-btn__fly i:last-child { transform: translateX(0); }
+
+/* --- secondary: a bracket that opens ---
+   The site annotates everything in brackets, so this one is a bracket. They
+   spread on hover and a rule draws in under the label. */
+.bh-btn--bracket {
+  border: 1px solid rgba(244, 242, 239, .26);
+  gap: .5rem;
+}
+.bh-btn--bracket b {
+  font-weight: 400;
+  color: var(--ink-3);
+  transition: transform .45s cubic-bezier(.65, 0, .35, 1), color .35s var(--ease);
+}
+.bh-btn--bracket b:first-of-type { transform-origin: right; }
+.bh-btn--bracket:hover {
+  color: var(--ink);
+  border-color: rgba(244, 242, 239, .62);
+}
+.bh-btn--bracket:hover b { color: var(--accent); }
+.bh-btn--bracket:hover b:first-of-type { transform: translateX(-4px); }
+.bh-btn--bracket:hover b:last-of-type { transform: translateX(4px); }
+/* The rule, drawn under the label from the left. */
+.bh-btn--bracket::after {
+  content: '';
+  position: absolute;
+  left: 1.5rem;
+  right: 1.5rem;
+  bottom: .72rem;
+  height: 1px;
+  background: var(--accent);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform .5s cubic-bezier(.65, 0, .35, 1);
+}
+.bh-btn--bracket:hover::after { transform: scaleX(1); }
+
+/* ======================================================================
+   THE FURNITURE — corners and edges
+   ====================================================================== */
+
+.bh-rail,
+.bh-mark,
+.bh-cross,
+.bh-claim {
+  position: absolute;
+  z-index: 2;
+  opacity: 0;
+}
+.bh[data-ready] .bh-rail,
+.bh[data-ready] .bh-mark,
+.bh[data-ready] .bh-claim {
+  animation: bh-arrive .9s var(--ease) 1.25s forwards;
+}
+
+/* A dotted rule down the far left with one live mark on it. */
+.bh-rail {
+  left: calc(var(--pad) * .38);
+  top: 28%;
+  bottom: 22%;
+  width: 1px;
+  background-image: linear-gradient(to bottom, rgba(244, 242, 239, .3) 2px, transparent 2px);
+  background-size: 1px 12px;
+}
+.bh-rail i {
+  position: absolute;
+  left: -2px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--accent);
+  animation: bh-crawl 14s ease-in-out infinite alternate;
+}
+@keyframes bh-crawl {
+  from { top: 12%; }
+  to { top: 78%; }
+}
+
+/* Bottom left: the mark, under its own accent slash. */
+.bh-mark {
+  left: var(--pad);
+  bottom: calc(clamp(1.5rem, 4vh, 2.6rem) + var(--app-bottom-nav, 0px));
+  margin: 0;
+  display: grid;
+  gap: .18rem;
+  padding-left: .85rem;
+  border-left: 1px solid var(--accent);
+  font: 500 .56rem var(--mono);
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+.bh-mark span:first-child { color: var(--ink-2); }
+
+/* Bottom centre: the scroll mark. Decorative — the copy above is the content,
+   and the section below is one scroll away whether or not this is read. */
+.bh-cross {
+  left: 50%;
+  bottom: 0;
+  transform: translateX(-50%);
+  display: grid;
+  justify-items: center;
+  color: var(--ink-3);
+}
+.bh[data-ready] .bh-cross {
+  animation: bh-arrive-c .9s var(--ease) 1.25s forwards;
+}
+@keyframes bh-arrive-c {
+  from { opacity: 0; transform: translate(-50%, 12px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}
+.bh-cross svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1;
+}
+.bh-cross i {
+  width: 1px;
+  height: clamp(2.5rem, 7vh, 5rem);
+  background: linear-gradient(to bottom, rgba(244, 242, 239, .28), transparent);
+}
+
+/* Bottom right: the claim, kept quiet and clear of the form above it. */
+.bh-claim {
+  right: var(--pad);
+  bottom: calc(clamp(1.5rem, 4vh, 2.6rem) + var(--app-bottom-nav, 0px));
+  display: grid;
+  justify-items: end;
+  gap: .7rem;
+  text-align: right;
+  max-width: min(34%, 260px);
+}
+.bh-claim__head {
+  margin: 0;
+  font-family: 'Archivo', var(--heading);
+  font-weight: 400;
+  font-stretch: 106%;
+  font-size: clamp(.72rem, 1.1vw, .9rem);
+  line-height: 1.3;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+}
+/* A label and a line that runs out to the edge — the arrow is the rule. */
+.bh-claim__go {
+  display: inline-flex;
+  align-items: center;
+  gap: .6rem;
+  text-decoration: none;
+  color: var(--ink-3);
+  font: 500 .54rem var(--mono);
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  transition: color .3s var(--ease);
+}
+.bh-claim__go i {
+  display: block;
+  position: relative;
+  width: clamp(28px, 4vw, 52px);
+  height: 1px;
+  background: currentColor;
+  transition: width .4s var(--ease);
+}
+.bh-claim__go i::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: -2.5px;
+  width: 6px;
+  height: 6px;
+  border-top: 1px solid currentColor;
+  border-right: 1px solid currentColor;
+  transform: rotate(45deg);
+}
+.bh-claim__go:hover { color: var(--accent); }
+.bh-claim__go:hover i { width: clamp(38px, 5.5vw, 68px); }
+.bh-claim__go:focus-visible {
+  outline: 1px solid var(--ink);
+  outline-offset: 4px;
+}
+
+/* ---------- tablet -----------------------------------------------------
+   The split holds, but the form gives back some width and the claim drops:
+   at this size it competes with the two buttons rather than supporting them. */
+@media (max-width: 1100px) {
+  .bh { grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); }
+  .bh-board { transform: scale(1.12); transform-origin: 76% 50%; }
+  .bh-claim { display: none; }
+  .bh-rail { display: none; }
+}
+
+/* ---------- phones -----------------------------------------------------
+   Stacked, in reading order: the copy first, then the form under it. The
+   headline still measures off its own column, so the word cannot overflow. */
+@media (max-width: 760px) {
+  .bh {
+    --pad: 1.25rem;
+    --beat: 48ms;
+    grid-template-columns: minmax(0, 1fr);
+    align-content: start;
+    padding-top: clamp(5.5rem, 15vh, 7.5rem);
+    padding-bottom: calc(3rem + var(--app-bottom-nav, 0px));
+  }
+  .bh-copy { gap: .6rem; }
+  .bh-span { font-size: .54rem; letter-spacing: .26em; }
+  .bh-btn { padding: .8rem 1.15rem; font-size: .56rem; letter-spacing: .14em; }
+
+  /* The form moves under the copy and takes the lower half of the screen. */
+  .bh-scene { top: auto; height: 52%; bottom: 0; }
+  .bh-board { transform: scale(1.5); transform-origin: 72% 44%; }
+
+  /* Centred in that lower band and whole: `contain` against a height cap is
+     what keeps the figure from being cropped on a short phone. */
+  /* The scene is only the lower half here and the board is scaled up inside
+     it, so board coordinates stop being useful: the figure goes back to being
+     centred in the band it was given. */
+  .bh-embryo {
+    left: 0;
+    right: 0;
+    top: auto;
+    bottom: 4%;
+    margin-inline: auto;
+    width: min(76vw, 400px);
+    height: auto;
+    max-height: 46vh;
+  }
+  .bh[data-ready] .bh-embryo { opacity: .9; }
+  .bh-vignette {
+    background:
+      linear-gradient(to bottom, rgba(5, 6, 10, .9) 0%, transparent 34%),
+      radial-gradient(80% 70% at 70% 50%, transparent 44%, rgba(5, 6, 10, .8) 100%);
+  }
+  .bh-scene::before { -webkit-mask-image: none; mask-image: none; opacity: .5; }
+
+  .bh-mark { font-size: .5rem; letter-spacing: .16em; }
+  .bh-cross { display: none; }
+}
+
+/* ---------- reduced motion --------------------------------------------
+   No boot panel at all (HeroScene.tsx skips it), and everything arrives in its
+   finished state. Scroll still drives --sc, because that is a position rather
+   than an animation and the hand-off to the section below depends on it. */
+@media (prefers-reduced-motion: reduce) {
+  .bh-dust span,
+  .bh-pulse,
+  .bh-pads g,
+  .bh-rail i,
+  .bh[data-ready] .bh-embryo {
+    animation: none;
+  }
+  .bh-pulse { opacity: 0; }
+  .bh-pads g { opacity: 1; }
+  .bh-rail i { top: 45%; }
+  .bh[data-ready] .bh-trace { animation: none; stroke-dashoffset: 0; }
+  .bh-line__in,
+  .bh-glyph {
+    transform: none;
+    opacity: 1;
+    filter: none;
+    animation: none;
+  }
+  .bh[data-ready] .bh-actions,
+  .bh[data-ready] .bh-rail,
+  .bh[data-ready] .bh-mark,
+  .bh[data-ready] .bh-claim { animation: none; opacity: 1; }
+  .bh[data-ready] .bh-cross { animation: none; opacity: 1; }
+  .bh-btn, .bh-btn__swap, .bh-btn__wash, .bh-btn__fly i,
+  .bh-btn--bracket b, .bh-btn--bracket::after,
+  .bh-claim__go, .bh-claim__go i { transition: none; }
+}

@@ -1,750 +1,927 @@
-/* login robot — contact page */
-@import url('https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&display=swap');
+/* ======================================================================
+   CONTACT — "the communication system"
 
-.contact-us {
-  --cu-paper: #e9e7df;
-  --cu-ink: var(--text-h);
-  --cu-accent: var(--nb-orange-3, #ff6e42);
-  --cu-accent-deep: var(--nb-orange-1, #c64e29);
-  --cu-teal: #2ec4b6;
-  --cu-yellow: #ffc53d;
-  --cu-shell: #fffdf8;
-  --cu-screen: var(--text-h);
-  --cu-eye: #fffdf8;
-  --cu-muted: var(--text);
-  --cu-field: #faf7f0;
-  --cu-line: 2px solid var(--cu-ink);
-  --cu-turn: .65s cubic-bezier(.5, -0.3, .25, 1.35);
+   The same studio as the landing hero, not the same page. What carries over is
+   the system: the near-black ground, the ink scale, the mono micro-labels at
+   .22em, the accent spent only on interface, the hairline borders, the wipe CTA
+   and the blur-to-sharp build where every delay is one `--i` times a shared
+   `--beat`. What deliberately does not carry over is the home board — no
+   traces, no pads, no drawn circuitry. Repeating those made this read as the
+   homepage with a form on it. The subject here is /assets/bg.png, the two
+   hands reaching, and the composition is led by the brief rather than by type.
 
-  font-family: 'Sora', 'Segoe UI', system-ui, sans-serif;
-  color: var(--cu-ink);
-  background: var(--cu-paper);
-}
+   MOTION
+   Four numbers, written on .cx by ContactUs.tsx, exactly as the hero does it:
 
-.contact-us * { box-sizing: border-box; }
+     --mx, --my   eased pointer, -1..1
+     --i          stagger index, per element
+     --beat       one beat of the cascade
 
-.contact-us .scene {
-  min-height: 100vh;
-  min-height: 100svh;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  align-items: center;
-  padding: 110px 24px 70px;
-  overflow: clip;
+   Depth is the same ladder: the plate moves furthest (12px), the haze least
+   (3px), the panel barely at all. The pointer loop parks itself once it has
+   caught up, exactly as the hero's does.
+   ====================================================================== */
+
+.cx {
+  --mx: 0;
+  --my: 0;
+
+  /* Contact's own palette. The home hero's ground is a cool blue-black
+     (#05060a); this one is the same darkness at the opposite temperature — a
+     warm charcoal that sits under the orange instead of fighting it. Same
+     accent, same ink weight, different room. The ink is warmed to match, so
+     white text does not read blue against a brown-black.
+
+     There is no second accent. The green status dot that used to live here was
+     a colour from nowhere; the page spends orange on interface and nothing
+     else, exactly as the rest of the site does. */
+  --bg: #0d0b0a;
+  --bg-2: #16120f;
+  --ink: #f7f3ed;
+  --ink-2: rgba(247, 243, 237, .78);
+  --ink-3: rgba(247, 243, 237, .5);
+  --line: rgba(247, 243, 237, .15);
+  --line-2: rgba(247, 243, 237, .3);
+  --accent: #ff6e42;
+  --accent-soft: #ffb38a;
+  --pad: clamp(1.25rem, 4vw, 4.5rem);
+  --beat: 62ms;
+  --ease: cubic-bezier(.22, .61, .36, 1);
+
   position: relative;
   isolation: isolate;
-  /* Match the Software hero background exactly. */
-  background: radial-gradient(circle at 75% 42%, #1b1630, #0f1818 44%);
+  overflow: hidden;
+  box-sizing: border-box;
+  min-height: 100svh;
+  padding: clamp(7.5rem, 17vh, 12rem) var(--pad)
+    calc(clamp(5rem, 11vh, 8.5rem) + var(--app-bottom-nav, 0px));
+  background: var(--bg);
+  color: var(--ink);
+  text-align: left;
+  font-family: var(--sans);
 }
 
-/* Keep the Software hero's subtle light grid over the dark-violet field. */
-.contact-us .scene::before {
-  content: '';
+.cx *,
+.cx *::before,
+.cx *::after { box-sizing: border-box; }
+
+/* ======================================================================
+   THE GROUND
+   ====================================================================== */
+
+.cx-scene {
   position: absolute;
   inset: 0;
-  z-index: -1;
-  opacity: .22;
+  z-index: 0;
   pointer-events: none;
-  background-image:
-    linear-gradient(rgba(255, 255, 255, .16) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, .16) 1px, transparent 1px);
-  background-size: clamp(46px, 6vw, 82px) clamp(46px, 6vw, 82px);
-  mask-image: linear-gradient(to bottom, #000, transparent 78%);
-  animation: cu-grid-drift 22s linear infinite alternate;
+  /* The scene's z-index makes a stacking context, and that is what the plate's
+     `screen` blends against — a transparent backdrop would leave its inverted
+     black exactly as black. Painting the page's own ground here changes
+     nothing visually and gives the blend something to drop out into. */
+  background: var(--bg);
 }
 
-.contact-us .scene::after {
-  display: none;
-}
-
-@keyframes cu-grid-drift {
-  from { transform: translate3d(-1.5%, -1%, 0); }
-  to { transform: translate3d(1.5%, 1%, 0); }
-}
-
-@keyframes cu-orbit-breathe {
-  from { transform: translate3d(0, 0, 0) scale(.96); }
-  to { transform: translate3d(-2%, 3%, 0) scale(1.04); }
-}
-
-.contact-us .left-pane {
-  min-width: 0;
-  width: min(560px, 100%);
-  justify-self: center;
-  display: flex;
-  justify-content: center;
-  position: relative;
-  z-index: 1;
-  /* Nudged off dead-centre of its column, towards the middle of the page. */
-  margin-left: clamp(0px, 10vw, 150px);
-}
-
-.contact-us .stage {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-self: center;
-  position: relative;
-  z-index: 1;
-  width: min(560px, 100%);
-  /* Mirrors the info card's nudge, so the two panes stay symmetrical. */
-  margin-right: clamp(0px, 10vw, 150px);
-}
-
-@media (max-width: 900px) {
-  .contact-us .scene {
-    grid-template-columns: 1fr;
-    gap: 40px;
-  }
-  .contact-us .left-pane { margin-left: 0; }
-  .contact-us .stage { margin-right: 0; }
-}
-
-/* robot */
-
-.contact-us .robot {
-  position: relative;
-  z-index: 1;
-  /* Nudged off the column's centre. Offset with `left`, not a transform: the
-     float animation below owns transform and would wipe it out. The bubble is
-     anchored to him, so it comes along and stops clipping the nav. */
-  left: clamp(12px, 3.5vw, 44px);
-  margin-bottom: -16px;
-  animation: cu-float 4s ease-in-out infinite alternate;
-  perspective: 800px;
-}
-
-@keyframes cu-float {
-  from { transform: translateY(0); }
-  to   { transform: translateY(-5px); }
-}
-
-.contact-us .antenna {
+/* Atmosphere: two still washes, so the black has somewhere to fall away to. */
+.cx-haze {
   position: absolute;
-  top: -32px;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  z-index: 2;
+  inset: -10%;
+  background:
+    radial-gradient(40% 44% at 78% 26%, rgba(132, 146, 190, .16), transparent 72%),
+    radial-gradient(46% 42% at 24% 78%, rgba(92, 80, 120, .1), transparent 74%);
+  transform: translate3d(calc(var(--mx) * -3px), calc(var(--my) * -2px), 0);
 }
-.contact-us .antenna-rod {
-  width: 4px;
-  height: 22px;
-  background: var(--cu-ink);
-  border-radius: 2px;
-}
-.contact-us .antenna-tip {
-  width: 15px;
-  height: 15px;
-  border-radius: 50%;
-  background: var(--cu-accent);
-  border: var(--cu-line);
-  order: -1;
-  margin-bottom: -2px;
-  position: relative;
-  animation: cu-bob 2.4s ease-in-out infinite;
-}
-.contact-us .antenna-tip::after {
+
+/* The faint technical grid, masked so it never reaches an edge. */
+.cx-scene::before {
   content: '';
   position: absolute;
-  top: 2px;
-  left: 3px;
-  width: 4px;
-  height: 4px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, .85);
+  inset: 0;
+  background-image:
+    linear-gradient(to right, rgba(190, 205, 255, .05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(190, 205, 255, .05) 1px, transparent 1px);
+  background-size: 78px 78px;
+  -webkit-mask-image: radial-gradient(58% 62% at 62% 40%, #000 0%, transparent 80%);
+  mask-image: radial-gradient(58% 62% at 62% 40%, #000 0%, transparent 80%);
 }
-@keyframes cu-bob {
-  0%, 100% { transform: translateY(0); }
-  50%      { transform: translateY(-2.5px); }
-}
-.contact-us .robot[data-mood="excited"] .antenna-tip { animation-duration: .4s; background: var(--cu-yellow); }
-.contact-us .robot[data-mood="success"] .antenna-tip { background: var(--cu-teal); }
 
-/* head */
-.contact-us .head3d {
-  width: 152px;
-  height: 140px;
-  perspective: 700px;
-  transform-style: preserve-3d;
-  transform:
-    translateY(var(--hy, 0px))
-    scale(var(--hsc, 1))
-    rotateX(var(--rx, 0deg))
-    rotateY(var(--ry, 0deg));
-  transition: transform .25s ease-out;
-  will-change: transform;
-}
-.contact-us .is-hyped .head3d { --hy: 5px; --hsc: 1.04; }
-.contact-us .is-pressed .head3d { --hy: 9px; --hsc: .94; }
+/* ---------- the plate ---------------------------------------------------
+   /assets/bg.png — the machine hand and the human one, reaching.
 
-.contact-us .head {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  transform-style: preserve-3d;
-  transition: transform var(--cu-turn);
-}
-.contact-us .is-spinning .head { animation: cu-victory .9s ease-in-out; }
-@keyframes cu-victory { to { transform: rotateY(360deg); } }
+   It is cut on white, so it is inverted: the ground falls to black and the two
+   hands come up as light, which is the only way a white plate belongs on this
+   page at all. `screen` then drops the inverted ground into the page's own,
+   and the mask feathers the plate's edges so there is no rectangle to find.
 
-.contact-us .ear {
+   This is deliberately NOT the home board. Same ink, same accent, same build —
+   different subject, so the two pages read as one studio rather than one
+   template. */
+.cx-bg {
   position: absolute;
-  top: 46px;
-  width: 18px;
-  height: 44px;
-  /* OREJA nodes wear the accent material on the 3D Nila — match it here. */
-  background: var(--cu-accent);
-  border: var(--cu-line);
-  border-radius: 8px;
-  transform: translateZ(0);
+  left: -4%;
+  right: -4%;
+  top: 0;
+  height: min(94vh, 860px);
+  background: url('/assets/bg.png') center 42% / cover no-repeat;
+  filter: invert(1) contrast(1.12) brightness(.88);
+  mix-blend-mode: screen;
+  opacity: .42;
+  -webkit-mask-image: radial-gradient(72% 68% at 50% 46%, #000 34%, rgba(0, 0, 0, .5) 68%, transparent 92%);
+  mask-image: radial-gradient(72% 68% at 50% 46%, #000 34%, rgba(0, 0, 0, .5) 68%, transparent 92%);
+  /* Parallax on `transform`, drift on the independent properties, so the two
+     never overwrite each other — the same split the home hero uses. */
+  transform: translate3d(calc(var(--mx) * -12px), calc(var(--my) * -8px), 0);
+  animation: cx-drift 26s ease-in-out infinite;
 }
-.contact-us .ear--l { left: -14px; }
-.contact-us .ear--r { right: -14px; }
+/* Almost still. The plate breathes toward the gap and back. */
+@keyframes cx-drift {
+  0%, 100% { translate: 0 0; scale: 1.02; }
+  50% { translate: -12px -8px; scale: 1.055; }
+}
 
-.contact-us .face {
+/* The gap between the fingertips is the subject of the plate, so it gets the
+   one piece of light on the page that moves on its own. */
+.cx-spark {
+  position: absolute;
+  left: 50%;
+  top: min(43vh, 395px);
+  width: min(46vw, 520px);
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%) translate3d(calc(var(--mx) * -12px), calc(var(--my) * -8px), 0);
+  background: radial-gradient(circle, rgba(255, 148, 106, .17), rgba(255, 110, 66, .05) 42%, transparent 70%);
+  animation: cx-breathe 7s ease-in-out infinite;
+}
+@keyframes cx-breathe {
+  0%, 100% { opacity: .55; scale: .96; }
+  50% { opacity: 1; scale: 1.06; }
+}
+
+/* Holds the type off the plate and closes the composition into black. */
+.cx-vignette {
   position: absolute;
   inset: 0;
-  border-radius: 34px;
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-  background: var(--cu-shell);
-  border: var(--cu-line);
+  background:
+    linear-gradient(90deg, rgba(13, 11, 10, .92) 0%, rgba(13, 11, 10, .58) 34%, transparent 62%),
+    radial-gradient(88% 78% at 56% 42%, transparent 40%, rgba(13, 11, 10, .86) 100%);
 }
-.contact-us .face--front { box-shadow: 5px 6px 0 rgba(28, 25, 23, .16); }
 
-.contact-us .visor {
-  position: absolute;
-  inset: 22px 16px 20px;
-  background: var(--cu-screen);
-  border-radius: 22px;
-  display: flex;
-  flex-direction: column;
+/* ======================================================================
+   THE BUILD
+   Held here rather than only in the keyframe, so anything that never gets
+   its class still has somewhere sane to sit.
+   ====================================================================== */
+
+.cx-build {
+  display: block;
+  transform: translateY(105%);
+  opacity: 0;
+  filter: blur(14px);
+  animation: cx-arrive 1.05s cubic-bezier(.16, 1, .3, 1) calc(var(--i, 0) * var(--beat)) forwards;
+}
+@keyframes cx-arrive {
+  from { transform: translateY(105%); opacity: 0; filter: blur(14px); }
+  55% { opacity: 1; }
+  to { transform: translateY(0); opacity: 1; filter: blur(0); }
+}
+
+/* Sections below the fold wait for their observer instead. */
+[data-build] {
+  opacity: 0;
+  transform: translateY(26px);
+}
+[data-build].is-in {
+  animation: cx-rise .95s cubic-bezier(.16, 1, .3, 1) forwards;
+}
+@keyframes cx-rise {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ======================================================================
+   HERO
+   ====================================================================== */
+
+.cx-hero {
+  position: relative;
+  z-index: 2;
+  max-width: 62rem;
+  margin-bottom: clamp(4rem, 9vh, 7rem);
+  transform: translate3d(calc(var(--mx) * 3px), calc(var(--my) * 2px), 0);
+}
+
+/* The micro-label the whole site annotates with. */
+.cx-label {
+  margin: 0;
+  font: 500 .58rem var(--mono);
+  letter-spacing: .24em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+.cx-label i {
+  font-style: normal;
+  color: var(--accent);
+  margin: 0 .35em;
+}
+
+.cx-head {
+  margin: clamp(1.1rem, 3vh, 1.8rem) 0 0;
+  display: grid;
+  justify-items: start;
+  font-family: 'Archivo', var(--heading);
+  font-weight: 200;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+
+/* Each line rides in its own mask and rises into it. */
+.cx-line {
+  display: block;
+  overflow: hidden;
+  padding-bottom: .08em;
+}
+.cx-head .cx-line > span {
+  font-size: clamp(1.9rem, 8.4vw, 5rem);
+  letter-spacing: .06em;
+  line-height: 1.04;
+  color: var(--ink-2);
+}
+/* The dominant line. Sized against the viewport it actually spans, and capped
+   so it can never run past the gutter. */
+.cx-head .cx-line--hero > span {
+  font-size: clamp(2.4rem, 11.5vw, 7.5rem);
+  letter-spacing: .01em;
+  line-height: 1;
+  color: var(--ink);
+}
+
+.cx-lead {
+  max-width: 44ch;
+  margin: clamp(1.2rem, 3vh, 2rem) 0 0;
+  font-size: clamp(.95rem, 1.15vw, 1.06rem);
+  line-height: 1.65;
+  color: var(--ink-2);
+}
+
+/* ======================================================================
+   THE INTERFACE
+   One panel, two halves and a readout — not three cards. The hairline between
+   the halves is the panel's own border, so they read as one system.
+   ====================================================================== */
+
+.cx-panel {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: minmax(0, 1.18fr) minmax(0, .82fr);
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, .016);
+  transform: translate3d(calc(var(--mx) * -2px), calc(var(--my) * -1px), 0);
+}
+
+.cx-panel__side {
+  padding: clamp(1.6rem, 3.4vw, 3.1rem);
+  display: grid;
+  align-content: start;
+  gap: clamp(1.4rem, 3vh, 2.2rem);
+  min-width: 0;
+}
+/* The brief comes first — it is what the page is for. The hairline moves to
+   whichever half is second. */
+.cx-panel__side--info { border-left: 1px solid var(--line); }
+
+/* ---------- channels ---------------------------------------------------
+   Rows with hairlines, not filled cards. The whole row is the target. */
+
+.cx-channels {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--line);
+}
+
+.cx-channel {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-areas: 'label go' 'value go';
   align-items: center;
-  justify-content: center;
-  gap: 13px;
+  gap: .2rem .75rem;
+  padding: .95rem .25rem;
+  border-bottom: 1px solid var(--line);
+  text-decoration: none;
+  transition: border-color .3s var(--ease), padding-left .3s var(--ease), background .3s var(--ease);
+}
+.cx-channel__label {
+  grid-area: label;
+  font: 500 .53rem var(--mono);
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  transition: color .3s var(--ease);
+}
+.cx-channel__value {
+  grid-area: value;
+  font-size: .95rem;
+  color: var(--ink);
+  word-break: break-word;
+  transition: color .3s var(--ease);
+}
+.cx-channel__go {
+  grid-area: go;
+  font-size: .9rem;
+  color: var(--ink-3);
+  transition: transform .3s var(--ease), color .3s var(--ease);
+}
+
+.cx-channel:hover,
+.cx-channel:focus-visible {
+  padding-left: .8rem;
+  border-bottom-color: var(--line-2);
+  background: rgba(255, 110, 66, .04);
+  outline: none;
+}
+.cx-channel:hover .cx-channel__label,
+.cx-channel:focus-visible .cx-channel__label { color: var(--accent); }
+.cx-channel:hover .cx-channel__go,
+.cx-channel:focus-visible .cx-channel__go {
+  color: var(--accent);
+  transform: translate(3px, -3px);
+}
+.cx-channel:focus-visible { outline: 1px solid var(--accent); outline-offset: 2px; }
+
+/* ---------- status readout --------------------------------------------- */
+
+.cx-status {
+  display: grid;
+  gap: .7rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, .02);
+}
+.cx-status__live {
+  display: flex;
+  align-items: center;
+  gap: .55rem;
+  margin: 0;
+  font-size: .82rem;
+  color: var(--ink);
+}
+.cx-status__live i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 0 0 rgba(255, 110, 66, .5);
+  animation: cx-ping 2.6s ease-out infinite;
+}
+@keyframes cx-ping {
+  0% { box-shadow: 0 0 0 0 rgba(255, 110, 66, .45); }
+  70%, 100% { box-shadow: 0 0 0 7px rgba(255, 110, 66, 0); }
+}
+.cx-status__row {
+  display: grid;
+  gap: .2rem;
+  margin: 0;
+  padding-top: .7rem;
+  border-top: 1px solid var(--line);
+}
+.cx-status__row dt {
+  font: 500 .53rem var(--mono);
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+.cx-status__row dd {
+  margin: 0;
+  font-size: .82rem;
+  color: var(--ink-2);
+}
+
+
+/* ---------- the live wire ----------------------------------------------
+   What the status block needed was a sign of life, not a face. One hairline
+   with a charge travelling it — the same gesture the home board makes with
+   its traces, reduced to a single rule. No box, no eyes, no second widget. */
+.cx-wire {
+  position: relative;
+  display: block;
+  height: 1px;
+  background: var(--line);
   overflow: hidden;
 }
+.cx-wire i {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 34%;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  animation: cx-charge 4.2s cubic-bezier(.55, 0, .45, 1) infinite;
+}
+@keyframes cx-charge {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(394%); }
+}
 
-.contact-us .eyes {
+/* ---------- form groups -------------------------------------------------
+   Two questions, asked in order: who you are, then what you are building. The
+   rule is the divider — this page does not draw boxes around things. */
+.cx-group {
+  grid-column: 1 / -1;
   display: flex;
-  gap: 28px;
-  transform: translate(var(--lx, 0px), var(--ly, 0px));
-  transition: transform .18s ease-out;
+  align-items: center;
+  gap: .85rem;
+  margin: .5rem 0 -.2rem;
 }
-.contact-us .eyes.blink .eye { transform: scaleY(.08); }
-
-.contact-us .eye {
-  width: 19px;
-  height: 25px;
-  border-radius: 9px;
-  background: var(--cu-eye);
-  transition: width .22s var(--ease), height .22s var(--ease),
-    border-radius .22s var(--ease), transform .22s var(--ease);
+.cx-group:first-child { margin-top: 0; }
+.cx-group span {
+  font: 500 .53rem var(--mono);
+  letter-spacing: .24em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  white-space: nowrap;
 }
-
-.contact-us [data-mood="happy"] .eye,
-.contact-us [data-mood="success"] .eye {
-  width: 25px;
-  height: 12px;
-  background: transparent;
-  border: 5px solid var(--cu-eye);
-  border-bottom: none;
-  border-radius: 25px 25px 0 0;
+.cx-group b {
+  font: 500 .53rem var(--mono);
+  letter-spacing: .24em;
+  color: var(--accent);
 }
-.contact-us [data-mood="excited"] .eye {
-  transform: scale(1.2);
-  border-radius: 50%;
-  height: 21px;
-}
-.contact-us [data-mood="pressed"] .eye {
-  width: 24px;
-  height: 12px;
-  background: transparent;
-  border: 5px solid var(--cu-eye);
-  border-top: none;
-  border-radius: 0 0 24px 24px;
-}
-
-.contact-us .cheek {
-  position: absolute;
-  top: 59%;
-  width: 15px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--cu-accent);
-  opacity: 0;
-  transition: opacity .3s ease;
-}
-.contact-us .cheek--l { left: 15px; }
-.contact-us .cheek--r { right: 15px; }
-.contact-us [data-mood="happy"] .cheek,
-.contact-us [data-mood="excited"] .cheek,
-.contact-us [data-mood="pressed"] .cheek,
-.contact-us [data-mood="success"] .cheek { opacity: .9; }
-
-.contact-us .mouth {
-  width: 15px;
-  height: 5px;
-  border-radius: 4px;
-  background: var(--cu-eye);
-  transition: width .25s var(--ease), height .25s var(--ease),
-    border-radius .25s var(--ease);
-}
-.contact-us [data-mood="watching"] .mouth { width: 9px; height: 9px; border-radius: 50%; }
-.contact-us [data-mood="happy"] .mouth { width: 30px; height: 12px; border-radius: 0 0 16px 16px; }
-.contact-us [data-mood="excited"] .mouth { width: 22px; height: 16px; border-radius: 0 0 13px 13px; }
-.contact-us [data-mood="pressed"] .mouth { width: 27px; height: 15px; border-radius: 0 0 14px 14px; }
-.contact-us [data-mood="success"] .mouth { width: 38px; height: 17px; border-radius: 0 0 20px 20px; }
-
-/* speech bubble */
-.contact-us .bubble {
-  position: absolute;
-  bottom: calc(100% + 16px);
-  left: 50%;
-  transform: translateX(-50%);
-  background: var(--cu-shell);
-  border: var(--cu-line);
-  color: var(--cu-ink);
-  font-size: 13px;
-  font-weight: 600;
-  line-height: 1.35;
-  padding: 9px 14px;
-  border-radius: 12px;
-  width: max-content;
-  max-width: 250px;
-  text-align: center;
-  box-shadow: 3px 3px 0 rgba(28, 25, 23, .9);
-  z-index: 3;
-}
-.contact-us .bubble::after {
+.cx-group::after {
   content: '';
-  position: absolute;
-  top: calc(100% - 5px);
-  left: 50%;
-  width: 10px;
-  height: 10px;
-  background: var(--cu-shell);
-  border-right: var(--cu-line);
-  border-bottom: var(--cu-line);
-  transform: translateX(-50%) rotate(45deg);
-}
-.contact-us .bubble.pop { animation: cu-pop .3s cubic-bezier(.34, 1.56, .64, 1); }
-@keyframes cu-pop {
-  from { transform: translateX(-50%) scale(.8); }
-  to   { transform: translateX(-50%) scale(1); }
+  flex: 1;
+  height: 1px;
+  background: var(--line);
 }
 
-/* form card */
+/* ======================================================================
+   THE FORM
+   ====================================================================== */
 
-.contact-us .card {
+.cx-form {
+  display: grid;
+  /* Name beside email, phone beside company. Anything that needs the full
+     measure — the chips, the idea, the button — says so with .cx-span. */
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.35rem 1.4rem;
+  align-items: start;
+}
+.cx-span { grid-column: 1 / -1; }
+
+.cx-field {
   position: relative;
-  z-index: 2;
+  display: grid;
+  gap: .4rem;
+}
+
+.cx-field label,
+.cx-field__legend {
+  font: 500 .53rem var(--mono);
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  /* Was --ink-3 at 38%. A field label you have to lean in for is not a label;
+     these carry the whole form now that the placeholders are gone. */
+  color: var(--ink-2);
+  transition: color .25s var(--ease);
+}
+.cx-field label em,
+.cx-field__legend em {
+  font-style: normal;
+  letter-spacing: .18em;
+  color: var(--ink-3);
+}
+
+.cx-field input,
+.cx-field textarea {
   width: 100%;
-  background: linear-gradient(165deg, #fffefb 0%, #fdfaf3 45%, var(--cu-field) 100%);
-  border: var(--cu-line);
-  border-radius: 20px;
-  padding: 36px 28px 40px;
-  box-shadow: 8px 9px 0 rgba(28, 25, 23, .9);
+  padding: .8rem .9rem;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, .04);
+  color: var(--ink);
+  font: 400 1rem var(--sans);
+  transition: border-color .25s var(--ease), background .25s var(--ease), box-shadow .25s var(--ease);
 }
+.cx-field textarea {
+  min-height: 8.5rem;
+  line-height: 1.55;
+  resize: vertical;
+}
+.cx-field input::placeholder,
+.cx-field textarea::placeholder { color: rgba(247, 243, 237, .38); }
 
-/* left info card */
-
-.contact-us .info-card {
-  text-align: left;
-}
-.contact-us .info-title {
-  font-size: 19px;
-  font-weight: 800;
-  letter-spacing: -.2px;
-  margin-bottom: 6px;
-}
-.contact-us .info-sub {
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--cu-muted);
-  margin-bottom: 24px;
-}
-
-.contact-us .info-eyebrow {
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: .14em;
-  text-transform: uppercase;
-  color: var(--cu-muted);
-  margin-bottom: 12px;
-}
-.contact-us .info-label {
-  font-weight: 700;
-  color: var(--cu-muted);
-  font-size: 12.5px;
-  letter-spacing: .04em;
-  text-transform: uppercase;
-}
-/* Pushed right so the handles line up down the card. */
-.contact-us .info-value {
-  margin-left: auto;
-  font-weight: 700;
-}
-.contact-us .social-btn {
-  flex: 1;
-  height: 46px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  background: var(--cu-field);
-  border: 2px solid rgba(28, 25, 23, .22);
-  border-radius: 12px;
-  color: var(--cu-ink);
-  font-weight: 700;
-  font-size: 13px;
-  text-decoration: none;
-  transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease;
-}
-.contact-us .social-btn svg {
-  width: 17px;
-  height: 17px;
-  fill: var(--cu-muted);
-  flex: none;
-  transition: fill .18s ease;
-}
-.contact-us .social-btn:hover {
-  border-color: var(--cu-ink);
-  box-shadow: 3px 3px 0 var(--cu-accent);
-  transform: translate(-1px, -1px);
-}
-.contact-us .social-btn:hover svg { fill: var(--cu-ink); }
-
-.contact-us .info-list {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-.contact-us .info-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  height: 52px;
-  padding: 0 14px;
-  background: var(--cu-field);
-  border: 2px solid rgba(28, 25, 23, .22);
-  border-radius: 12px;
-  color: var(--cu-ink);
-  font-weight: 600;
-  font-size: 14.5px;
-  text-decoration: none;
-  transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease;
-}
-.contact-us .info-row:hover {
-  border-color: var(--cu-ink);
-  box-shadow: 3px 3px 0 var(--cu-accent);
-  transform: translate(-1px, -1px);
-}
-.contact-us .info-row:hover .field-icon { fill: var(--cu-ink); }
-
-.contact-us .hand {
-  position: absolute;
-  top: -16px;
-  width: 44px;
-  height: 32px;
-  background:
-    linear-gradient(90deg, transparent 31%, rgba(28, 25, 23, .9) 32%, rgba(28, 25, 23, .9) 36%, transparent 37%, transparent 63%, rgba(28, 25, 23, .9) 64%, rgba(28, 25, 23, .9) 68%, transparent 69%) 0 12px / 100% calc(100% - 12px) no-repeat,
-    var(--cu-shell);
-  border: var(--cu-line);
-  border-radius: 9px 9px 14px 14px;
-  z-index: 3;
-  transition: transform .25s ease;
-}
-.contact-us .hand--l { left: calc(50% - 136px); }
-.contact-us .hand--r { right: calc(50% - 136px); }
-.contact-us .is-hyped ~ .card .hand { transform: translateY(-3px) scaleY(1.08); }
-
-.contact-us .foot {
-  position: absolute;
-  bottom: -26px;
-  width: 54px;
-  height: 34px;
-  background: var(--cu-shell);
-  border: var(--cu-line);
-  border-radius: 9px 9px 14px 14px;
-  box-shadow: inset 0 -9px 0 rgba(28, 25, 23, .12);
-  z-index: -1;
-}
-.contact-us .foot--l { left: calc(50% - 110px); }
-.contact-us .foot--r { right: calc(50% - 110px); }
-
-.contact-us .field {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  height: 52px;
-  padding: 0 14px;
-  margin-bottom: 14px;
-  background: var(--cu-field);
-  border: 2px solid rgba(28, 25, 23, .22);
-  border-radius: 12px;
-  transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease;
-  cursor: text;
-}
-.contact-us .field:focus-within {
-  border-color: var(--cu-ink);
-  box-shadow: 3px 3px 0 var(--cu-accent);
-  transform: translate(-1px, -1px);
-}
-.contact-us .field-icon {
-  width: 19px;
-  height: 19px;
-  fill: var(--cu-muted);
-  flex: none;
-  transition: fill .18s ease;
-}
-.contact-us .field:focus-within .field-icon { fill: var(--cu-ink); }
-
-.contact-us .field input {
-  flex: 1;
-  min-width: 0;
-  border: none;
+.cx-field input:focus,
+.cx-field textarea:focus {
   outline: none;
-  background: transparent;
-  font: inherit;
-  font-size: 14.5px;
-  font-weight: 600;
-  color: var(--cu-ink);
+  border-color: rgba(255, 110, 66, .55);
+  background: rgba(255, 255, 255, .04);
+  /* The soft focus glow, in the accent rather than a browser blue. */
+  box-shadow: 0 0 0 3px rgba(255, 110, 66, .1);
 }
-.contact-us .field input::placeholder { color: var(--cu-muted); font-weight: 500; }
+.cx-field:focus-within label { color: var(--accent); }
 
-.contact-us .field--select {
-  position: relative;
-  padding: 0 0 0 14px;
+/* The small orange signal that lights when the field has the caret. */
+.cx-field__signal {
+  position: absolute;
+  right: .75rem;
+  bottom: 1.05rem;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--accent);
+  opacity: 0;
+  transform: scale(.4);
+  transition: opacity .25s var(--ease), transform .25s var(--ease);
+  pointer-events: none;
+}
+.cx-field--area .cx-field__signal { bottom: auto; top: 2.1rem; }
+.cx-field:focus-within .cx-field__signal { opacity: 1; transform: scale(1); }
+
+.cx-field.has-error input,
+.cx-field.has-error textarea { border-color: rgba(255, 110, 66, .7); }
+
+/* ---------- project type: chips ---------------------------------------- */
+
+.cx-chips {
+  display: grid;
+  gap: .55rem;
+}
+.cx-chips__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .4rem;
+}
+.cx-chip {
+  padding: .5rem .8rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ink-2);
+  font: 500 .58rem var(--mono);
+  letter-spacing: .12em;
+  text-transform: uppercase;
   cursor: pointer;
+  white-space: nowrap;
+  transition: color .25s var(--ease), border-color .25s var(--ease), background .25s var(--ease);
 }
-.contact-us .reason-trigger {
-  flex: 1;
-  min-width: 0;
-  height: 100%;
-  padding: 0 14px 0 0;
-  border: none;
-  outline: none;
-  background: transparent;
-  font: inherit;
-  font-size: 14.5px;
-  font-weight: 600;
-  color: var(--cu-ink);
+.cx-chip:hover { color: var(--ink); border-color: var(--line-2); }
+.cx-chip.is-on {
+  color: var(--accent);
+  border-color: rgba(255, 110, 66, .55);
+  background: rgba(255, 110, 66, .09);
+}
+.cx-chip:focus-visible { outline: 1px solid var(--accent); outline-offset: 2px; }
+.cx-chips.has-error .cx-chip { border-color: rgba(255, 110, 66, .34); }
+
+/* ---------- budget: our own listbox ------------------------------------ */
+
+.cx-field--select { position: relative; }
+
+.cx-select {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
-  cursor: pointer;
-}
-.contact-us .reason-trigger .placeholder { color: var(--cu-muted); font-weight: 500; }
-.contact-us .reason-chevron {
-  width: 16px;
-  height: 16px;
-  flex: none;
-  fill: var(--cu-muted);
-  transition: transform .18s ease;
-}
-.contact-us .field--select.open .reason-chevron { transform: rotate(180deg); }
-
-.contact-us .reason-list {
-  position: absolute;
-  left: -2px;
-  right: -2px;
-  top: calc(100% + 8px);
-  z-index: 5;
-  margin: 0;
-  padding: 6px;
-  list-style: none;
-  background: var(--cu-shell);
-  border: var(--cu-line);
-  border-radius: 12px;
-  box-shadow: 4px 5px 0 rgba(28, 25, 23, .9);
-  opacity: 0;
-  transform: translateY(-6px);
-  pointer-events: none;
-  transition: opacity .15s ease, transform .15s ease;
-}
-.contact-us .field--select.open { z-index: 6; }
-.contact-us .field--select.open .reason-list {
-  opacity: 1;
-  transform: translateY(0);
-  pointer-events: auto;
-}
-.contact-us .reason-list li {
-  padding: 9px 12px;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--cu-ink);
-  cursor: pointer;
-  transition: background .12s ease, color .12s ease;
-}
-.contact-us .reason-list li:hover,
-.contact-us .reason-list li:focus-visible {
-  background: var(--cu-accent);
-  color: #fff;
-}
-.contact-us .reason-list li[aria-selected="true"] {
-  color: var(--cu-accent-deep);
-  background: color-mix(in srgb, var(--cu-accent) 14%, transparent);
-}
-.contact-us .reason-list li[aria-selected="true"]:hover {
-  color: #fff;
-  background: var(--cu-accent);
-}
-
-.contact-us .field--textarea {
-  height: auto;
-  align-items: flex-start;
-  padding: 12px 14px;
-  cursor: text;
-}
-.contact-us .field--textarea .field-icon { margin-top: 3px; }
-.contact-us .field--textarea textarea {
-  flex: 1;
-  min-width: 0;
-  min-height: 96px;
-  resize: vertical;
-  border: none;
-  outline: none;
-  background: transparent;
-  font: inherit;
-  font-size: 14.5px;
-  font-weight: 600;
-  line-height: 1.4;
-  color: var(--cu-ink);
-}
-.contact-us .field--textarea textarea::placeholder { color: var(--cu-muted); font-weight: 500; }
-
-/* login button */
-.contact-us .btn {
-  position: relative;
+  gap: .75rem;
   width: 100%;
-  height: 54px;
-  margin-top: 10px;
-  border: var(--cu-line);
-  border-radius: 12px;
-  background: var(--cu-accent);
-  color: #fff;
-  font: inherit;
-  font-size: 15px;
-  font-weight: 800;
-  letter-spacing: 1px;
+  padding: .8rem .9rem;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, .022);
+  color: var(--ink);
+  font: 400 .95rem var(--sans);
+  text-align: left;
   cursor: pointer;
-  display: flex;
+  transition: border-color .25s var(--ease), background .25s var(--ease);
+}
+.cx-select:hover { border-color: var(--line-2); }
+.cx-select .is-placeholder { color: rgba(247, 243, 237, .38); }
+.cx-select svg {
+  width: 18px;
+  height: 18px;
+  flex: none;
+  fill: var(--ink-3);
+  transition: transform .25s var(--ease);
+}
+.cx-field--select.is-open .cx-select {
+  border-color: rgba(255, 110, 66, .55);
+  background: rgba(255, 255, 255, .04);
+}
+.cx-field--select.is-open .cx-select svg { transform: rotate(180deg); }
+
+.cx-options {
+  position: absolute;
+  z-index: 5;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  margin: 0;
+  padding: .3rem;
+  list-style: none;
+  border: 1px solid var(--line-2);
+  border-radius: 6px;
+  /* The one opaque surface on the page: a list you can read through is not a
+     list. It matches the ground rather than introducing a new one. */
+  background: #0b0d12;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, .5);
+  display: none;
+}
+.cx-field--select.is-open .cx-options { display: block; }
+.cx-options button {
+  display: block;
+  width: 100%;
+  padding: .55rem .6rem;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--ink-2);
+  font: 400 .88rem var(--sans);
+  text-align: left;
+  cursor: pointer;
+  transition: color .18s, background .18s;
+}
+.cx-options button:hover,
+.cx-options button:focus-visible {
+  color: var(--ink);
+  background: rgba(255, 110, 66, .12);
+  outline: none;
+}
+.cx-options [aria-selected='true'] button { color: var(--accent); }
+
+/* ---------- the note, the send, the receipt ---------------------------- */
+
+.cx-note {
+  min-height: 1em;
+  margin: 0;
+  font: 500 .58rem var(--mono);
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+.cx-note__err { color: var(--accent); }
+
+.cx-send {
+  position: relative;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  box-shadow: 4px 5px 0 rgba(28, 25, 23, .9);
-  transition: transform .18s cubic-bezier(.34, 1.56, .64, 1), box-shadow .18s ease, background .25s ease;
+  gap: .7rem;
+  justify-self: start;
+  padding: 1rem 1.6rem;
+  border: 1px solid rgba(255, 110, 66, .5);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--accent);
+  font: 500 .62rem var(--mono);
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  cursor: pointer;
+  overflow: hidden;
+  transition: color .35s var(--ease), border-color .35s var(--ease), box-shadow .35s var(--ease);
 }
-.contact-us .btn:hover, .contact-us .btn:focus-visible {
-  transform: translate(-2px, -2px);
-  background: var(--cu-accent-deep);
-  box-shadow: 7px 8px 0 rgba(28, 25, 23, .9);
-}
-.contact-us .btn:active {
-  transform: translate(3px, 4px);
-  box-shadow: 0 0 0 rgba(28, 25, 23, .9);
-}
-.contact-us .btn:focus-visible { outline: 3px solid var(--cu-ink); outline-offset: 3px; }
-
-.contact-us .btn-bolt {
-  display: inline-block;
-  opacity: 0;
-  transform: translateX(-10px) scale(.4) rotate(-30deg);
-  transition: opacity .3s ease, transform .3s cubic-bezier(.34, 1.56, .64, 1);
-}
-.contact-us .btn:hover .btn-bolt, .contact-us .btn:focus-visible .btn-bolt {
-  opacity: 1;
-  transform: none;
-  animation: cu-bolt-jitter .4s ease-in-out infinite;
-}
-@keyframes cu-bolt-jitter {
-  0%, 100% { transform: rotate(-7deg) scale(1); }
-  50%      { transform: rotate(7deg) scale(1.2); }
-}
-
-.contact-us .btn.is-success { background: var(--cu-teal); }
-
-.contact-us .card.shake { animation: cu-shake .4s ease; }
-@keyframes cu-shake {
-  0%, 100% { transform: translateX(0); }
-  25% { transform: translateX(-7px); }
-  50% { transform: translateX(6px); }
-  75% { transform: translateX(-3px); }
-}
-
-.contact-us .confetti {
+/* The fill wipes in from the left rather than fading — the hero's button. */
+.cx-send__wash {
   position: absolute;
-  width: 10px;
-  height: 10px;
-  top: 0;
-  left: 0;
-  border-radius: 2px;
-  pointer-events: none;
-  z-index: 10;
+  inset: 0;
+  z-index: 0;
+  background: var(--accent);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform .5s cubic-bezier(.65, 0, .35, 1);
 }
+.cx-send__label,
+.cx-send__go {
+  position: relative;
+  z-index: 1;
+  transition: transform .35s var(--ease);
+}
+.cx-send:hover:not(:disabled) {
+  color: #1a0a04;
+  border-color: var(--accent);
+  box-shadow: 0 0 34px rgba(255, 110, 66, .22);
+}
+.cx-send:hover:not(:disabled) .cx-send__wash { transform: scaleX(1); }
+.cx-send:hover:not(:disabled) .cx-send__go { transform: translate(3px, -3px); }
+.cx-send:focus-visible { outline: 1px solid var(--accent); outline-offset: 4px; }
+.cx-send.is-sent {
+  color: var(--accent-soft);
+  border-color: rgba(255, 179, 138, .45);
+  cursor: default;
+}
+
+.cx-receipt {
+  display: grid;
+  gap: .4rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid rgba(255, 179, 138, .32);
+  border-radius: 6px;
+  background: rgba(255, 110, 66, .07);
+  animation: cx-rise .6s cubic-bezier(.16, 1, .3, 1) both;
+}
+.cx-receipt p {
+  margin: 0;
+  font-size: .84rem;
+  line-height: 1.5;
+  color: var(--ink-2);
+}
+.cx-receipt__head {
+  font: 500 .58rem var(--mono) !important;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: var(--accent-soft) !important;
+}
+
+/* ---------- the signal readout ----------------------------------------- */
+
+.cx-signal {
+  align-self: end;
+  display: grid;
+  gap: .7rem;
+  padding: .85rem 1rem;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, .02);
+  animation: cx-rise .6s cubic-bezier(.16, 1, .3, 1) both;
+}
+.cx-signal dl {
+  display: grid;
+  gap: .6rem;
+  margin: 0;
+}
+.cx-signal dt {
+  font: 500 .5rem var(--mono);
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  margin-bottom: .15rem;
+}
+.cx-signal dd {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  margin: 0;
+  font-size: .82rem;
+  color: var(--ink);
+}
+.cx-signal dd i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--ink-3);
+}
+.cx-signal dd.is-ready { color: var(--accent-soft); }
+.cx-signal dd.is-ready i {
+  background: var(--accent);
+  animation: cx-ping 2.6s ease-out infinite;
+}
+
+/* ======================================================================
+   CLOSING
+   ====================================================================== */
+
+.cx-closing {
+  position: relative;
+  z-index: 2;
+  margin-top: clamp(4rem, 12vh, 9rem);
+  display: grid;
+  justify-items: start;
+  gap: 1.4rem;
+}
+.cx-closing h2 {
+  display: grid;
+  justify-items: start;
+  margin: 0;
+  font-family: 'Archivo', var(--heading);
+  font-weight: 200;
+  text-transform: uppercase;
+  color: var(--ink-2);
+}
+.cx-closing h2 .cx-line > span {
+  display: block;
+  font-size: clamp(1.7rem, 7vw, 4.2rem);
+  letter-spacing: .05em;
+  line-height: 1.06;
+}
+.cx-closing h2 .cx-line--hero > span {
+  font-size: clamp(2.2rem, 10vw, 6.4rem);
+  letter-spacing: .01em;
+  color: var(--ink);
+}
+
+.cx-closing__span {
+  margin: 0;
+  font: 500 .58rem var(--mono);
+  letter-spacing: .38em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+/* A label and a rule that runs out — the arrow is the rule. */
+.cx-closing__go {
+  display: inline-flex;
+  align-items: center;
+  gap: .7rem;
+  text-decoration: none;
+  color: var(--ink-2);
+  font: 500 .58rem var(--mono);
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  transition: color .3s var(--ease);
+}
+.cx-closing__go i {
+  position: relative;
+  display: block;
+  width: clamp(32px, 5vw, 62px);
+  height: 1px;
+  background: currentColor;
+  transition: width .4s var(--ease);
+}
+.cx-closing__go i::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: -2.5px;
+  width: 6px;
+  height: 6px;
+  border-top: 1px solid currentColor;
+  border-right: 1px solid currentColor;
+  transform: rotate(45deg);
+}
+.cx-closing__go:hover { color: var(--accent); }
+.cx-closing__go:hover i { width: clamp(44px, 7vw, 82px); }
+.cx-closing__go:focus-visible { outline: 1px solid var(--accent); outline-offset: 4px; }
+
+/* ======================================================================
+   TABLET — the split holds, the type gives back some size
+   ====================================================================== */
+
+@media (max-width: 1100px) {
+  .cx-panel { grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr); }
+  .cx-vignette {
+    background: radial-gradient(96% 82% at 54% 42%, transparent 44%, rgba(13, 11, 10, .88) 100%);
+  }
+}
+
+/* ======================================================================
+   PHONES — stacked, in reading order: hero, channels, form, signal, closing
+   ====================================================================== */
 
 @media (max-width: 860px) {
-  .contact-us .scene {
-    padding: calc(5.5rem + env(safe-area-inset-top)) 1.25rem 3rem;
-    gap: 32px;
-    min-height: auto;
-  }
+  .cx { --pad: 1.25rem; --beat: 48ms; }
 
-  .contact-us .card {
-    padding: 28px 20px 32px;
+  .cx-panel { grid-template-columns: minmax(0, 1fr); }
+  /* The divider moves from the side to the top, because the halves now sit
+     above each other rather than beside. */
+  .cx-panel__side--info {
+    border-left: 0;
+    border-top: 1px solid var(--line);
   }
+  /* One column of fields on a phone: two would put a 140px input beside
+     another one, and neither would be typeable. */
+  .cx-form { grid-template-columns: minmax(0, 1fr); }
 
-  /* iOS zooms the whole page when a focused field is under 16px. Bumping the
-     control text is the only way to keep the form from yanking the layout. */
-  .contact-us .field input,
-  .contact-us .field textarea,
-  .contact-us .reason-trigger {
-    font-size: 16px;
+  .cx-head .cx-line > span { font-size: clamp(1.6rem, 8.5vw, 2.6rem); }
+  .cx-head .cx-line--hero > span { font-size: clamp(2.1rem, 13vw, 3.6rem); }
+  .cx-lead { font-size: .9rem; }
+
+  /* A chip row that scrolls sideways would hide options; it wraps instead. */
+  .cx-chip { padding: .55rem .75rem; font-size: .55rem; }
+
+
+  .cx-closing h2 .cx-line > span { font-size: clamp(1.5rem, 8vw, 2.4rem); }
+  .cx-closing h2 .cx-line--hero > span { font-size: clamp(2rem, 12vw, 3.4rem); }
+
+  /* The plate is mostly cropped at this width, so it drops back to being
+     atmosphere and lets the type hold the screen on its own. */
+  .cx-bg {
+    height: min(58vh, 460px);
+    opacity: .3;
+    background-position: center 46%;
   }
-
-  .contact-us .field { height: 54px; }
+  .cx-spark { top: min(26vh, 210px); width: min(78vw, 340px); }
+  .cx-scene::before { -webkit-mask-image: none; mask-image: none; opacity: .5; }
 }
 
-@media (max-width: 560px) {
-  .contact-us .scene { padding-top: calc(5rem + env(safe-area-inset-top)); }
-  .contact-us .bubble { max-width: 210px; font-size: 12.5px; }
-  .contact-us .head3d { width: 132px; height: 122px; }
-  .contact-us .info-card { padding-bottom: 24px; }
+@media (max-width: 460px) {
+  .cx-channel { grid-template-columns: 1fr auto; }
+  .cx-channel__value { font-size: .88rem; }
 }
+
+/* ======================================================================
+   REDUCED MOTION — everything arrives in its finished state
+   ====================================================================== */
 
 @media (prefers-reduced-motion: reduce) {
-  .contact-us .scene::before,
-  .contact-us .scene::after { animation: none; }
-  .contact-us .robot { animation: none; }
-  .contact-us .antenna-tip { animation: none; }
-  .contact-us .head { transition-duration: .01s; }
-  .contact-us .btn:hover .btn-bolt { animation: none; }
-  .contact-us .is-spinning .head { animation: none; }
-  .contact-us .bubble.pop { animation: none; }
-  .contact-us .eyes { transition: none; }
-}
-
-/* --- Phone stacking ------------------------------------------------------
-   Single column puts the mascot between the two cards. Its speech bubble is
-   absolutely positioned above it and its arms hang below, so without reserved
-   room it covered the info card's last row and got clipped by the form. */
-@media (max-width: 900px) {
-  .contact-us .stage {
-    padding-top: 86px;
-    margin-bottom: 12px;
+  .cx-build,
+  [data-build],
+  .cx-receipt,
+  .cx-signal {
+    animation: none;
+    opacity: 1;
+    transform: none;
+    filter: none;
   }
-
-  /* Bubble and robot both sit above the form card's ground. */
-  .contact-us .stage,
-  .contact-us .bubble { z-index: 4; }
-}
-
-@media (max-width: 560px) {
-  .contact-us .stage { padding-top: 78px; }
+  .cx-bg,
+  .cx-spark,
+  .cx-wire i { animation: none; }
+  .cx-status__live i,
+  .cx-signal dd.is-ready i { animation: none; }
+  .cx-channel,
+  .cx-send,
+  .cx-send__wash,
+  .cx-chip,
+  .cx-closing__go,
+  .cx-closing__go i { transition: none; }
 }

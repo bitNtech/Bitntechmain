@@ -158,7 +158,7 @@ export default function Navbar() {
             .filter(([path]) => path !== '/get-started')
             .map(([path, label]) => (
               <li key={path}>
-                <Link to={path} tabIndex={0} className={pathname === path ? 'is-active' : ''}>{label}</Link>
+                <Link to={path} tabIndex={0} viewTransition className={pathname === path ? 'is-active' : ''}>{label}</Link>
               </li>
             ))}
         </ul>
@@ -172,11 +172,11 @@ export default function Navbar() {
       </nav>
       <div className="nav-05__overlay" role="dialog" aria-label="Full screen navigation">
         <ul className="nav-05__nav-list">
-          <li><Link to="/" onClick={closeAfterNavigate}><span className="nav-05__num">01</span>Home</Link></li>
-          <li><Link to="/hardware" onClick={closeAfterNavigate}><span className="nav-05__num">02</span>Hardware</Link></li>
-          <li><Link to="/software" onClick={closeAfterNavigate}><span className="nav-05__num">03</span>Software</Link></li>
-          <li><Link to="/about" onClick={closeAfterNavigate}><span className="nav-05__num">04</span>About</Link></li>
-          <li><Link to="/contact" onClick={closeAfterNavigate}><span className="nav-05__num">05</span>Contact</Link></li>
+          <li><Link to="/" viewTransition onClick={closeAfterNavigate}><span className="nav-05__num">01</span>Home</Link></li>
+          <li><Link to="/hardware" viewTransition onClick={closeAfterNavigate}><span className="nav-05__num">02</span>Hardware</Link></li>
+          <li><Link to="/software" viewTransition onClick={closeAfterNavigate}><span className="nav-05__num">03</span>Software</Link></li>
+          <li><Link to="/about" viewTransition onClick={closeAfterNavigate}><span className="nav-05__num">04</span>About</Link></li>
+          <li><Link to="/contact" viewTransition onClick={closeAfterNavigate}><span className="nav-05__num">05</span>Contact</Link></li>
         </ul>
         <div className="nav-05__overlay-footer">
           <div className="nav-05__overlay-social">

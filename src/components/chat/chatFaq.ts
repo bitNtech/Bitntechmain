@@ -1,4 +1,6 @@
-import { CONTACT } from '../../contact'
+/* Explicit extension: this module is imported by scripts/test-chat-faq.ts,
+   which runs under node's ESM resolver rather than Vite's. */
+import { CONTACT } from '../../contact.ts'
 
 export type FaqReply = { answer: string; mood: string }
 

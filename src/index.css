@@ -44,6 +44,10 @@
   background: var(--bg);
 }
 
+/* The native scrollbar gutter was the only thing splitting the page edge. */
+html, body { scrollbar-width: none; }
+html::-webkit-scrollbar, body::-webkit-scrollbar { display: none; }
+
 body {
   margin: 0;
   background: var(--bg);
