@@ -1,25 +1,87 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import './AboutUs.css'
 
 gsap.registerPlugin(ScrollTrigger)
 
-/* The seven. One source of truth: the hero's floating cards and the team grid
-   both read this list, so a person is added or removed in exactly one place.
-   `img: null` means we have no real portrait yet — the card falls back to
-   initials rather than a stock face. Paths are lower-case and hyphenated on
-   purpose: two of these arrived with spaces and a capital, which survives a
-   Windows dev server (case-insensitive) and then 404s on a Linux host. Hero geometry (rot/depth) lives here too;
-   the matching sizes/positions are .card-1..7 in AboutUs.css. */
-const TEAM = [
-  { name: 'Veeraragavan Natarajan', role: 'Founder & CEO', img: '/assets/veera.jpg', rot: -9, depth: 14 },
-  { name: 'Prem Kumar Ramamoorthy', role: 'Co-Founder & CTO', img: '/assets/prem-kumar.jpg', rot: -5, depth: 10 },
-  { name: 'Akash S', role: 'CSO', img: '/assets/akashimg.png', rot: -2, depth: 8 },
-  { name: 'Narendren S V', role: 'Chief AI Engineer', img: '/assets/narendren.jpg', rot: 3, depth: 12 },
-  { name: 'Shashanth D', role: 'Finance & Marketing Manager', img: null, rot: 0, depth: 6 },
-  { name: 'Veronica T', role: 'COO', img: '/assets/veronica.jpg', rot: 4, depth: 11 },
-  { name: 'Sri Hari Hara Pandiyan', role: 'Executive Assistant', img: '/assets/sri-hari.jpg', rot: 7, depth: 9 },
+/* The seven. One source of truth: the hero's floating cards, the team grid and
+   the profile card all read this list, so a person is added, removed or given
+   a new link in exactly one place. `img: null` means we have no real portrait
+   yet — the card falls back to initials rather than a stock face. Image paths
+   are lower-case and hyphenated on purpose: some arrived with spaces and a
+   capital, which survives a Windows dev server (case-insensitive) and then
+   404s on a Linux host. Hero geometry (rot/depth) lives here too; the matching
+   sizes/positions are .card-1..7 in AboutUs.css.
+
+   Social links are optional per person and per network — several have no
+   GitHub, and a row that is not there simply is not rendered. Every URL is
+   normalised through `link()` below. */
+type Member = {
+  name: string
+  role: string
+  img: string | null
+  rot: number
+  depth: number
+  instagram: string | null
+  linkedin: string | null
+  github: string | null
+}
+
+const TEAM: readonly Member[] = [
+  {
+    name: 'Veeraragavan Natarajan', role: 'Founder & CEO', img: '/assets/veera.jpg', rot: -9, depth: 14,
+    instagram: 'https://www.instagram.com/veerzz_23/',
+    linkedin: 'www.linkedin.com/in/veeraragavannatarajan',
+    github: 'https://github.com/Veeraragavan-Natarajan',
+  },
+  {
+    name: 'Prem Kumar Ramamoorthy', role: 'Co-Founder & CTO', img: '/assets/prem-kumar.jpg', rot: -5, depth: 10,
+    instagram: 'https://www.instagram.com/prem_ramamoorthi/',
+    linkedin: 'www.linkedin.com/in/premramamoorthy',
+    github: 'https://github.com/prem-ramamoorthy',
+  },
+  {
+    name: 'Akash S', role: 'CSO', img: '/assets/akashimg.png', rot: -2, depth: 8,
+    instagram: 'https://www.instagram.com/_._akash._.s/',
+    linkedin: 'https://www.linkedin.com/in/akash-s-38603a280/',
+    github: 'https://github.com/Akashwrites',
+  },
+  {
+    name: 'Narendren S V', role: 'Chief AI Engineer', img: '/assets/narendren.jpg', rot: 3, depth: 12,
+    instagram: 'https://www.instagram.com/naren_170406/',
+    linkedin: 'https://www.linkedin.com/in/narendren-s-v-b83418328/',
+    github: 'https://github.com/Naren1704',
+  },
+  {
+    name: 'Shashanth D', role: 'Finance & Marketing Manager', img: '/assets/shashanth.jpg', rot: 0, depth: 6,
+    instagram: 'https://www.instagram.com/shashanth_dt/',
+    linkedin: 'www.linkedin.com/in/shashanth-dinesh-745201329/',
+    github: null,
+  },
+  {
+    name: 'Veronica T', role: 'COO', img: '/assets/veronica.jpg', rot: 4, depth: 11,
+    instagram: 'https://www.instagram.com/its.veronica.___/',
+    linkedin: 'https://www.linkedin.com/in/t-veronica/',
+    github: null,
+  },
+  {
+    name: 'Sri Hari Hara Pandiyan', role: 'Executive Assistant', img: '/assets/sri-hari.jpg', rot: 7, depth: 9,
+    instagram: 'https://www.instagram.com/dan_harxx__/',
+    linkedin: 'https://www.linkedin.com/in/sri-hari-hara-pandiyan-bb3ab533b/',
+    github: null,
+  },
+]
+
+/* Several of these were given as bare `www.linkedin.com/...`. An href without
+   a scheme is a *relative path*, so the browser would send you to
+   /about/www.linkedin.com/... and 404 rather than off-site. */
+const link = (url: string) => (/^https?:\/\//.test(url) ? url : `https://${url}`)
+
+const SOCIALS = [
+  { key: 'instagram', label: 'Instagram' },
+  { key: 'linkedin', label: 'LinkedIn' },
+  { key: 'github', label: 'GitHub' },
 ] as const
 
 /* Slot order for the hero row, as indices into TEAM. The slots are size-ranked
@@ -81,6 +143,11 @@ const STATS = [
 ]
 
 export default function AboutUs() {
+  /* The profile card. `null` is closed; the element that opened it is kept so
+     focus can go back where it came from when it shuts. */
+  const [profile, setProfile] = useState<Member | null>(null)
+  const openerRef = useRef<HTMLElement | null>(null)
+  const closeRef = useRef<HTMLButtonElement>(null)
   const rootRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -91,7 +158,6 @@ export default function AboutUs() {
       gsap.set('.navbar', { opacity: 0, y: -20 })
       gsap.set('.small-team .word > span', { y: '105%' })
       gsap.set('.big-results .letter', { y: 80, opacity: 0 })
-      gsap.set('.nb-subline', { opacity: 0, y: 20 })
       gsap.set('.t-card', { opacity: 0 })
       gsap.set('.stats-inner', { opacity: 0 })
 
@@ -120,7 +186,6 @@ export default function AboutUs() {
           },
           0.8,
         )
-        .to('.nb-subline', { opacity: 1, y: 0, duration: 0.8 }, 1.6)
 
       cards.forEach((card, i) => {
         const rot = parseFloat(card.dataset.restRot || '0')
@@ -222,7 +287,6 @@ export default function AboutUs() {
             const rest = parseFloat(card.dataset.restRot || '0')
             gsap.set(card, { x: m.x * p, y: m.y * p, rotation: rest + m.rot * p })
           })
-          gsap.set('.nb-subline', { opacity: 1 - p * 2 })
         },
       })
 
@@ -392,6 +456,24 @@ export default function AboutUs() {
     return () => ctx.revert()
   }, [])
 
+  useEffect(() => {
+    if (!profile) return
+    /* The page scrolls behind a fixed overlay otherwise, and on iOS the body
+       keeps its momentum under the card. */
+    const prev = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    closeRef.current?.focus()
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setProfile(null)
+    }
+    document.addEventListener('keydown', onKey)
+    return () => {
+      document.body.style.overflow = prev
+      document.removeEventListener('keydown', onKey)
+      openerRef.current?.focus()
+    }
+  }, [profile])
+
   return (
     <main className="about-us" ref={rootRef}>
       <div className="grain" />
@@ -410,16 +492,11 @@ export default function AboutUs() {
         </div>
 
         <div className="cards-row">
-          {HERO_ORDER.map((t) => TEAM[t]).map((m, i) => (
+          {HERO_ORDER.map((t): Member => TEAM[t]).map((m, i) => (
             <div key={m.name} className={`card card-${i + 1}`} data-rot={m.rot} data-depth={m.depth} title={`${m.name} — ${m.role}`}>
               {m.img ? <img src={m.img} alt={m.name} /> : <span className="card-initials" aria-hidden="true">{initials(m.name)}</span>}
             </div>
           ))}
-        </div>
-
-        <div className="subline nb-subline">
-          <div className="subline-text">Seven people. 30+ projects shipped. One shared vision.</div>
-          <div className="subline-note">Including work from our VR Creations journey.</div>
         </div>
       </section>
 
@@ -507,14 +584,27 @@ export default function AboutUs() {
 
         <div className="team-grid">
           {TEAM.map((m, i) => (
-            /* --t-i drives the resting tilt; hover unwinds it to 0deg. */
-            <div className="t-card" key={m.name} style={{ '--t-i': String(i) } as React.CSSProperties}>
+            /* --t-i drives the resting tilt; hover unwinds it to 0deg. A
+               button, not a div with a click handler: it is a real control, so
+               it gets keyboard and screen-reader behaviour for free. */
+            <button
+              type="button"
+              className="t-card"
+              key={m.name}
+              style={{ '--t-i': String(i) } as React.CSSProperties}
+              aria-haspopup="dialog"
+              onClick={(e) => {
+                openerRef.current = e.currentTarget
+                setProfile(m)
+              }}
+            >
               {m.img ? <img src={m.img} alt={m.name} /> : <span className="t-initials" aria-hidden="true">{initials(m.name)}</span>}
               <div className="t-meta">
                 <div className="nm">{m.name}</div>
                 <div className="rl">{m.role}</div>
               </div>
-            </div>
+              <span className="t-open" aria-hidden="true">↗</span>
+            </button>
           ))}
         </div>
       </section>
@@ -536,6 +626,56 @@ export default function AboutUs() {
           ))}
         </div>
       </section>
+
+      {profile && (
+        <div className="t-modal" onClick={() => setProfile(null)}>
+          <div
+            className="t-modal__card"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="t-modal-name"
+            /* The backdrop closes; the card must not close itself when the
+               click lands inside it. */
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              type="button"
+              className="t-modal__x"
+              ref={closeRef}
+              onClick={() => setProfile(null)}
+              aria-label="Close profile"
+            >
+              ×
+            </button>
+
+            <div className="t-modal__portrait">
+              {profile.img
+                ? <img src={profile.img} alt={profile.name} />
+                : <span className="t-initials" aria-hidden="true">{initials(profile.name)}</span>}
+            </div>
+
+            <div className="t-modal__body">
+              <p className="t-modal__role">{profile.role}</p>
+              <h3 id="t-modal-name">{profile.name}</h3>
+
+              <ul className="t-modal__links">
+                {SOCIALS.map(({ key, label }) => {
+                  const url = profile[key]
+                  if (!url) return null
+                  return (
+                    <li key={key}>
+                      <a href={link(url)} target="_blank" rel="noreferrer">
+                        <span>{label}</span>
+                        <i aria-hidden="true">↗</i>
+                      </a>
+                    </li>
+                  )
+                })}
+              </ul>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   )
 }

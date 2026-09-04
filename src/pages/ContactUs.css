@@ -272,8 +272,34 @@
   display: grid;
   grid-template-columns: minmax(0, 1.18fr) minmax(0, .82fr);
   border: 1px solid var(--line);
-  background: rgba(255, 255, 255, .016);
+  border-radius: 4px;
+  /* Frosted, not tinted. The plate runs behind this panel, and at 1.6% alpha
+     the hands were reading straight through the form — a name field over a
+     knuckle. The blur pushes the image back into being a ground and the fill
+     gives the labels something to sit on, while the panel still admits what
+     is behind it. */
+  background: rgba(22, 18, 15, .58);
+  backdrop-filter: blur(22px) saturate(1.25);
+  -webkit-backdrop-filter: blur(22px) saturate(1.25);
+  box-shadow: 0 40px 90px -30px rgba(0, 0, 0, .8), inset 0 1px 0 rgba(247, 243, 237, .06);
   transform: translate3d(calc(var(--mx) * -2px), calc(var(--my) * -1px), 0);
+}
+
+/* The frost catches a slow sheen as it settles in — one pass, on arrival. */
+.cx-panel::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  background: linear-gradient(105deg, transparent 38%, rgba(255, 179, 138, .07) 50%, transparent 62%);
+  transform: translateX(-120%);
+}
+[data-build].is-in.cx-panel::after {
+  animation: cx-sheen 1.6s cubic-bezier(.4, 0, .2, 1) .35s both;
+}
+@keyframes cx-sheen {
+  to { transform: translateX(120%); }
 }
 
 .cx-panel__side {
@@ -491,7 +517,7 @@
   padding: .8rem .9rem;
   border: 1px solid var(--line);
   border-radius: 6px;
-  background: rgba(255, 255, 255, .04);
+  background: rgba(0, 0, 0, .28);
   color: var(--ink);
   font: 400 1rem var(--sans);
   transition: border-color .25s var(--ease), background .25s var(--ease), box-shadow .25s var(--ease);
@@ -508,7 +534,7 @@
 .cx-field textarea:focus {
   outline: none;
   border-color: rgba(255, 110, 66, .55);
-  background: rgba(255, 255, 255, .04);
+  background: rgba(0, 0, 0, .4);
   /* The soft focus glow, in the accent rather than a browser blue. */
   box-shadow: 0 0 0 3px rgba(255, 110, 66, .1);
 }
@@ -915,7 +941,8 @@
   }
   .cx-bg,
   .cx-spark,
-  .cx-wire i { animation: none; }
+  .cx-wire i,
+  .cx-panel::after { animation: none; }
   .cx-status__live i,
   .cx-signal dd.is-ready i { animation: none; }
   .cx-channel,

@@ -50,7 +50,10 @@
   position: relative;
   overflow: hidden;
   min-height: 100vh;
-  padding: 130px 32px 60px;
+  /* The photo row is absolute at top:50% and 320px tall, so it contributes no
+     height. This bottom padding is what holds the centred type clear of it —
+     the job the strapline's 180px top margin used to do before it was removed. */
+  padding: 130px 32px 308px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -200,25 +203,6 @@
 }
 .about-us .card-initials { font-size: 2.4rem; }
 .about-us .t-initials { font-size: clamp(2.4rem, 5vw, 4rem); }
-
-.about-us .subline {
-  margin-top: 180px;
-  text-align: center;
-  z-index: 4;
-  position: relative;
-}
-.about-us .subline-note {
-  margin-top: 8px;
-  font-size: 12px;
-  color: rgba(246, 245, 238, 0.42);
-  letter-spacing: 0.05em;
-}
-.about-us .subline-text {
-  margin-top: 22px;
-  font-size: 13px;
-  color: var(--nb-mute);
-  letter-spacing: 0.06em;
-}
 
 /* ============ COMPANY BRIEF ============ */
 .about-us .company-brief {
@@ -810,7 +794,7 @@
 }
 @media (max-width: 750px) {
   .about-us .hero {
-    padding: 100px 16px 40px;
+    padding: 100px 16px 260px;
   }
   .about-us .small-team {
     font-size: 10vw;
@@ -831,16 +815,6 @@
   .about-us .card-6 { width: 88px;  height: 118px; left: 72%; top: 45px; }
   .about-us .card-7 { width: 70px;  height: 95px;  left: 85%; top: 30px; }
   .about-us .card-initials { font-size: 1.2rem; }
-  /* Clear the absolutely-placed photo row instead of sitting behind it. */
-  .about-us .subline {
-    margin-top: 300px;
-  }
-  .about-us .subline-text {
-    font-size: 12px;
-    line-height: 1.5;
-    max-width: 22ch;
-    margin-inline: auto;
-  }
   .about-us .team-section {
     padding: 80px 20px 40px;
   }
@@ -885,4 +859,197 @@
   .about-us .stats h3 { grid-column: 1 / -1; font-size: 24px; }
   .about-us .stat-block .num { font-size: 38px; }
   .about-us .stat-block .lbl { font-size: 10px; letter-spacing: .12em; margin-top: 8px; padding-top: 8px; }
+}
+
+/* ======================================================================
+   THE PROFILE CARD
+   A team card is a real control now, so it says so: the arrow appears on
+   hover and the whole thing opens a dialog.
+   ====================================================================== */
+
+.about-us .t-card {
+  border: 0;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.about-us .t-card:focus-visible {
+  outline: 2px solid var(--nb-orange-3);
+  outline-offset: 3px;
+}
+.about-us .t-open {
+  position: absolute;
+  top: 14px;
+  right: 16px;
+  z-index: 3;
+  font-size: 1.05rem;
+  color: #fff;
+  opacity: 0;
+  transform: translate(-4px, 4px);
+  transition: opacity .35s cubic-bezier(.6, 0, .2, 1), transform .35s cubic-bezier(.6, 0, .2, 1);
+}
+.about-us .t-card:hover .t-open,
+.about-us .t-card:focus-visible .t-open {
+  opacity: 1;
+  transform: translate(0, 0);
+}
+
+/* The overlay. Frosted rather than a flat scrim, so the grid stays legible
+   underneath and the card reads as glass over the page it came from. */
+.t-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  display: grid;
+  place-items: center;
+  padding: 1.25rem;
+  background: rgba(20, 10, 30, .5);
+  backdrop-filter: blur(14px) saturate(1.15);
+  -webkit-backdrop-filter: blur(14px) saturate(1.15);
+  animation: t-fade .28s ease both;
+}
+@keyframes t-fade { from { opacity: 0; } }
+
+.t-modal__card {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 260px) minmax(0, 1fr);
+  gap: 0;
+  width: min(680px, 100%);
+  max-height: min(88vh, 620px);
+  border-radius: 26px;
+  overflow: hidden;
+  background: var(--nb-bg);
+  box-shadow: 0 50px 90px -20px rgba(var(--nb-shadow-c), .55);
+  /* Comes up from the card that opened it rather than fading in place. */
+  animation: t-pop .5s cubic-bezier(.16, 1, .3, 1) both;
+}
+@keyframes t-pop {
+  from { opacity: 0; transform: translateY(22px) scale(.94); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.t-modal__portrait {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: 260px;
+  background: linear-gradient(
+    180deg,
+    var(--nb-orange-1) 0%,
+    var(--nb-orange-2) 35%,
+    var(--nb-orange-3) 70%,
+    var(--nb-orange-4) 100%
+  );
+}
+.t-modal__portrait img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+  display: block;
+}
+.t-modal__portrait .t-initials {
+  font-size: 3.4rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.t-modal__body {
+  display: grid;
+  align-content: start;
+  gap: .35rem;
+  padding: clamp(1.5rem, 4vw, 2.4rem);
+  overflow-y: auto;
+}
+.t-modal__role {
+  margin: 0;
+  font-size: .68rem;
+  font-weight: 700;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: var(--nb-orange-2);
+}
+.t-modal__card h3 {
+  margin: 0 0 1.1rem;
+  font-size: clamp(1.5rem, 3.4vw, 2.1rem);
+  line-height: 1.1;
+  letter-spacing: -.03em;
+  color: var(--nb-ink);
+}
+
+/* Rows with hairlines — the same gesture the contact page uses, in this
+   page's own palette. */
+.t-modal__links {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--nb-line);
+}
+.t-modal__links a {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: .85rem .2rem;
+  border-bottom: 1px solid var(--nb-line);
+  text-decoration: none;
+  font-size: .95rem;
+  font-weight: 600;
+  color: var(--nb-ink);
+  transition: padding-left .3s cubic-bezier(.6, 0, .2, 1), color .3s, border-color .3s;
+}
+.t-modal__links a i {
+  font-style: normal;
+  color: var(--nb-mute);
+  transition: transform .3s cubic-bezier(.6, 0, .2, 1), color .3s;
+}
+.t-modal__links a:hover,
+.t-modal__links a:focus-visible {
+  padding-left: .7rem;
+  color: var(--nb-orange-2);
+  border-bottom-color: var(--nb-orange-4);
+  outline: none;
+}
+.t-modal__links a:hover i,
+.t-modal__links a:focus-visible i {
+  color: var(--nb-orange-2);
+  transform: translate(3px, -3px);
+}
+
+.t-modal__x {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  z-index: 2;
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, .82);
+  color: var(--nb-ink);
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: background .25s, transform .25s;
+}
+.t-modal__x:hover { background: #fff; transform: rotate(90deg); }
+.t-modal__x:focus-visible { outline: 2px solid var(--nb-orange-3); outline-offset: 2px; }
+
+@media (max-width: 640px) {
+  .t-modal__card {
+    grid-template-columns: minmax(0, 1fr);
+    max-height: 88vh;
+  }
+  .t-modal__portrait { min-height: 0; aspect-ratio: 4 / 3; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .t-modal, .t-modal__card { animation: none; }
+  .about-us .t-open, .t-modal__x, .t-modal__links a, .t-modal__links a i { transition: none; }
 }
