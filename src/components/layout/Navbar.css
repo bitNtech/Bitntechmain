@@ -330,9 +330,15 @@
    Wordmark on the left, menu button on the right, and the glass capsule they
    sit in. Nothing here applies at 768px and up. */
 @media (max-width: 767px) {
+  /* How far the bar sits below the top of the screen. It is added to the bar's
+     own padding-top and to the capsule's top inset by the same amount, so the
+     whole header moves down together and the capsule keeps its height rather
+     than stretching. */
+  .nav-05 { --nav-drop: 10px; }
+
   .nav-05__bar {
     padding: 12px 14px;
-    padding-top: calc(12px + env(safe-area-inset-top));
+    padding-top: calc(12px + var(--nav-drop) + env(safe-area-inset-top));
   }
 
   /* Compact but never squeezed: it stops shrinking at 320px, where it is
@@ -362,7 +368,7 @@
        bar hung 11px above the top of the screen. The top inset carries the
        safe area itself, because the bar's own padding-top does and a pill
        anchored to the centre would otherwise sit low by half of it. */
-    top: calc(env(safe-area-inset-top) + 5px);
+    top: calc(env(safe-area-inset-top) + 5px + var(--nav-drop, 0px));
     bottom: 5px;
     left: 14px;
     right: 14px;
