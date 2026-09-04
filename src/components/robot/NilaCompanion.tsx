@@ -11,7 +11,12 @@ const HALF = 42
 /* Chrome she should never try to explain — she reads content, not furniture. */
 const FURNITURE = 'header, footer, nav, .nila-companion, .navbar, .bottom-nav'
 
-type Box = { el: HTMLElement; title: string; body: string; points: string[] }
+/* `line`, when present, is a written line the element handed her through
+   `data-nila` — see the team cards in AboutUs.tsx. Most boxes have none and
+   she builds a line out of their own copy instead; a card whose whole content
+   is a name and a job title has nothing worth building from, so it says what
+   it wants said. */
+type Box = { el: HTMLElement; title: string; body: string; points: string[]; line?: string }
 
 function readBox(heading: Element): Box {
   // The box is the card the heading sits in — but a heading whose card is most
@@ -24,21 +29,41 @@ function readBox(heading: Element): Box {
     .map((li) => (li.textContent ?? '').replace(/\s+/g, ' ').trim())
     .filter((t) => t.length > 2 && t.length < 90)
     .slice(0, 3)
-  return { el, title: heading.textContent ?? '', body: el.querySelector('p')?.textContent ?? '', points }
+  return {
+    el,
+    title: heading.textContent ?? '',
+    body: el.querySelector('p')?.textContent ?? '',
+    points,
+    line: el.dataset.nila || (card.dataset.nila ?? undefined),
+  }
+}
+
+/** A box that carries its own line and needs no heading to be found. */
+function readScripted(el: HTMLElement): Box {
+  return { el, title: '', body: '', points: [], line: el.dataset.nila }
 }
 
 /** Every titled box currently on screen. */
 function visibleBoxes(): Box[] {
   const seen = new Set<HTMLElement>()
   const out: Box[] = []
-  for (const heading of document.querySelectorAll('section h2, section h3')) {
-    if (heading.closest(FURNITURE)) continue
-    const box = readBox(heading)
-    if (seen.has(box.el)) continue
-    const rect = box.el.getBoundingClientRect()
-    if (rect.bottom < window.innerHeight * 0.15 || rect.top > window.innerHeight * 0.85) continue
+  const onScreen = (el: HTMLElement) => {
+    const rect = el.getBoundingClientRect()
+    return rect.bottom >= window.innerHeight * 0.15 && rect.top <= window.innerHeight * 0.85
+  }
+  const collect = (box: Box) => {
+    if (seen.has(box.el) || !onScreen(box.el)) return
     seen.add(box.el)
     out.push(box)
+  }
+  for (const heading of document.querySelectorAll('section h2, section h3')) {
+    if (heading.closest(FURNITURE)) continue
+    collect(readBox(heading))
+  }
+  // Anything that wrote its own line joins the tour on the same terms.
+  for (const el of document.querySelectorAll<HTMLElement>('[data-nila]')) {
+    if (el.closest(FURNITURE)) continue
+    collect(readScripted(el))
   }
   return out
 }
@@ -87,7 +112,9 @@ export default function NilaCompanion() {
   const entered = useRef(false)
 
   const explain = useCallback((box: Box, tone: NilaMood = 'happy') => {
-    const line = explainLine(box.title, box.body, box.points)
+    // A written line wins: nothing generated from a name and a job title is
+    // going to beat one somebody wrote for that person.
+    const line = box.line ?? explainLine(box.title, box.body, box.points)
     if (line) sayText(line, tone)
   }, [sayText])
 

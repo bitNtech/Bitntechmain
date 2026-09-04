@@ -26,6 +26,11 @@ type Member = {
   instagram: string | null
   linkedin: string | null
   github: string | null
+  /* What Nila says when she flies to this card on the tour. Written per person
+     and pitched at what they actually do — she reaches it through `data-nila`,
+     because a card whose entire content is a name and a job title gives her
+     nothing to build a line out of on her own. */
+  punch: string
 }
 
 const TEAM: readonly Member[] = [
@@ -34,42 +39,49 @@ const TEAM: readonly Member[] = [
     instagram: 'https://www.instagram.com/veerzz_23/',
     linkedin: 'www.linkedin.com/in/veeraragavannatarajan',
     github: 'https://github.com/Veeraragavan-Natarajan',
+    punch: "Veeraragavan started all this. He decides where we point — then goes and builds it too.",
   },
   {
     name: 'Prem Kumar Ramamoorthy', role: 'Co-Founder & CTO', img: '/assets/prem-kumar.jpg', rot: -5, depth: 10,
     instagram: 'https://www.instagram.com/prem_ramamoorthi/',
     linkedin: 'www.linkedin.com/in/premramamoorthy',
     github: 'https://github.com/prem-ramamoorthy',
+    punch: "Prem is the CTO. If it runs in production, he has argued with it at least once.",
   },
   {
     name: 'Akash S', role: 'CSO', img: '/assets/akashimg.png', rot: -2, depth: 8,
     instagram: 'https://www.instagram.com/_._akash._.s/',
     linkedin: 'https://www.linkedin.com/in/akash-s-38603a280/',
     github: 'https://github.com/Akashwrites',
+    punch: "Akash sets the strategy. He asks 'why' until the plan stops wobbling.",
   },
   {
     name: 'Narendren S V', role: 'Chief AI Engineer', img: '/assets/narendren.jpg', rot: 3, depth: 12,
     instagram: 'https://www.instagram.com/naren_170406/',
     linkedin: 'https://www.linkedin.com/in/narendren-s-v-b83418328/',
     github: 'https://github.com/Naren1704',
+    punch: "Narendren does the AI. He teaches machines to make decisions — including me.",
   },
   {
     name: 'Shashanth D', role: 'Finance & Marketing Manager', img: '/assets/shashanth.jpg', rot: 0, depth: 6,
     instagram: 'https://www.instagram.com/shashanth_dt/',
     linkedin: 'www.linkedin.com/in/shashanth-dinesh-745201329/',
     github: null,
+    punch: "Shashanth handles the money and the message. Both at once, somehow.",
   },
   {
     name: 'Veronica T', role: 'COO', img: '/assets/veronica.jpg', rot: 4, depth: 11,
     instagram: 'https://www.instagram.com/its.veronica.___/',
     linkedin: 'https://www.linkedin.com/in/t-veronica/',
     github: null,
+    punch: "Veronica keeps the whole thing moving. Deadlines are frightened of her.",
   },
   {
     name: 'Sri Hari Hara Pandiyan', role: 'Executive Assistant', img: '/assets/sri-hari.jpg', rot: 7, depth: 9,
     instagram: 'https://www.instagram.com/dan_harxx__/',
     linkedin: 'https://www.linkedin.com/in/sri-hari-hara-pandiyan-bb3ab533b/',
     github: null,
+    punch: "Sri Hari keeps the days straight. Nothing reaches the team unsorted.",
   },
 ]
 
@@ -593,6 +605,7 @@ export default function AboutUs() {
               key={m.name}
               style={{ '--t-i': String(i) } as React.CSSProperties}
               aria-haspopup="dialog"
+              data-nila={m.punch}
               onClick={(e) => {
                 openerRef.current = e.currentTarget
                 setProfile(m)
