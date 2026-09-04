@@ -22,9 +22,21 @@
     overflow-x: clip;
     overflow-y: visible;
 
+    /* Sixty of these, on every page, forever. They used to animate `width`,
+       `height` and `bottom` — three properties the compositor cannot touch, so
+       every frame laid out and repainted sixty elements for the life of the
+       tab. They are the same motion expressed as `scale` and `translate`,
+       which the compositor owns: laid out once, then moved on the GPU.
+
+       The size and the rise are separate animations, so they write to the two
+       independent properties and leave `transform` free to hold the centring
+       that must not move. */
     .bubble {
       position: absolute;
       left: var(--position, 50%);
+      bottom: -4rem;
+      width: var(--size, 4rem);
+      height: var(--size, 4rem);
       background: var(--footer-background);
       border-radius: 100%;
       animation:
@@ -32,6 +44,15 @@
         bubble-move var(--time, 4s) ease-in infinite var(--delay, 0s);
       transform: translate(-50%, 100%);
     }
+
+    /* Off-screen, or a visitor who asked for less motion: the elements stay
+       exactly where they are, the compositor just stops being asked to move
+       them and the filter stops being re-run. */
+    &.is-paused .bubble { animation-play-state: paused; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .bubbles .bubble { animation: none; }
   }
 
   .content {
@@ -150,7 +171,16 @@
     .columns {
       display: flex;
       flex-direction: column;
-      gap: 0.4rem;
+      gap: 0.1rem;
+    }
+
+    /* 0.78rem of type is a 23px row — one pixel under the 24x24 minimum, and
+       nowhere near a comfortable thumb. The padding buys the height; the gap
+       above shrinks by the same amount so the column keeps its rhythm. */
+    .columns a {
+      display: inline-flex;
+      align-items: center;
+      min-height: 32px;
     }
 
   }
@@ -159,21 +189,21 @@
 @keyframes bubble-size {
   0%,
   75% {
-    width: var(--size, 4rem);
-    height: var(--size, 4rem);
+    scale: 1;
   }
   100% {
-    width: 0rem;
-    height: 0rem;
+    scale: 0;
   }
 }
 
+/* Rises by its whole travel: from bottom:-4rem to bottom:var(--distance) is
+   (distance + 4rem) upward, and up is negative here. */
 @keyframes bubble-move {
   0% {
-    bottom: -4rem;
+    translate: 0 0;
   }
   100% {
-    bottom: var(--distance, 10rem);
+    translate: 0 calc(-1 * (var(--distance, 10rem) + 4rem));
   }
 }
 

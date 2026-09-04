@@ -71,14 +71,17 @@
 
 .cx-scene {
   position: absolute;
-  inset: 0;
+  inset: 0 0 auto 0;
+  /* Bounded, rather than `inset: 0`. This used to span the full scroll height
+     of the page — every layer inside it (the masked grid, the vignette, the
+     plate) rasterised and carried at two or three thousand pixels tall, all to
+     decorate a region that ends before the first fold does. The plate is
+     860px at most and the vignette resolves to the page ground at its own
+     edges, so below this there is nothing to draw that `.cx`'s background is
+     not already drawing. */
+  height: min(100%, 1100px);
   z-index: 0;
   pointer-events: none;
-  /* The scene's z-index makes a stacking context, and that is what the plate's
-     `screen` blends against — a transparent backdrop would leave its inverted
-     black exactly as black. Painting the page's own ground here changes
-     nothing visually and gives the blend something to drop out into. */
-  background: var(--bg);
 }
 
 /* Atmosphere: two still washes, so the black has somewhere to fall away to. */
@@ -122,20 +125,35 @@
   top: 0;
   height: min(94vh, 860px);
   background: url('/assets/bg.png') center 42% / cover no-repeat;
-  filter: invert(1) contrast(1.12) brightness(.88);
-  mix-blend-mode: screen;
+  /* `invert(.94)`, not `invert(1)`, and that missing 6% is what let the blend
+     go. A blended element cannot be promoted to its own composited layer —
+     blending needs the pixels underneath — so `screen` was re-running over a
+     viewport-sized area on every scroll frame. It was there to stop the
+     plate's inverted-white ground reading as a dark rectangle.
+
+     Inverting to 94% instead lands that ground on 0.06 x 255 = 15, which is
+     the page's own #0d0b0a to within a value or two, so ordinary compositing
+     leaves it invisible and no blend is needed. The hands come out at 97
+     against the old 94 — the same picture, one whole pass cheaper. */
+  filter: invert(.94) contrast(1.05);
   opacity: .42;
   -webkit-mask-image: radial-gradient(72% 68% at 50% 46%, #000 34%, rgba(0, 0, 0, .5) 68%, transparent 92%);
   mask-image: radial-gradient(72% 68% at 50% 46%, #000 34%, rgba(0, 0, 0, .5) 68%, transparent 92%);
   /* Parallax on `transform`, drift on the independent properties, so the two
      never overwrite each other — the same split the home hero uses. */
+  scale: 1.03;
   transform: translate3d(calc(var(--mx) * -12px), calc(var(--my) * -8px), 0);
   animation: cx-drift 26s ease-in-out infinite;
 }
 /* Almost still. The plate breathes toward the gap and back. */
+/* `translate` only. Scaling this layer changed its raster geometry, so the
+   invert + contrast + mask chain above re-ran from scratch every frame;
+   translating it lets the browser raster the chain once and simply move the
+   result. The static 1.03 scale replaces what the keyframe was doing, without
+   the per-frame cost. */
 @keyframes cx-drift {
-  0%, 100% { translate: 0 0; scale: 1.02; }
-  50% { translate: -12px -8px; scale: 1.055; }
+  0%, 100% { translate: 0 0; }
+  50% { translate: -14px -9px; }
 }
 
 /* The gap between the fingertips is the subject of the plate, so it gets the
@@ -150,9 +168,11 @@
   background: radial-gradient(circle, rgba(255, 148, 106, .17), rgba(255, 110, 66, .05) 42%, transparent 70%);
   animation: cx-breathe 7s ease-in-out infinite;
 }
+/* Opacity only, for the same reason as the drift — and at this softness the
+   scale was doing nothing the fade was not already doing. */
 @keyframes cx-breathe {
-  0%, 100% { opacity: .55; scale: .96; }
-  50% { opacity: 1; scale: 1.06; }
+  0%, 100% { opacity: .5; }
+  50% { opacity: 1; }
 }
 
 /* Holds the type off the plate and closes the composition into black. */
@@ -183,8 +203,10 @@
   to { transform: translateY(0); opacity: 1; filter: blur(0); }
 }
 
-/* Sections below the fold wait for their observer instead. */
-[data-build] {
+/* Sections below the fold wait for their observer instead. Gated on `.js`
+   (set in main.tsx) so a browser that never runs the observer shows the page
+   rather than three empty screens. */
+.js [data-build] {
   opacity: 0;
   transform: translateY(26px);
 }
@@ -273,19 +295,21 @@
   grid-template-columns: minmax(0, 1.18fr) minmax(0, .82fr);
   border: 1px solid var(--line);
   border-radius: 4px;
-  /* Frosted, not tinted. The plate runs behind this panel, and at 1.6% alpha
-     the hands were reading straight through the form — a name field over a
-     knuckle. The blur pushes the image back into being a ground and the fill
-     gives the labels something to sit on, while the panel still admits what
-     is behind it. */
-  background: rgba(22, 18, 15, .58);
-  backdrop-filter: blur(22px) saturate(1.25);
-  -webkit-backdrop-filter: blur(22px) saturate(1.25);
+  /* The plate runs behind this panel, and at 1.6% alpha the hands read
+     straight through the form — a name field over a knuckle. The fill is what
+     gives the labels a ground.
+
+     There is no backdrop-filter. A 22px blur over most of the viewport,
+     recomputed every frame because the plate behind it animates, is what made
+     this page drop them. What it was blurring is a 42%-opacity image under a
+     vignette, which the fill hides anyway — so it cost a pass a frame to
+     soften something already invisible. */
+  background: rgba(22, 18, 15, .72);
   box-shadow: 0 40px 90px -30px rgba(0, 0, 0, .8), inset 0 1px 0 rgba(247, 243, 237, .06);
   transform: translate3d(calc(var(--mx) * -2px), calc(var(--my) * -1px), 0);
 }
 
-/* The frost catches a slow sheen as it settles in — one pass, on arrival. */
+/* The panel catches a slow sheen as it settles in — one pass, on arrival. */
 .cx-panel::after {
   content: '';
   position: absolute;
@@ -390,16 +414,30 @@
   color: var(--ink);
 }
 .cx-status__live i {
+  position: relative;
   width: 7px;
   height: 7px;
   border-radius: 50%;
   background: var(--accent);
-  box-shadow: 0 0 0 0 rgba(255, 110, 66, .5);
+}
+
+/* The ring is a pseudo-element that scales and fades, not an animated
+   box-shadow. box-shadow is a paint property: animating it repainted both of
+   these dots on every frame for the life of the page, and each repaint
+   invalidated everything composited above them. transform and opacity are
+   handled by the compositor and paint exactly once. */
+.cx-status__live i::after,
+.cx-signal dd.is-ready i::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 1px solid var(--accent);
   animation: cx-ping 2.6s ease-out infinite;
 }
 @keyframes cx-ping {
-  0% { box-shadow: 0 0 0 0 rgba(255, 110, 66, .45); }
-  70%, 100% { box-shadow: 0 0 0 7px rgba(255, 110, 66, 0); }
+  0% { transform: scale(1); opacity: .5; }
+  70%, 100% { transform: scale(3.4); opacity: 0; }
 }
 .cx-status__row {
   display: grid;
@@ -782,6 +820,7 @@
   color: var(--ink);
 }
 .cx-signal dd i {
+  position: relative;
   width: 6px;
   height: 6px;
   border-radius: 50%;
@@ -790,7 +829,6 @@
 .cx-signal dd.is-ready { color: var(--accent-soft); }
 .cx-signal dd.is-ready i {
   background: var(--accent);
-  animation: cx-ping 2.6s ease-out infinite;
 }
 
 /* ======================================================================
@@ -839,6 +877,9 @@
   display: inline-flex;
   align-items: center;
   gap: .7rem;
+  /* Same as the hero's: the rule and its label are 13px tall, the link is not. */
+  padding: 14px 6px;
+  margin: -14px -6px;
   text-decoration: none;
   color: var(--ink-2);
   font: 500 .58rem var(--mono);
@@ -931,7 +972,7 @@
 
 @media (prefers-reduced-motion: reduce) {
   .cx-build,
-  [data-build],
+  .js [data-build],
   .cx-receipt,
   .cx-signal {
     animation: none;
@@ -943,8 +984,10 @@
   .cx-spark,
   .cx-wire i,
   .cx-panel::after { animation: none; }
-  .cx-status__live i,
-  .cx-signal dd.is-ready i { animation: none; }
+  /* The ping lives on the ring pseudo-element now, so that is what has to be
+     stopped — and it is hidden rather than frozen mid-scale. */
+  .cx-status__live i::after,
+  .cx-signal dd.is-ready i::after { animation: none; opacity: 0; }
   .cx-channel,
   .cx-send,
   .cx-send__wash,

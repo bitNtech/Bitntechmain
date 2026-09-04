@@ -2,21 +2,39 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/jpeg" href="/bitntechlogo.png" />
+    <link rel="icon" type="image/png" href="/logo.png" />
+    <link rel="apple-touch-icon" href="/logo.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <!-- The hero is the first paint on every route; matching the browser chrome
          to it stops the white flash strip above the page on mobile. -->
     <meta name="theme-color" content="#05060a" />
-    <title>BitNTech</title>
+    <meta name="author" content="BitNTech" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+    <meta name="format-detection" content="telephone=no" />
+    <!-- Route-specific title, description, canonical, Open Graph and JSON-LD are
+         stamped in here per route by scripts/seo-build.ts and re-rendered by
+         src/components/Seo.tsx once React is running. These two are the
+         fallback for a URL neither of those covers. -->
+    <title>BitNTech — AI, Software &amp; Robotics Engineering Company</title>
+    <meta
+      name="description"
+      content="BitNTech is an engineering studio building AI systems, custom software, web and mobile products, automation, IoT and robotics — from first prototype to production deployment."
+    />
+
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <!-- Archivo carries both a width and a weight axis, which is what the home
          hero animates: the tagline grows from condensed-light to expanded-black
-         line by line. DM Sans is everything else. -->
+         line by line. DM Sans is everything else. Latin only: the full file
+         carries Cyrillic, Greek and Vietnamese subsets nothing on the site uses. -->
     <link
-      href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=DM+Sans:ital,opsz,wght@0,9..40,400..900;1,9..40,400..900&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=DM+Sans:opsz,wght@9..40,400..900&display=swap"
       rel="stylesheet"
     />
+    <!-- The landing hero's image is preloaded, but only into the home route's
+         own HTML — see scripts/seo-build.ts. Preloading it from the shared
+         shell fetched it on /about and /contact too, where nothing ever
+         referenced it. -->
   </head>
   <body>
     <div id="root"></div>

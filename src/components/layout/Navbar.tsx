@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { CONTACT } from '../../contact'
 import './Navbar.css'
 
 const PAGE_LABELS: Record<string, string> = {
@@ -46,7 +45,6 @@ function groundIsDark(x: number, y: number): boolean | null {
 }
 
 export default function Navbar() {
-  const toggleRef = useRef<HTMLInputElement>(null)
   const brandRef = useRef<HTMLAnchorElement>(null)
   const progressSegmentsRef = useRef<(HTMLDivElement | null)[]>([])
   const { pathname } = useLocation()
@@ -79,11 +77,15 @@ export default function Navbar() {
       const maxScroll = document.documentElement.scrollHeight - window.innerHeight
       const scrolled = maxScroll > 0 ? Math.min(scrollY / maxScroll, 1) : 0
       
+      /* `scaleX`, not `width`. Width is a layout property: writing it to six
+         or eight segments on every scroll frame made the browser re-lay-out a
+         fixed, full-width element for the whole length of every page. A
+         transform is the compositor's job and costs nothing. */
       const N = sectionsCount
       progressSegmentsRef.current.forEach((segment, i) => {
         if (!segment) return
         const localScrolled = Math.min(1, Math.max(0, scrolled * N - i))
-        segment.style.width = `${localScrolled * 100}%`
+        segment.style.transform = `scaleX(${localScrolled})`
       })
     }
     const onScroll = () => {
@@ -101,16 +103,37 @@ export default function Navbar() {
 
   useEffect(() => {
     let frame = 0
+    let idle = 0
+    // -Infinity so the first probe of a route always runs.
+    let probedAt = -Infinity
+
     const probe = () => {
       frame = 0
+      probedAt = window.scrollY
       const box = brandRef.current?.getBoundingClientRect()
       if (!box) return
       const dark = groundIsDark(box.left + box.width / 2, box.top + box.height / 2)
       if (dark !== null) setOnDark(dark)
     }
+
+    /* `groundIsDark` hit-tests the point under the wordmark and reads computed
+       style off everything it finds, which flushes layout and resolves style
+       for a handful of elements — perfectly affordable, and it was running on
+       every scroll frame of every page.
+
+       What it produces is one boolean that only changes where a section
+       boundary passes under the bar. So it runs when the page has actually
+       moved far enough for that to be possible, and once more shortly after
+       scrolling stops, which catches a boundary crossed inside the threshold.
+       Same answer, a fraction of the work. */
+    const STEP = 32
     const onScroll = () => {
+      window.clearTimeout(idle)
+      idle = window.setTimeout(probe, 120)
+      if (Math.abs(window.scrollY - probedAt) < STEP) return
       if (!frame) frame = requestAnimationFrame(probe)
     }
+
     probe()
     // The route's first paint has not landed on the frame this runs in.
     const settle = window.setTimeout(probe, 220)
@@ -118,17 +141,12 @@ export default function Navbar() {
     window.addEventListener('resize', onScroll)
     return () => {
       if (frame) cancelAnimationFrame(frame)
+      window.clearTimeout(idle)
       window.clearTimeout(settle)
       window.removeEventListener('scroll', onScroll)
       window.removeEventListener('resize', onScroll)
     }
   }, [pathname])
-
-  const closeAfterNavigate = () => {
-    setTimeout(() => {
-      if (toggleRef.current) toggleRef.current.checked = false
-    }, 1000)
-  }
 
   return (
     <div className="nav-05">
@@ -144,8 +162,7 @@ export default function Navbar() {
           ))}
         </div>
       </div>
-      <input ref={toggleRef} type="checkbox" id="nav-05-toggle" />
-      <nav className={`nav-05__bar${isScrolled ? ' is-scrolled' : ''}${onDark ? ' nav-05__bar--on-dark' : ''}`}>
+      <nav aria-label="Primary" className={`nav-05__bar${isScrolled ? ' is-scrolled' : ''}${onDark ? ' nav-05__bar--on-dark' : ''}`}>
         <div className="nav-05__glass" aria-hidden="true">
           <div className="nav-05__glass-inner"></div>
         </div>
@@ -165,35 +182,8 @@ export default function Navbar() {
 
         <div className="nav-05__actions">
           {!onContact && <Link to="/get-started" tabIndex={0} className="nav-05__cta">Get Started <span>↗</span></Link>}
-          <label htmlFor="nav-05-toggle" className="nav-05__btn" aria-label="Open menu">
-            <span></span><span></span><span></span>
-          </label>
         </div>
       </nav>
-      <div className="nav-05__overlay" role="dialog" aria-label="Full screen navigation">
-        <ul className="nav-05__nav-list">
-          <li><Link to="/" viewTransition onClick={closeAfterNavigate}><span className="nav-05__num">01</span>Home</Link></li>
-          <li><Link to="/hardware" viewTransition onClick={closeAfterNavigate}><span className="nav-05__num">02</span>Hardware</Link></li>
-          <li><Link to="/software" viewTransition onClick={closeAfterNavigate}><span className="nav-05__num">03</span>Software</Link></li>
-          <li><Link to="/about" viewTransition onClick={closeAfterNavigate}><span className="nav-05__num">04</span>About</Link></li>
-          <li><Link to="/contact" viewTransition onClick={closeAfterNavigate}><span className="nav-05__num">05</span>Contact</Link></li>
-        </ul>
-        <div className="nav-05__overlay-footer">
-          <div className="nav-05__overlay-social">
-            <a href={CONTACT.linkedin.url} target="_blank" rel="noreferrer">LinkedIn</a>
-            <a href={CONTACT.instagram.url} target="_blank" rel="noreferrer">Instagram</a>
-            <a href={CONTACT.github.url} target="_blank" rel="noreferrer">GitHub</a>
-          </div>
-          {!onContact && <Link to="/get-started" className="nav-05__overlay-cta">Get Started →</Link>}
-        </div>
-      </div>
-      <svg className="nav-05__filters" aria-hidden="true" focusable="false">
-        <filter id="nav-liquid-glass" x="0%" y="0%" width="100%" height="100%">
-          <feTurbulence type="fractalNoise" baseFrequency="0.008 0.008" numOctaves="2" seed="92" result="noise" />
-          <feGaussianBlur in="noise" stdDeviation="0.02" result="blur" />
-          <feDisplacementMap in="SourceGraphic" in2="blur" scale="77" xChannelSelector="R" yChannelSelector="G" />
-        </filter>
-      </svg>
     </div>
   )
 }

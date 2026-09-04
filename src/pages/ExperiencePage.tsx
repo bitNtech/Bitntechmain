@@ -1,52 +1,22 @@
-import { useEffect, useRef, useState } from 'react'
+import { Suspense, lazy, useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { animate, createTimeline, stagger } from 'animejs'
-import RobotArmModel from '../components/3d/RobotArmModel'
-import CuteComputerModel from '../components/3d/InteractiveWorkspaceModel'
-import ErrorBoundary from '../components/ErrorBoundary'
-import { Bounds } from '@react-three/drei'
-import { Canvas } from '@react-three/fiber'
-import { Suspense } from 'react'
 import { SERVICES } from '../data/services'
+import { canAffordHeavyMedia } from '../lib/utils'
 import './ExperiencePage.css'
 
-function RobotArmScene({ pointerRef }: { pointerRef: React.MutableRefObject<{ x: number; y: number }> }) {
-  const ARM_FACING = Math.PI
-  return (
-    <div className="experience-object" aria-hidden="true" style={{ zIndex: 0, pointerEvents: 'none' }}>
-      {/* Capped DPR: phones report 3x and would render 9x the pixels for a
-          decorative model, which is where the scroll jank comes from. */}
-      <Canvas dpr={[1, 1.6]} camera={{ position: [2.5, 1.8, 3.5], fov: 40 }}>
-        <ambientLight intensity={0.8} />
-        <directionalLight position={[3, 5, 2]} intensity={1.6} />
-        <directionalLight position={[-4, -2, -3]} intensity={0.4} />
-        <Suspense fallback={null}>
-          <Bounds fit clip observe margin={1.5}>
-            <group rotation-y={ARM_FACING}>
-              <RobotArmModel pointerRef={pointerRef} />
-            </group>
-          </Bounds>
-        </Suspense>
-      </Canvas>
-    </div>
-  )
-}
+/* three.js, drei and a multi-megabyte GLB behind a dynamic import, so the page's
+   own chunk carries none of it and a visitor who is never shown the model never
+   pays for it. Loaded only once `canAffordHeavyMedia()` agrees — see there. */
+const HeroModels = lazy(() => import('../components/3d/HeroModels'))
 
-function CuteComputerScene({ pointerRef }: { pointerRef: React.MutableRefObject<{ x: number; y: number }> }) {
+/* The CSS ornament the hero falls back to: concentric rings around a lit core,
+   the same silhouette in the same place as the model, for anyone on a metered
+   or slow connection, a low-memory device, or reduced motion. */
+function ObjectShell({ children }: { children?: React.ReactNode }) {
   return (
     <div className="experience-object" aria-hidden="true" style={{ zIndex: 0, pointerEvents: 'none' }}>
-      <ErrorBoundary fallback={null}>
-        <Canvas dpr={[1, 1.6]} camera={{ position: [4, 3, 6], fov: 40 }}>
-          <ambientLight intensity={2} />
-          <directionalLight position={[4, 8, 4]} intensity={3} color="#fff5e6" />
-          <directionalLight position={[-5, 3, -2]} intensity={1.2} color="#8ce5ff" />
-          <pointLight position={[0, 2, -3]} intensity={1.5} color="#ab8cff" />
-          <hemisphereLight args={['#ffffff', '#2a1a3a', 1.5]} />
-          <Suspense fallback={null}>
-            <CuteComputerModel pointerRef={pointerRef} />
-          </Suspense>
-        </Canvas>
-      </ErrorBoundary>
+      {children ?? (<><i /><i /><i /><strong /></>)}
     </div>
   )
 }
@@ -62,6 +32,11 @@ export default function ExperiencePage({ mode }: Props) {
   const copy = COPY[mode]
   const pillars = SERVICES.filter(s => s.domain === mode)
   const [expandedPillar, setExpandedPillar] = useState<string | null>(null)
+  /* Decided after mount, never during render: the answer depends on
+     `navigator` and on a media query, and reading either while rendering makes
+     the first paint depend on the device rather than on the markup. */
+  const [heavyOk, setHeavyOk] = useState(false)
+  useEffect(() => { setHeavyOk(canAffordHeavyMedia()) }, [])
 
   // Pointer tracking for both scenes
   useEffect(() => {
@@ -109,15 +84,13 @@ export default function ExperiencePage({ mode }: Props) {
     root.querySelectorAll<HTMLElement>('[data-xp]').forEach(el=>observer.observe(el))
     return () => { observer.disconnect(); animations.forEach(animation => animation.revert()) }
   }, [mode])
-  return <main ref={page} className={`experience experience--${copy.hue}`}>
+  return <main ref={page} id="main" className={`experience experience--${copy.hue}`}>
     <section className="experience-hero"><div className="experience-hero__grid" aria-hidden="true" /><div className="experience-hero__meter experience-hero__body" aria-hidden="true"><span>01 / {mode === 'hardware' ? 'HARDWARE' : 'SOFTWARE'}</span><i /></div><p className="experience-hero__eyebrow">{copy.eyebrow}</p><h1 aria-label={copy.title.join(' ')}>{copy.title.map(line=><span className="experience-title-wrap" key={line}><span className="experience-title-line">{line}</span></span>)}</h1><p className="experience-lead experience-hero__body">{copy.lead}</p><a className="experience-hero__body" href="#field">Enter the field <b>↓</b></a>
     
-    {mode === 'hardware' ? (
-      <RobotArmScene pointerRef={armPointerRef} />
-    ) : (
-      <CuteComputerScene pointerRef={armPointerRef} />
-    )}
-    
+    {heavyOk
+      ? <Suspense fallback={<ObjectShell />}><ObjectShell><HeroModels mode={mode} pointerRef={armPointerRef} /></ObjectShell></Suspense>
+      : <ObjectShell />}
+
     <p className="experience-hero__index experience-hero__body" aria-hidden="true">SYSTEM<br />ONLINE</p></section>
     <section className="experience-field" id="field" data-xp><div className="xp-reveal"><p className="xp-label">Explore the system</p><h2>Every layer,<br /><em>in conversation.</em></h2></div><div className="experience-pillar-grid">{pillars.map(({ Icon, title, body, desc, items }, index)=>{
       const expanded = expandedPillar === title
@@ -125,8 +98,17 @@ export default function ExperiencePage({ mode }: Props) {
         className={`xp-reveal experience-pillar${expanded ? ' experience-pillar--expanded' : ''}`}
         key={title}
         onClick={() => setExpandedPillar(v => v === title ? null : title)}
+        /* A div with role="button" is only a button if it also answers the
+           keyboard the way one does. Space additionally has to be stopped from
+           scrolling the page. */
+        onKeyDown={e => {
+          if (e.key !== 'Enter' && e.key !== ' ') return
+          e.preventDefault()
+          setExpandedPillar(v => v === title ? null : title)
+        }}
         role="button"
         tabIndex={0}
+        aria-expanded={expanded}
       >
         <div className="experience-pillar__row">
           <div className="experience-pillar__head"><span>{String(index + 1).padStart(2, '0')}</span><Icon size={28} /><h3>{title}</h3></div>

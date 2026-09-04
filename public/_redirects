@@ -1,0 +1,10 @@
+# SPA fallback, read by Netlify and Cloudflare Pages.
+#
+# The build writes a real HTML file for every route in src/seo.ts, and a file
+# that exists always wins over a rule here — so /about is served its own
+# stamped <head>, not this. The rule is only what catches a URL no route
+# claims, so a deep link never 404s before React can route it.
+#
+# 200, not 301: a redirect would change the address bar and lose the path the
+# router needs to read.
+/*  /index.html  200

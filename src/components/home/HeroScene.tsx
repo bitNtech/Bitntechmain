@@ -18,7 +18,7 @@ import './HeroScene.css'
  * stops it dead when the hero leaves the viewport.
  */
 
-/* The figure is /assets/hero-embryo.png, laid over the board in the right-hand
+/* The figure is /assets/hero-embryo.jpg, laid over the board in the right-hand
    half. It is screen-blended, so the black it was cut on drops out and the
    traces underneath read through its edge rather than stopping at a rectangle.
    Nothing about the board depends on it — the traces run to their own pads. */
@@ -90,7 +90,13 @@ const DUST = Array.from({ length: 14 }, (_, i) => ({
 }))
 
 const WORD = 'Evolution'
-const BOOT_MS = 1400
+/* The count and the panel's exit sit in front of the hero on a first visit, so
+   between them they *are* the landing page's LCP — 1400 + 900 put it past six
+   seconds on a throttled phone. Shortened to the same gesture at a pace that
+   does not own the metric. Lengthen if the beat matters more than the number;
+   every ms here lands on LCP one-for-one. */
+const BOOT_MS = 850
+const BOOT_OUT_MS = 560
 const BOOT_KEY = 'bh-booted'
 
 export default function HeroScene() {
@@ -145,7 +151,7 @@ export default function HeroScene() {
 
   useEffect(() => {
     if (!ready || bootGone) return
-    const id = window.setTimeout(() => setBootGone(true), 900)
+    const id = window.setTimeout(() => setBootGone(true), BOOT_OUT_MS)
     return () => window.clearTimeout(id)
   }, [ready, bootGone])
 
@@ -153,7 +159,14 @@ export default function HeroScene() {
     const root = rootRef.current
     if (!root) return
 
-    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    /* No hover, no pointer parallax. On a touch screen there is no cursor for
+       the scene to lag behind, `pointermove` only fires mid-drag, and `--near`
+       drives a `filter` on the hero image — so the loop was recomputing a
+       filter on the largest element on the page during touch scrolling, for an
+       effect nobody could see. Everything else in the hero still runs. */
+    const reduced =
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches ||
+      !window.matchMedia('(hover: hover) and (pointer: fine)').matches
 
     /* Scroll is a position, not an animation, so it runs under reduced motion
        too — the hand-off to the section below depends on it. One frame per
@@ -337,10 +350,13 @@ export default function HeroScene() {
             hero's own subject only delays it. */}
         <img
           className="bh-embryo"
-          src="/assets/hero-embryo.png"
+          src="/assets/hero-embryo.jpg"
           alt=""
           loading="eager"
+          fetchPriority="high"
           decoding="async"
+          width="522"
+          height="692"
         />
 
         {/* The far end of the board, in front of the figure. Same viewBox and

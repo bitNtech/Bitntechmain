@@ -58,20 +58,21 @@ body {
 }
 
 /* --- App shell / touch tuning ------------------------------------------
-   Height the fixed bottom tab bar occupies, so page footers can reserve
-   room for it instead of hiding their last row underneath. */
+   What every page has to keep clear at its foot. It used to be the height of
+   the fixed tab bar; navigation lives in the header at every width now, so all
+   that is left is the home indicator's own strip. Every
+   `calc(... + var(--app-bottom-nav))` on the site keeps working and simply
+   reserves less. */
 :root {
-  --app-bottom-nav: 0px;
+  --app-bottom-nav: env(safe-area-inset-bottom);
   --safe-bottom: env(safe-area-inset-bottom);
 }
 
 @media (max-width: 860px) {
-  :root { --app-bottom-nav: calc(60px + env(safe-area-inset-bottom)); }
-
   /* In-page anchors (the hero's "Enter the field" jump) otherwise land the
-     target underneath the fixed top bar or the tab bar. */
+     target underneath the fixed top bar. */
   html {
-    scroll-padding-top: calc(56px + env(safe-area-inset-top));
+    scroll-padding-top: calc(64px + env(safe-area-inset-top));
     scroll-padding-bottom: var(--app-bottom-nav);
   }
 }
@@ -102,6 +103,7 @@ a, button, label, summary, [role='button'], input, select, textarea {
 @media (max-width: 860px) {
   .home-worlds__track,
   .about-us .team-grid,
+  .about-us .tl-scope,
   [data-touch-rail] {
     -webkit-overflow-scrolling: touch;
     overscroll-behavior-x: contain;
@@ -120,7 +122,6 @@ a, button, label, summary, [role='button'], input, select, textarea {
 
   /* Content that only appears on hover would never appear at all. */
   .about-us .t-card .t-meta { opacity: 1; transform: none; }
-  .nav-05__nav-list li a .nav-05__num { opacity: 1; }
 }
 
 h1,
@@ -162,3 +163,58 @@ code {
   padding: 4px 8px;
   background: var(--code-bg);
 }
+
+/* Holds the page's place while its chunk loads — see App.tsx. Near-black
+   because every route that is code-split opens on a dark hero, so the swap is
+   invisible rather than a flash of cream. */
+.route-fallback {
+  min-height: 100svh;
+  background: #05060a;
+}
+
+/* The footer's bubbles are drawn outside their own strip on purpose — they
+   rise five to nine rem into the section above so the pink reads as pouring
+   up into it. Desktop sections have enough bottom padding to absorb that; the
+   phone overrides cut theirs to 3.5-4rem, which put the closing CTA of every
+   page underneath the blob. One rule, on whichever section happens to be last. */
+@media (max-width: 767px) {
+  main > section:last-of-type {
+    padding-bottom: 9rem;
+  }
+}
+
+/* --- Keyboard --------------------------------------------------------- */
+
+/* First tab stop on every page. Off-screen until focused, then it lands in the
+   top-left corner over whatever the page is painting there. */
+.skip-link {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 10000;
+  padding: 0.85rem 1.25rem;
+  background: #220934;
+  color: #fff;
+  font: 600 0.85rem var(--sans);
+  text-decoration: none;
+  border-radius: 0 0 8px 0;
+  transform: translateY(-120%);
+  transition: transform 0.18s var(--ease);
+}
+.skip-link:focus-visible {
+  transform: translateY(0);
+  outline: 2px solid #ff6e42;
+  outline-offset: -4px;
+}
+
+/* Several components draw their own focus ring; this is the floor for
+   everything that does not, so nothing interactive is ever focused invisibly.
+   `:focus-visible` rather than `:focus`, so a mouse click never draws it. */
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: 2px solid #ff6e42;
+  outline-offset: 3px;
+}
+
+/* Every <img> on the site is cropped to a CSS-driven box, so the aspect ratio
+   that stops the reflow has to come from the tag's own width/height attributes
+   — see the intrinsic sizes carried alongside each source. */

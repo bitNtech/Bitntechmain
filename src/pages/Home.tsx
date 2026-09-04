@@ -6,6 +6,7 @@ import {
   GlyphPulse, GlyphSprout, GlyphLearn,
 } from '../components/icons/Glyphs'
 import HeroScene from '../components/home/HeroScene'
+import { FAQ } from '../seo'
 import './Home.css'
 
 /* The two ways into what the studio builds. */
@@ -27,14 +28,19 @@ const JOURNEY = [
    animation, in-view pausing and reduced-motion handling for free. Four of
    these already existed for the services list; three were added for the
    sectors that had no mark yet. */
+/* Label, animated mark, and the plate behind it. The file names are spelled
+   out rather than derived from the label: two of them do not match it
+   ('SMBs' -> SMB.jpg, 'Startups' -> startup.jpg), and a derived path would
+   survive a Windows dev server — which is case- and near-enough-insensitive —
+   then 404 on a Linux host. */
 const INDUSTRIES = [
-  ['Healthcare', GlyphPulse],
-  ['Agriculture', GlyphSprout],
-  ['Manufacturing', GlyphGear],
-  ['Education', GlyphLearn],
-  ['Startups', GlyphCompass],
-  ['SMBs', GlyphChart],
-  ['Security', GlyphShield],
+  ['Healthcare', GlyphPulse, '/assets/healthcare.jpg'],
+  ['Agriculture', GlyphSprout, '/assets/agriculture.jpg'],
+  ['Manufacturing', GlyphGear, '/assets/manufacturing.jpg'],
+  ['Education', GlyphLearn, '/assets/education.jpg'],
+  ['Startups', GlyphCompass, '/assets/startup.jpg'],
+  ['SMBs', GlyphChart, '/assets/SMB.jpg'],
+  ['Security', GlyphShield, '/assets/security.jpg'],
 ] as const
 
 /**
@@ -215,13 +221,20 @@ export default function Home() {
     worldsTrackRef.current?.scrollBy({ left: dir * 360, behavior: 'smooth' })
   }
 
-  return <main className="home-experience" ref={pageRef}>
+  return <main className="home-experience" id="main" ref={pageRef}>
     <HeroScene />
 
     <section className="home-manifesto" data-reveal><p className="home-kicker reveal">The bitNtech approach</p><h2 className="reveal">Ideas gain momentum when <em>every layer</em> works together.</h2><div className="home-manifesto__footer reveal"><p>AI. Software. Hardware. One curious team, building things that are useful in the real world.</p><span>01 / 05</span></div></section>
     <section className="home-solutions" id="solutions" data-reveal><div className="home-section-head reveal"><p className="home-kicker">Capabilities</p><h2>Choose your<br />launch point.</h2><p>Hover, tilt and pick a path into what we build.</p></div><div className="home-service-grid">{PATHS.map(({ num, Icon, title, body, to }) => <Link className="home-service reveal" key={num} to={to}><span className="home-service__number">{num}</span><Icon size={42} /><h3>{title}</h3><p>{body}</p><span className="home-service__arrow">↗</span></Link>)}</div></section>
     <section className="home-process" data-reveal ref={processRef}><div className="home-process__sticky"><p className="home-kicker reveal">From signal to system</p><h2 className="reveal">A process built to keep moving.</h2><p className="reveal">Scroll through the five moves that take a good question all the way to a working answer.</p></div><div className="home-process__list-wrap"><div className="home-process__line"><div className="home-process__line-progress" ref={lineRef} /></div><ol>{JOURNEY.map(([number, title, text]) => <li className="reveal" key={number}><span className="process-number">{number}</span><div><h3>{title}</h3><p>{text}</p></div></li>)}</ol></div></section>
-    <section className="home-worlds" data-reveal><div className="home-section-head reveal"><p className="home-kicker">Built for the real world</p><h2>Any industry.<br /><em>More possibility.</em></h2></div><div className="home-worlds__track reveal" ref={worldsTrackRef}>{INDUSTRIES.map(([industry, Mark], index) => <div className="home-world" key={industry}><span>0{index + 1}</span><Mark className="home-world__mark" size={46} /><h3>{industry}</h3><i /></div>)}</div><div className="home-worlds__scrollbar reveal"><button type="button" aria-label="Scroll left" onClick={() => scrollWorlds(-1)}>‹</button><div className="home-worlds__scrollbar-track"><div className="home-worlds__scrollbar-thumb" ref={worldsThumbRef} /></div><button type="button" aria-label="Scroll right" onClick={() => scrollWorlds(1)}>›</button></div></section>
+    <section className="home-worlds" id="industries" data-reveal><div className="home-section-head reveal"><p className="home-kicker">Built for the real world</p><h2>Any industry.<br /><em>More possibility.</em></h2></div><div className="home-worlds__track reveal" ref={worldsTrackRef}>{INDUSTRIES.map(([industry, Mark, plate], index) => <div className="home-world" key={industry}><img className="home-world__plate" src={plate} alt="" loading="lazy" decoding="async" /><span>0{index + 1}</span><Mark className="home-world__mark" size={46} /><h3>{industry}</h3><i /></div>)}</div><div className="home-worlds__scrollbar reveal"><button type="button" aria-label="Scroll left" onClick={() => scrollWorlds(-1)}>‹</button><div className="home-worlds__scrollbar-track"><div className="home-worlds__scrollbar-thumb" ref={worldsThumbRef} /></div><button type="button" aria-label="Scroll right" onClick={() => scrollWorlds(1)}>›</button></div></section>
+    {/* The answers a search or answer engine is asked about a studio like this,
+        on the page in the same words as the FAQPage schema in <head> — Google
+        only credits structured data a visitor can actually read. <details> is
+        the platform's own disclosure widget: keyboard, screen readers and
+        find-in-page all work with no script and no state. */}
+    <section className="home-faq" id="faq" data-reveal><div className="home-section-head reveal"><p className="home-kicker">Questions, answered</p><h2>What people<br />ask us first.</h2></div><div className="home-faq__list">{FAQ.map(({ q, a }, i) => <details className="home-faq__item" key={q} name="home-faq" open={i === 0}><summary><span>{q}</span><i aria-hidden="true" /></summary><p>{a}</p></details>)}</div></section>
+
     <section className="home-closing" data-reveal><p className="home-kicker reveal">Make the next move</p><h2 className="reveal">Let’s make your idea <em>impossible to ignore.</em></h2><Link className="reveal" to="/contact">Tell us what you’re building <span>↗</span></Link></section>
   </main>
 }

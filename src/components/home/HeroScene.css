@@ -6,7 +6,7 @@
    the form's near edge. Near-black throughout; the orange is spent only on
    interface details.
 
-   The form is /assets/hero-embryo.png, screen-blended over the board so the
+   The form is /assets/hero-embryo.jpg, screen-blended over the board so the
    black it was cut on drops out and the traces read through its edge instead
    of stopping at a rectangle. It is absolutely positioned and never enters the
    flow; its width is capped so its left edge always lands past the headline's
@@ -67,12 +67,29 @@
   --ink-3: rgba(244, 242, 239, .38);
   --accent: #ff6e42;
   --pad: clamp(1.25rem, 4vw, 4.5rem);
-  /* The board's own mapping, in CSS. `preserveAspectRatio="xMidYMid slice"`
-     scales the 1600x900 viewBox by max(W/1600, H/900) and centres it; this is
-     that number, so anything sized and placed with it lands in the same space
-     the traces are drawn in — at every viewport, not just the one it was
-     eyeballed at. It is the whole reason the pads can meet the figure's rim. */
-  --slice: max(calc(100vw / 1600), calc(100svh / 900));
+
+  /* ---- the board box ----
+     The one rectangle the 1600x900 viewBox is drawn into. The two board SVGs
+     are laid out in it and the figure is placed inside it in board
+     coordinates, so everything in the composition is described relative to
+     this and nothing else. Change these four and the traces, the pads and the
+     figure move together; that is the entire point of them.
+
+     It used to be implicit — the SVGs took `inset: 0` off .bh-scene while the
+     figure was placed off the viewport, and the breakpoints then transformed
+     the SVGs alone. So on a phone the traces were scaled 1.5x about a point
+     the figure knew nothing about, and ran straight across it instead of
+     landing on its rim. */
+  --board-x: 0px;
+  --board-y: 0px;
+  --board-w: 100vw;
+  --board-h: 100svh;
+
+  /* `preserveAspectRatio="xMidYMid slice"` scales the viewBox by
+     max(W/1600, H/900) and centres it; this is that number, in CSS, so
+     anything sized or placed with it lands in the space the traces are drawn
+     in. It is the whole reason the pads can meet the figure's rim. */
+  --slice: max(calc(var(--board-w) / 1600), calc(var(--board-h) / 900));
   /* One beat, reused by every staggered element via --i. */
   --beat: 62ms;
 
@@ -236,7 +253,7 @@
 }
 
 /* ---------- the figure --------------------------------------------------
-   /assets/hero-embryo.png, over the board rather than beside it.
+   /assets/hero-embryo.jpg, over the board rather than beside it.
 
    `mix-blend-mode: screen` is the one exception to the no-blend rule at the
    top of this file, and it is worth it: the asset is cut on black, so screen
@@ -250,8 +267,8 @@
   /* Placed in board coordinates: a 518x680 box at 1002,120 of the 1600x900
      viewBox. Positioning it in vw/% instead is what kept the traces from ever
      meeting it — the two boxes rescaled against each other on every resize. */
-  left: calc((100vw - 1600 * var(--slice)) / 2 + 1002 * var(--slice));
-  top: calc((100svh - 900 * var(--slice)) / 2 + 120 * var(--slice));
+  left: calc(var(--board-x) + (var(--board-w) - 1600 * var(--slice)) / 2 + 1002 * var(--slice));
+  top: calc(var(--board-y) + (var(--board-h) - 900 * var(--slice)) / 2 + 120 * var(--slice));
   width: calc(518 * var(--slice));
   height: calc(680 * var(--slice));
   object-fit: contain;
@@ -319,9 +336,12 @@
 
 .bh-board {
   position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
+  /* The board box, not the scene box — see --board-* on .bh. The figure is
+     placed inside the same rectangle, which is what welds the pads to it. */
+  left: var(--board-x);
+  top: var(--board-y);
+  width: var(--board-w);
+  height: var(--board-h);
   overflow: visible;
 }
 /* The foreground copy needs nothing of its own: it inherits the box and the
@@ -802,6 +822,11 @@
   display: inline-flex;
   align-items: center;
   gap: .6rem;
+  /* Half a line of uppercase micro-type is an 11px hit area. The padding is
+     pulled straight back out as negative margin, so the composition is
+     untouched and only the target grows. */
+  padding: 14px 6px;
+  margin: -14px -6px;
   text-decoration: none;
   color: var(--ink-3);
   font: 500 .54rem var(--mono);
@@ -840,15 +865,31 @@
    at this size it competes with the two buttons rather than supporting them. */
 @media (max-width: 1100px) {
   .bh { grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); }
-  .bh-board { transform: scale(1.12); transform-origin: 76% 50%; }
+  /* Was `transform: scale(1.12)` on the SVGs alone, about 76%/50%. That moved
+     the traces and left the figure where it was, so the pads drifted off its
+     rim. Same framing, expressed as the board box growing 12% about that same
+     point — which the figure is placed inside, so it comes along. */
+  .bh {
+    --board-x: -9.12vw;
+    --board-y: -6svh;
+    --board-w: 112vw;
+    --board-h: 112svh;
+  }
   .bh-claim { display: none; }
   .bh-rail { display: none; }
 }
 
-/* ---------- phones -----------------------------------------------------
+/* ---------- portrait ---------------------------------------------------
    Stacked, in reading order: the copy first, then the form under it. The
-   headline still measures off its own column, so the word cannot overflow. */
-@media (max-width: 760px) {
+   headline still measures off its own column, so the word cannot overflow.
+
+   Keyed on the aspect ratio as well as the width, because the thing that
+   decides this layout is whether a 16:9 board can sit beside the type at all.
+   A portrait tablet is 768-1024 wide and was falling into the landscape branch
+   above, which pushed the figure almost entirely off the right edge — the
+   viewBox is nearly twice as wide as the screen there, so `slice` crops the
+   sides away and the figure lives in the part that got cropped. */
+@media (max-width: 760px), (max-aspect-ratio: 4 / 5) {
   .bh {
     --pad: 1.25rem;
     --beat: 48ms;
@@ -861,24 +902,30 @@
   .bh-span { font-size: .54rem; letter-spacing: .26em; }
   .bh-btn { padding: .8rem 1.15rem; font-size: .56rem; letter-spacing: .14em; }
 
-  /* The form moves under the copy and takes the lower half of the screen. */
-  .bh-scene { top: auto; height: 52%; bottom: 0; }
-  .bh-board { transform: scale(1.5); transform-origin: 72% 44%; }
+  /* ---- the composition, on a portrait screen ----
+     The figure moves under the copy and takes the lower band, and the board
+     goes with it. Previously the scene was cropped to the lower 52%, the SVGs
+     were scaled 1.5x about 72%/44% and the figure was re-centred in the band
+     by hand — three different frames of reference, which is why the traces ran
+     across the figure instead of stopping at it.
 
-  /* Centred in that lower band and whole: `contain` against a height cap is
-     what keeps the figure from being cropped on a short phone. */
-  /* The scene is only the lower half here and the board is scaled up inside
-     it, so board coordinates stop being useful: the figure goes back to being
-     centred in the band it was given. */
-  .bh-embryo {
-    left: 0;
-    right: 0;
-    top: auto;
-    bottom: 4%;
-    margin-inline: auto;
-    width: min(76vw, 400px);
-    height: auto;
-    max-height: 46vh;
+     Here the figure's own box is the input and the board is derived from it,
+     so the relationship is the desktop one at any phone size. The constants
+     are the figure's place in the viewBox: it is a 518x680 box at 1002,120 of
+     1600x900, so 1002/518 across and 120/518 down, and the board is 1600/518
+     by 900/518 of the figure's width. The board box therefore has the viewBox
+     aspect exactly, `slice` and `meet` agree, and nothing is cropped. */
+  .bh {
+    --fig-w: min(72vw, 380px);
+    --fig-h: calc(1.31274 * var(--fig-w));
+    /* Centred across, sitting on the lower edge above the tab bar. */
+    --fig-x: calc((100vw - var(--fig-w)) / 2);
+    --fig-y: calc(100svh - var(--fig-h) - 7svh - var(--app-bottom-nav, 0px));
+
+    --board-w: calc(3.08880 * var(--fig-w));
+    --board-h: calc(1.73745 * var(--fig-w));
+    --board-x: calc(var(--fig-x) - 1.93436 * var(--fig-w));
+    --board-y: calc(var(--fig-y) - 0.23166 * var(--fig-w));
   }
   .bh[data-ready] .bh-embryo { opacity: .9; }
   .bh-vignette {
@@ -897,15 +944,19 @@
    finished state. Scroll still drives --sc, because that is a position rather
    than an animation and the hand-off to the section below depends on it. */
 @media (prefers-reduced-motion: reduce) {
+  /* Every one of these has to carry `[data-ready]`, because that is what the
+     animation itself is declared on — without it the override is a class less
+     specific than the rule it is trying to beat, and the trace pulses and the
+     nine pad loops kept running for a reader who asked for no motion. */
   .bh-dust span,
-  .bh-pulse,
-  .bh-pads g,
   .bh-rail i,
+  .bh[data-ready] .bh-pulse,
+  .bh[data-ready] .bh-pads g,
   .bh[data-ready] .bh-embryo {
     animation: none;
   }
-  .bh-pulse { opacity: 0; }
-  .bh-pads g { opacity: 1; }
+  .bh[data-ready] .bh-pulse { opacity: 0; }
+  .bh[data-ready] .bh-pads g { opacity: 1; }
   .bh-rail i { top: 45%; }
   .bh[data-ready] .bh-trace { animation: none; stroke-dashoffset: 0; }
   .bh-line__in,

@@ -163,7 +163,12 @@
 .experience-pillar-grid b { color: #102020; flex: none; font-size: 1.2rem; }
 .experience-pillar__collapse { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .35s ease; }
 .experience-pillar--expanded .experience-pillar__collapse { grid-template-rows: 1fr; }
-.experience-pillar__collapse-inner { overflow: hidden; }
+/* `grid-template-rows: 0fr` clips the panel visually but leaves every word of
+   it in the accessibility tree and in find-in-page. `visibility` is what
+   actually closes it, held back until the row collapse has finished so the
+   panel is still painted on the way out. */
+.experience-pillar__collapse-inner { overflow: hidden; visibility: hidden; transition: visibility 0s linear .35s; }
+.experience-pillar--expanded .experience-pillar__collapse-inner { visibility: visible; transition: visibility 0s; }
 .experience-pillar__desc { text-align: left; max-width: 480px; margin: 1.5rem 0 0; }
 .experience-pillar__items { list-style: none; margin: 1.5rem 0 0; padding: 0; display: grid; grid-template-columns: repeat(3,1fr); border-top: 1px solid #00000040; }
 .experience-pillar__items li { padding: .85rem 1rem .85rem 0; border-bottom: 1px solid #00000040; border-right: 1px solid #00000040; font: 600 .82rem var(--mono); letter-spacing: -.01em; color: #102020; }
@@ -174,7 +179,16 @@
 .experience-quote em { color: var(--xp); font-style: normal; }
 .experience-cta { text-align: center; min-height: 65vh; display: flex; flex-direction: column; justify-content: center; align-items: center; background: #0f1818; }
 .experience-cta h2 { margin: 0 0 2.2rem; }
-.xp-reveal { opacity: 0; transform: translateY(42px); }
+.js .xp-reveal { opacity: 0; transform: translateY(42px); }
+
+/* Tablet: the pillar row is a no-wrap flex line holding a nowrap heading and a
+   260px description, which together need more width than a portrait tablet has
+   — the heading was pushed past the card's right edge well before the phone
+   breakpoint. The heading wraps and the description steps out here instead. */
+@media (max-width: 900px) {
+  .experience-pillar-grid h3 { white-space: normal; }
+  .experience-pillar-grid p { display: none; }
+}
 
 @media (max-width: 700px) {
   /* Model sits in the upper third so the whole pitch — eyebrow, headline,
@@ -216,5 +230,8 @@
 @media (max-width: 420px) { .experience-hero__meter { top: 5.7rem; } }
 
 @media (prefers-reduced-motion: reduce) {
+  /* `.js .xp-reveal` is what hides these (see the base rule), so the override
+     has to match that specificity or the section never appears. */
+  .js .xp-reveal,
   .xp-reveal, .experience-hero__eyebrow, .experience-title-line, .experience-hero__body { opacity: 1; transform: none; }
 }

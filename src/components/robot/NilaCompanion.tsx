@@ -9,7 +9,7 @@ import './Nila.css'
 
 const HALF = 42
 /* Chrome she should never try to explain — she reads content, not furniture. */
-const FURNITURE = 'header, footer, nav, .nila-companion, .navbar, .bottom-nav'
+const FURNITURE = 'header, footer, nav, .nila-companion'
 
 /* `line`, when present, is a written line the element handed her through
    `data-nila` — see the team cards in AboutUs.tsx. Most boxes have none and
@@ -226,7 +226,7 @@ export default function NilaCompanion() {
      character, it is a fly. */
   useEffect(() => {
     if (pinned || asking) return
-    const CTA = 'a[href="/get-started"], a[href="/contact"], .nila-bubble__cta, .nav-05__cta, .nav-05__overlay-cta'
+    const CTA = 'a[href="/get-started"], a[href="/contact"], .nila-bubble__cta, .nav-05__cta'
     const FIELD = 'form input, form textarea, form select'
     let last = 0
     const react = (event: NilaEvent) => {

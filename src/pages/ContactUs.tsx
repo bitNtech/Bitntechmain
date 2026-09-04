@@ -178,7 +178,7 @@ export default function ContactUs() {
   const ready = Boolean(projectType && values.name.trim() && EMAIL_RE.test(values.email.trim()))
 
   return (
-    <main className="cx" ref={rootRef}>
+    <main className="cx" id="main" ref={rootRef}>
       {/* ---- the ground: the hero's scene, quieter ---- */}
       <div className="cx-scene" aria-hidden="true">
         {/* The reach. Inverted, because the plate is cut on white and this page
@@ -220,7 +220,9 @@ export default function ContactUs() {
             <div className={`cx-field${error?.field === 'name' ? ' has-error' : ''}`}>
               <label htmlFor="cx-name">Name</label>
               <input
-                id="cx-name" name="name" type="text" autoComplete="name"
+                id="cx-name" name="name" type="text" autoComplete="name" required
+                aria-invalid={error?.field === 'name' || undefined}
+                aria-describedby="cx-note"
                 data-focus="name" value={values.name} onChange={set('name')}
               />
               <i className="cx-field__signal" aria-hidden="true" />
@@ -229,7 +231,9 @@ export default function ContactUs() {
             <div className={`cx-field${error?.field === 'email' ? ' has-error' : ''}`}>
               <label htmlFor="cx-email">Email</label>
               <input
-                id="cx-email" name="email" type="email" autoComplete="email"
+                id="cx-email" name="email" type="email" autoComplete="email" required
+                aria-invalid={error?.field === 'email' || undefined}
+                aria-describedby="cx-note"
                 data-focus="email" value={values.email} onChange={set('email')}
               />
               <i className="cx-field__signal" aria-hidden="true" />
@@ -262,6 +266,7 @@ export default function ContactUs() {
               className={`cx-chips cx-span${error?.field === 'projectType' ? ' has-error' : ''}`}
               role="group"
               aria-labelledby="cx-type-label"
+              aria-describedby="cx-note"
             >
               <span className="cx-field__legend" id="cx-type-label">Project type</span>
               <div className="cx-chips__row">
@@ -345,7 +350,7 @@ export default function ContactUs() {
 
             {/* One live region for the whole form: the complaint and the
                 receipt land in the same place, so nothing is announced twice. */}
-            <p className="cx-note cx-span" role="status" aria-live="polite">
+            <p className="cx-note cx-span" id="cx-note" role="status" aria-live="polite">
               {error ? <span className="cx-note__err">{error.message}</span> : null}
             </p>
 

@@ -240,8 +240,8 @@
   border-radius: 999px;
   border: 1px solid rgba(34, 9, 52, 0.14);
   background: rgba(255, 255, 255, 0.55);
-  backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
 }
 .about-us .triad i {
   font-style: normal;
@@ -656,8 +656,17 @@
   right: 14px;
   bottom: 14px;
   background: rgba(20, 10, 6, 0.7);
-  backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  /* On touch this caption is permanently visible (see index.css) and the card
+     under it is being tweened by ScrollTrigger, so the blur would be
+     re-composited seven times a frame for the whole scroll. A flat ground
+     reads the same and costs nothing. */
+  @media (hover: none) {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    background: rgba(20, 10, 6, 0.88);
+  }
   color: #fafaf7;
   padding: 12px 16px;
   border-radius: 14px;
@@ -803,6 +812,12 @@
   .about-us .big-results {
     font-size: 12vw;
   }
+  /* The tuck under the line above is -20px, which is about a tenth of the
+     desktop type's height and half of the phone's. Scaled to the type it
+     stays a tuck instead of a collision. */
+  .about-us .big-results-wrap {
+    margin-top: -1vw;
+  }
   .about-us .cards-row {
     height: 200px;
     top: 46%;
@@ -906,9 +921,9 @@
   display: grid;
   place-items: center;
   padding: 1.25rem;
-  background: rgba(20, 10, 30, .5);
-  backdrop-filter: blur(14px) saturate(1.15);
-  -webkit-backdrop-filter: blur(14px) saturate(1.15);
+  background: rgba(18, 9, 27, .58);
+  -webkit-backdrop-filter: blur(16px) saturate(1.2);
+  backdrop-filter: blur(16px) saturate(1.2);
   animation: t-fade .28s ease both;
 }
 @keyframes t-fade { from { opacity: 0; } }
@@ -922,8 +937,14 @@
   max-height: min(88vh, 620px);
   border-radius: 26px;
   overflow: hidden;
-  background: var(--nb-bg);
-  box-shadow: 0 50px 90px -20px rgba(var(--nb-shadow-c), .55);
+  /* Glass, not a card. The overlay behind it is already blurring the page, so
+     this only needs a tint to sit in — a second backdrop-filter here would
+     blur an already-blurred result for no visible gain and twice the cost.
+     Everything inside it turns light to match; near-black ink on a dark
+     translucent panel is the one thing this must not do. */
+  background: rgba(22, 12, 30, .34);
+  border: 1px solid rgba(255, 255, 255, .16);
+  box-shadow: 0 50px 90px -20px rgba(0, 0, 0, .55);
   /* Comes up from the card that opened it rather than fading in place. */
   animation: t-pop .5s cubic-bezier(.16, 1, .3, 1) both;
 }
@@ -971,23 +992,23 @@
   font-weight: 700;
   letter-spacing: .2em;
   text-transform: uppercase;
-  color: var(--nb-orange-2);
+  color: var(--nb-orange-3);
 }
 .t-modal__card h3 {
   margin: 0 0 1.1rem;
   font-size: clamp(1.5rem, 3.4vw, 2.1rem);
   line-height: 1.1;
   letter-spacing: -.03em;
-  color: var(--nb-ink);
+  color: #fff;
 }
 
-/* Rows with hairlines — the same gesture the contact page uses, in this
-   page's own palette. */
+/* Rows with hairlines — the same gesture the contact page uses, and now in the
+   same key: light rules on glass rather than dark ones on paper. */
 .t-modal__links {
   list-style: none;
   margin: 0;
   padding: 0;
-  border-top: 1px solid var(--nb-line);
+  border-top: 1px solid rgba(255, 255, 255, .18);
 }
 .t-modal__links a {
   display: flex;
@@ -995,28 +1016,28 @@
   justify-content: space-between;
   gap: 1rem;
   padding: .85rem .2rem;
-  border-bottom: 1px solid var(--nb-line);
+  border-bottom: 1px solid rgba(255, 255, 255, .18);
   text-decoration: none;
   font-size: .95rem;
   font-weight: 600;
-  color: var(--nb-ink);
+  color: rgba(255, 255, 255, .94);
   transition: padding-left .3s cubic-bezier(.6, 0, .2, 1), color .3s, border-color .3s;
 }
 .t-modal__links a i {
   font-style: normal;
-  color: var(--nb-mute);
+  color: rgba(255, 255, 255, .55);
   transition: transform .3s cubic-bezier(.6, 0, .2, 1), color .3s;
 }
 .t-modal__links a:hover,
 .t-modal__links a:focus-visible {
   padding-left: .7rem;
-  color: var(--nb-orange-2);
-  border-bottom-color: var(--nb-orange-4);
+  color: var(--nb-orange-3);
+  border-bottom-color: rgba(255, 110, 66, .55);
   outline: none;
 }
 .t-modal__links a:hover i,
 .t-modal__links a:focus-visible i {
-  color: var(--nb-orange-2);
+  color: var(--nb-orange-3);
   transform: translate(3px, -3px);
 }
 
@@ -1029,16 +1050,16 @@
   height: 38px;
   display: grid;
   place-items: center;
-  border: 0;
+  border: 1px solid rgba(255, 255, 255, .22);
   border-radius: 50%;
-  background: rgba(255, 255, 255, .82);
-  color: var(--nb-ink);
+  background: rgba(255, 255, 255, .12);
+  color: #fff;
   font-size: 1.5rem;
   line-height: 1;
   cursor: pointer;
   transition: background .25s, transform .25s;
 }
-.t-modal__x:hover { background: #fff; transform: rotate(90deg); }
+.t-modal__x:hover { background: rgba(255, 255, 255, .24); transform: rotate(90deg); }
 .t-modal__x:focus-visible { outline: 2px solid var(--nb-orange-3); outline-offset: 2px; }
 
 @media (max-width: 640px) {

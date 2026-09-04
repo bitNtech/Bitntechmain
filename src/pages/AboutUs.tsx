@@ -49,7 +49,7 @@ const TEAM: readonly Member[] = [
     punch: "Prem is the CTO. If it runs in production, he has argued with it at least once.",
   },
   {
-    name: 'Akash S', role: 'CSO', img: '/assets/akashimg.png', rot: -2, depth: 8,
+    name: 'Akash S', role: 'CSO', img: '/assets/akashimg.jpg', rot: -2, depth: 8,
     instagram: 'https://www.instagram.com/_._akash._.s/',
     linkedin: 'https://www.linkedin.com/in/akash-s-38603a280/',
     github: 'https://github.com/Akashwrites',
@@ -89,6 +89,13 @@ const TEAM: readonly Member[] = [
    a scheme is a *relative path*, so the browser would send you to
    /about/www.linkedin.com/... and 404 rather than off-site. */
 const link = (url: string) => (/^https?:\/\//.test(url) ? url : `https://${url}`)
+
+/* Every portrait ships at two widths. The hero row draws them between 70 and
+   240 CSS px and the grid at about 300; only the profile modal at 500 needs the
+   large one, and it was the only thing the whole page had — seven 900px files
+   fetched eagerly above the fold on a phone. `sizes` is what lets the browser
+   pick per slot; the 480 is enough for every slot but the modal. */
+const srcSet = (img: string) => `${img.replace(/\.jpg$/, '-480.jpg')} 480w, ${img} 900w`
 
 const SOCIALS = [
   { key: 'instagram', label: 'Instagram' },
@@ -165,9 +172,15 @@ export default function AboutUs() {
   useEffect(() => {
     const root = rootRef.current
     if (!root) return
+    /* Everything below is motion: an intro timeline, seven infinite float
+       tweens, a pointer-driven parallax loop, a scrubbed hero and a dozen
+       scroll-triggered reveals. Under reduced motion none of it should run —
+       and none of it needs to, because the page's resting CSS is the finished
+       state. Only the count-up wrote content, and the markup carries the final
+       figure now. */
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
 
     const ctx = gsap.context(() => {
-      gsap.set('.navbar', { opacity: 0, y: -20 })
       gsap.set('.small-team .word > span', { y: '105%' })
       gsap.set('.big-results .letter', { y: 80, opacity: 0 })
       gsap.set('.t-card', { opacity: 0 })
@@ -182,7 +195,6 @@ export default function AboutUs() {
 
       const intro = gsap.timeline({ defaults: { ease: 'power3.out' } })
       intro
-        .to('.navbar', { opacity: 1, y: 0, duration: 0.8 }, 0.1)
         .to('.small-team .word > span', { y: '0%', duration: 0.9, stagger: 0.08, ease: 'power3.out' }, 0.3)
         .to('.big-results .letter', { y: 0, opacity: 1, duration: 0.9, stagger: 0.05, ease: 'back.out(1.6)' }, 0.55)
         .to(
@@ -199,9 +211,9 @@ export default function AboutUs() {
           0.8,
         )
 
-      cards.forEach((card, i) => {
+      const floats = cards.map((card, i) => {
         const rot = parseFloat(card.dataset.restRot || '0')
-        gsap.to(card, {
+        return gsap.to(card, {
           y: `+=${8 + (i % 3) * 5}`,
           rotation: rot + (i % 2 === 0 ? 1.5 : -1.5),
           duration: 3 + (i % 4) * 0.5,
@@ -216,19 +228,29 @@ export default function AboutUs() {
       let mx = 0, my = 0, tx = 0, ty = 0
       let raf = 0
 
+      let onScreen = true
       const onMove = (e: MouseEvent) => {
         if (!hero) return
         const r = hero.getBoundingClientRect()
         mx = ((e.clientX - r.left) / r.width - 0.5) * 2
         my = ((e.clientY - r.top) / r.height - 0.5) * 2
+        wake()
       }
       const onLeave = () => {
         mx = 0
         my = 0
+        wake()
       }
       hero?.addEventListener('mousemove', onMove)
       hero?.addEventListener('mouseleave', onLeave)
 
+      /* This used to be an unconditional loop: seven `translate` writes every
+         frame for the life of the page, whether the pointer had moved or not
+         and whether the hero was on screen or not. It now parks itself once
+         the cards have caught up with the pointer, and the observer below
+         stops it — and the seven infinite float tweens — the moment the hero
+         scrolls away. */
+      let running = false
       const parallax = () => {
         tx += (mx - tx) * 0.05
         ty += (my - ty) * 0.05
@@ -236,9 +258,19 @@ export default function AboutUs() {
           const d = parseFloat(card.dataset.depth || '8')
           card.style.translate = `${tx * d}px ${ty * d * 0.5}px`
         })
+        if (!onScreen || (Math.abs(mx - tx) < 0.0005 && Math.abs(my - ty) < 0.0005)) {
+          running = false
+          raf = 0
+          return
+        }
         raf = requestAnimationFrame(parallax)
       }
-      parallax()
+      const wake = () => {
+        if (running || !onScreen) return
+        running = true
+        raf = requestAnimationFrame(parallax)
+      }
+      wake()
 
       cards.forEach((card) => {
         const onCardMove = (e: MouseEvent) => {
@@ -458,9 +490,25 @@ export default function AboutUs() {
         gsap.to('.big-results .letter', { y: 0, duration: 0.6, stagger: 0.03, ease: 'elastic.out(1, 0.6)' })
       })
 
+      /* The hero is the first screen, so everything in it — the pointer loop
+         and the seven infinite float tweens — is running while the visitor is
+         reading the timeline three sections down. Off screen, all of it stops. */
+      const heroIo = hero
+        ? new IntersectionObserver(
+            ([entry]) => {
+              onScreen = entry.isIntersecting
+              floats.forEach((t) => (onScreen ? t.resume() : t.pause()))
+              if (onScreen) wake()
+            },
+            { rootMargin: '150px' },
+          )
+        : null
+      if (hero) heroIo?.observe(hero)
+
       return () => {
         hero?.removeEventListener('mousemove', onMove)
         hero?.removeEventListener('mouseleave', onLeave)
+        heroIo?.disconnect()
         cancelAnimationFrame(raf)
       }
     }, root)
@@ -487,7 +535,7 @@ export default function AboutUs() {
   }, [profile])
 
   return (
-    <main className="about-us" ref={rootRef}>
+    <main className="about-us" id="main" ref={rootRef}>
       <div className="grain" />
 
       <section className="hero">
@@ -506,7 +554,7 @@ export default function AboutUs() {
         <div className="cards-row">
           {HERO_ORDER.map((t): Member => TEAM[t]).map((m, i) => (
             <div key={m.name} className={`card card-${i + 1}`} data-rot={m.rot} data-depth={m.depth} title={`${m.name} — ${m.role}`}>
-              {m.img ? <img src={m.img} alt={m.name} /> : <span className="card-initials" aria-hidden="true">{initials(m.name)}</span>}
+              {m.img ? <img src={m.img} srcSet={srcSet(m.img)} sizes="(max-width: 750px) 122px, 240px" alt={`${m.name}, ${m.role} at BitNTech`} decoding="async" /> : <span className="card-initials" aria-hidden="true">{initials(m.name)}</span>}
             </div>
           ))}
         </div>
@@ -611,7 +659,7 @@ export default function AboutUs() {
                 setProfile(m)
               }}
             >
-              {m.img ? <img src={m.img} alt={m.name} /> : <span className="t-initials" aria-hidden="true">{initials(m.name)}</span>}
+              {m.img ? <img src={m.img} srcSet={srcSet(m.img)} sizes="(max-width: 480px) 50vw, 300px" alt={`${m.name}, ${m.role} at BitNTech`} loading="lazy" decoding="async" /> : <span className="t-initials" aria-hidden="true">{initials(m.name)}</span>}
               <div className="t-meta">
                 <div className="nm">{m.name}</div>
                 <div className="rl">{m.role}</div>
@@ -628,7 +676,11 @@ export default function AboutUs() {
           {STATS.map((s) => (
             <div className="stat-block" key={s.label}>
               <div className="num" data-count={s.count}>
-                <span>0</span>
+                {/* The finished figure, not a zero. The count-up tween starts
+                    from 0 itself; rendering 0 here left anyone who never gets
+                    that tween — reduced motion, or a failed script — reading
+                    "0 projects shipped". */}
+                <span>{s.count.toLocaleString()}</span>
                 {s.decimals > 0 && <small>.{'0'.repeat(s.decimals)}</small>}
                 {/* '+' is part of the figure, not a unit — it keeps the big
                     ink instead of the muted unit styling. */}
@@ -663,7 +715,7 @@ export default function AboutUs() {
 
             <div className="t-modal__portrait">
               {profile.img
-                ? <img src={profile.img} alt={profile.name} />
+                ? <img src={profile.img} alt={`${profile.name}, ${profile.role} at BitNTech`} decoding="async" />
                 : <span className="t-initials" aria-hidden="true">{initials(profile.name)}</span>}
             </div>
 

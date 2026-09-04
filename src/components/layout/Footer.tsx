@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { CONTACT } from '../../contact'
 import './Footer.css'
@@ -49,9 +50,25 @@ export default function Footer() {
   const { pathname } = useLocation()
   const onContact = pathname === '/contact' || pathname === '/get-started'
 
+  /* Sixty circles under an SVG gaussian filter is the most expensive paint on
+     the site, and the footer is below the fold on every page — so for almost
+     the whole visit the browser was re-running that filter for something
+     nobody could see. The class parks the animations; see Footer.css. */
+  const bubblesRef = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    const el = bubblesRef.current
+    if (!el) return
+    const io = new IntersectionObserver(
+      ([entry]) => el.classList.toggle('is-paused', !entry.isIntersecting),
+      { rootMargin: '200px' },
+    )
+    io.observe(el)
+    return () => io.disconnect()
+  }, [])
+
   return (
     <footer className="site-footer">
-      <div className="bubbles">
+      <div className="bubbles is-paused" ref={bubblesRef}>
         {bubbles.map((b) => (
           <div
             className="bubble"
@@ -77,7 +94,10 @@ export default function Footer() {
               'to' in link ? (
                 <Link key={link.label} to={link.to}>{link.label}</Link>
               ) : (
-                <a key={link.label} href={link.href} target="_blank" rel="noreferrer">{link.label}</a>
+                /* /#solutions and /#industries are this site — sending them
+                   through the external branch opened the homepage in a new
+                   tab. Only an off-site URL gets target/rel. */
+                <a key={link.label} href={link.href}>{link.label}</a>
               ),
             )}
           </div>
@@ -104,7 +124,10 @@ export default function Footer() {
         <div className="brand-watermark" aria-hidden="true">BitN<em>Tech</em></div>
       </div>
 
-      <svg style={{ position: 'fixed', top: '100vh' }}>
+      {/* Filter definition only. It was `position: fixed` at top: 100vh, which
+          promoted a permanently off-screen layer the compositor carried on
+          every scroll; a zero-sized absolute box costs nothing. */}
+      <svg aria-hidden="true" focusable="false" style={{ position: 'absolute', width: 0, height: 0 }}>
         <defs>
           <filter id="blob">
             <feGaussianBlur in="SourceGraphic" stdDeviation="10" result="blur" />
