@@ -2,7 +2,8 @@ import { Suspense, lazy, useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { animate, createTimeline, stagger } from 'animejs'
 import { SERVICES } from '../data/services'
-import { canAffordHeavyMedia } from '../lib/utils'
+import { canAffordHeavyMedia, prefersLessMotion } from '../lib/utils'
+import ErrorBoundary from '../components/ErrorBoundary'
 import './ExperiencePage.css'
 
 /* three.js, drei and a multi-megabyte GLB behind a dynamic import, so the page's
@@ -11,8 +12,10 @@ import './ExperiencePage.css'
 const HeroModels = lazy(() => import('../components/3d/HeroModels'))
 
 /* The CSS ornament the hero falls back to: concentric rings around a lit core,
-   the same silhouette in the same place as the model, for anyone on a metered
-   or slow connection, a low-memory device, or reduced motion. */
+   the same silhouette in the same place as the model. It stands in whenever
+   the model cannot be shown — no WebGL2, Save-Data, a 2G connection — and,
+   just as importantly, whenever the model fails to arrive: a 404, a dropped
+   fetch or a decode error used to leave the hero with nothing in it at all. */
 function ObjectShell({ children }: { children?: React.ReactNode }) {
   return (
     <div className="experience-object" aria-hidden="true" style={{ zIndex: 0, pointerEvents: 'none' }}>
@@ -36,7 +39,12 @@ export default function ExperiencePage({ mode }: Props) {
      `navigator` and on a media query, and reading either while rendering makes
      the first paint depend on the device rather than on the markup. */
   const [heavyOk, setHeavyOk] = useState(false)
-  useEffect(() => { setHeavyOk(canAffordHeavyMedia()) }, [])
+  const [still, setStill] = useState(false)
+  useEffect(() => {
+    setHeavyOk(canAffordHeavyMedia())
+    /* Reduced motion no longer hides the model — it just stops it moving. */
+    setStill(prefersLessMotion())
+  }, [])
 
   // Pointer tracking for both scenes
   useEffect(() => {
@@ -87,8 +95,16 @@ export default function ExperiencePage({ mode }: Props) {
   return <main ref={page} id="main" className={`experience experience--${copy.hue}`}>
     <section className="experience-hero"><div className="experience-hero__grid" aria-hidden="true" /><div className="experience-hero__meter experience-hero__body" aria-hidden="true"><span>01 / {mode === 'hardware' ? 'HARDWARE' : 'SOFTWARE'}</span><i /></div><p className="experience-hero__eyebrow">{copy.eyebrow}</p><h1 aria-label={copy.title.join(' ')}>{copy.title.map(line=><span className="experience-title-wrap" key={line}><span className="experience-title-line">{line}</span></span>)}</h1><p className="experience-lead experience-hero__body">{copy.lead}</p><a className="experience-hero__body" href="#field">Enter the field <b>↓</b></a>
     
+    {/* The boundary is outside the lazy import on purpose: Suspense catches a
+        slow chunk, not a failed one, so a network error fetching either the
+        module or the .glb has to land somewhere that can still draw the
+        ornament. */}
     {heavyOk
-      ? <Suspense fallback={<ObjectShell />}><ObjectShell><HeroModels mode={mode} pointerRef={armPointerRef} /></ObjectShell></Suspense>
+      ? <ErrorBoundary fallback={<ObjectShell />}>
+          <Suspense fallback={<ObjectShell />}>
+            <ObjectShell><HeroModels mode={mode} still={still} pointerRef={armPointerRef} /></ObjectShell>
+          </Suspense>
+        </ErrorBoundary>
       : <ObjectShell />}
 
     <p className="experience-hero__index experience-hero__body" aria-hidden="true">SYSTEM<br />ONLINE</p></section>

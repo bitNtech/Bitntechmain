@@ -3,25 +3,58 @@ export function cn(...classes: Array<string | false | null | undefined>) {
 }
 
 /**
+ * Whether this browser can draw the scenes at all.
+ *
+ * three.js has been WebGL2-only since r163, so a context is the whole question:
+ * without one the canvas would mount and stay blank. This is the only reason a
+ * visitor should ever be denied the model — everything else below is about
+ * what it costs to fetch, not whether it can be shown.
+ */
+export function canRenderWebGL(): boolean {
+  if (typeof document === 'undefined') return false
+  try {
+    const canvas = document.createElement('canvas')
+    return !!(canvas.getContext('webgl2') as WebGL2RenderingContext | null)
+  } catch {
+    /* Some privacy modes throw rather than returning null. */
+    return false
+  }
+}
+
+export function prefersLessMotion(): boolean {
+  return typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
+}
+
+/**
  * Whether this visit should be shown the decorative WebGL scenes.
  *
- * They are worth several megabytes of geometry and a continuous GPU loop for
- * something that is `aria-hidden` and, on phones, sits at 62% opacity behind
- * the type. That is a fair trade on a laptop on wifi and a bad one on a metered
- * phone, so the trade is made per visit rather than once at build time. When it
- * says no, the hero keeps its CSS ornament and nothing else changes.
+ * The bar used to be far higher than it should have been, and the models were
+ * missing on a lot of ordinary machines because of it:
+ *
+ *  - `deviceMemory <= 4` — Chrome quantises this to 0.25/0.5/1/2/4/8 and caps
+ *    it at 8, so "4" is not a weak device, it is most laptops and most phones.
+ *    That one line was hiding the robot arm and the workspace on roughly half
+ *    the devices that asked for them.
+ *  - `effectiveType === '3g'` — measured, not the radio, and a good 4G
+ *    connection under load reports 3g routinely.
+ *  - `prefers-reduced-motion` — a reason not to *animate* the model, not a
+ *    reason to withhold it. It is rendered still instead; see `prefersLessMotion`.
+ *
+ * What is left is the two signals that actually mean "do not spend megabytes
+ * here": the visitor has asked their browser to save data, or the connection is
+ * genuinely 2G.
  */
 export function canAffordHeavyMedia(): boolean {
   if (typeof window === 'undefined') return false
-  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return false
+  if (!canRenderWebGL()) return false
 
   const nav = navigator as Navigator & {
     connection?: { saveData?: boolean; effectiveType?: string }
     deviceMemory?: number
   }
   if (nav.connection?.saveData) return false
-  if (nav.connection?.effectiveType && /^(slow-)?2g$|^3g$/.test(nav.connection.effectiveType)) return false
-  if (typeof nav.deviceMemory === 'number' && nav.deviceMemory <= 4) return false
-  /* No WebGL, no point downloading a model for it. */
-  return !!document.createElement('canvas').getContext('webgl2')
+  if (nav.connection?.effectiveType && /^(slow-)?2g$/.test(nav.connection.effectiveType)) return false
+  /* Genuinely tiny devices only — see the note above about what 4 means. */
+  if (typeof nav.deviceMemory === 'number' && nav.deviceMemory <= 0.5) return false
+  return true
 }

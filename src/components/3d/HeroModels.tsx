@@ -11,26 +11,31 @@ import ErrorBoundary from '../ErrorBoundary'
  * page's own chunk entirely and are fetched only for a visit that will show
  * them (see `canAffordHeavyMedia`).
  *
- * ponytail: the models themselves are unquantised float32 geometry —
- * cute_computer_follow_cursor.glb alone is 17 MB with no textures in it. Run
- * them through `gltf-transform optimize --compress draco` if the download
- * matters more than keeping the toolchain dependency-free; deferring the fetch
- * is what is done here instead.
+ * The .glb files are quantised (KHR_mesh_quantization, which three decodes
+ * natively — no Draco or Meshopt decoder to fetch): 17.8 MB -> 8.2 MB for the
+ * workspace, 3.6 -> 1.5 for the arm. `gltf-transform quantize`, not `optimize`:
+ * `optimize` also prunes and joins nodes, and both rigs are driven by node
+ * *name*, so joining them silently killed every joint.
  */
 type Props = {
   mode: 'hardware' | 'software'
   pointerRef: React.MutableRefObject<{ x: number; y: number }>
+  /* Reduced motion. The model is still shown — withholding it was the wrong
+     reading of the preference — but the render loop draws once and stops
+     instead of running every frame for the life of the page. */
+  still?: boolean
 }
 
 const ARM_FACING = Math.PI
 
-export default function HeroModels({ mode, pointerRef }: Props) {
+export default function HeroModels({ mode, pointerRef, still = false }: Props) {
+  const frameloop = still ? 'demand' : 'always'
   return (
     <ErrorBoundary fallback={null}>
       {mode === 'hardware' ? (
         // Capped DPR: phones report 3x and would render 9x the pixels for a
         // decorative model, which is where the scroll jank comes from.
-        <Canvas dpr={[1, 1.6]} camera={{ position: [2.5, 1.8, 3.5], fov: 40 }}>
+        <Canvas frameloop={frameloop} dpr={[1, 1.6]} camera={{ position: [2.5, 1.8, 3.5], fov: 40 }}>
           <ambientLight intensity={0.8} />
           <directionalLight position={[3, 5, 2]} intensity={1.6} />
           <directionalLight position={[-4, -2, -3]} intensity={0.4} />
@@ -43,7 +48,7 @@ export default function HeroModels({ mode, pointerRef }: Props) {
           </Suspense>
         </Canvas>
       ) : (
-        <Canvas dpr={[1, 1.6]} camera={{ position: [4, 3, 6], fov: 40 }}>
+        <Canvas frameloop={frameloop} dpr={[1, 1.6]} camera={{ position: [4, 3, 6], fov: 40 }}>
           <ambientLight intensity={2} />
           <directionalLight position={[4, 8, 4]} intensity={3} color="#fff5e6" />
           <directionalLight position={[-5, 3, -2]} intensity={1.2} color="#8ce5ff" />
