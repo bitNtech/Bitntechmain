@@ -10,15 +10,22 @@ export function cn(...classes: Array<string | false | null | undefined>) {
  * visitor should ever be denied the model — everything else below is about
  * what it costs to fetch, not whether it can be shown.
  */
+let webgl: boolean | undefined
 export function canRenderWebGL(): boolean {
   if (typeof document === 'undefined') return false
+  if (webgl !== undefined) return webgl
   try {
-    const canvas = document.createElement('canvas')
-    return !!(canvas.getContext('webgl2') as WebGL2RenderingContext | null)
+    const gl = document.createElement('canvas').getContext('webgl2') as WebGL2RenderingContext | null
+    /* Hand the probe context straight back. Browsers cap live contexts (about
+       16 in Chrome, fewer on phones) and drop the oldest past it, so a probe
+       per route change could cost a real scene its context. */
+    gl?.getExtension('WEBGL_lose_context')?.loseContext()
+    webgl = !!gl
   } catch {
     /* Some privacy modes throw rather than returning null. */
-    return false
+    webgl = false
   }
+  return webgl
 }
 
 export function prefersLessMotion(): boolean {

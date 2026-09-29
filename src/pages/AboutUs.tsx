@@ -5,14 +5,14 @@ import './AboutUs.css'
 
 gsap.registerPlugin(ScrollTrigger)
 
-/* The seven. One source of truth: the hero's floating cards, the team grid and
+/* The six. One source of truth: the hero's floating cards, the team grid and
    the profile card all read this list, so a person is added, removed or given
    a new link in exactly one place. `img: null` means we have no real portrait
    yet — the card falls back to initials rather than a stock face. Image paths
    are lower-case and hyphenated on purpose: some arrived with spaces and a
    capital, which survives a Windows dev server (case-insensitive) and then
    404s on a Linux host. Hero geometry (rot/depth) lives here too; the matching
-   sizes/positions are .card-1..7 in AboutUs.css.
+   sizes/positions are .card-1..6 in AboutUs.css.
 
    Social links are optional per person and per network — several have no
    GitHub, and a row that is not there simply is not rendered. Every URL is
@@ -70,13 +70,6 @@ const TEAM: readonly Member[] = [
     punch: "Shashanth handles the money and the message. Both at once, somehow.",
   },
   {
-    name: 'Veronica T', role: 'COO', img: '/assets/veronica.jpg', rot: 4, depth: 11,
-    instagram: 'https://www.instagram.com/its.veronica.___/',
-    linkedin: 'https://www.linkedin.com/in/t-veronica/',
-    github: null,
-    punch: "Veronica keeps the whole thing moving. Deadlines are frightened of her.",
-  },
-  {
     name: 'Sri Hari Hara Pandiyan', role: 'Executive Assistant', img: '/assets/sri-hari.jpg', rot: 7, depth: 9,
     instagram: 'https://www.instagram.com/dan_harxx__/',
     linkedin: 'https://www.linkedin.com/in/sri-hari-hara-pandiyan-bb3ab533b/',
@@ -104,10 +97,10 @@ const SOCIALS = [
 ] as const
 
 /* Slot order for the hero row, as indices into TEAM. The slots are size-ranked
-   in AboutUs.css - .card-4 is the largest and sits dead centre, .card-3/.card-5
-   flank it - so this puts the founder in the middle and the co-founder beside
-   him, while TEAM itself stays in roster order for the grid below. */
-const HERO_ORDER = [4, 3, 2, 0, 1, 5, 6] as const
+   in AboutUs.css - .card-3/.card-4 are the largest and share the centre - so
+   this puts the founder and the co-founder side by side in the middle, while
+   TEAM itself stays in roster order for the grid below. */
+const HERO_ORDER = [4, 2, 0, 1, 3, 5] as const
 
 const initials = (name: string) =>
   name.split(' ').filter(Boolean).slice(0, 2).map((w) => w[0]).join('').toUpperCase()
@@ -172,7 +165,7 @@ export default function AboutUs() {
   useEffect(() => {
     const root = rootRef.current
     if (!root) return
-    /* Everything below is motion: an intro timeline, seven infinite float
+    /* Everything below is motion: an intro timeline, six infinite float
        tweens, a pointer-driven parallax loop, a scrubbed hero and a dozen
        scroll-triggered reveals. Under reduced motion none of it should run —
        and none of it needs to, because the page's resting CSS is the finished
@@ -244,11 +237,11 @@ export default function AboutUs() {
       hero?.addEventListener('mousemove', onMove)
       hero?.addEventListener('mouseleave', onLeave)
 
-      /* This used to be an unconditional loop: seven `translate` writes every
+      /* This used to be an unconditional loop: six `translate` writes every
          frame for the life of the page, whether the pointer had moved or not
          and whether the hero was on screen or not. It now parks itself once
          the cards have caught up with the pointer, and the observer below
-         stops it — and the seven infinite float tweens — the moment the hero
+         stops it — and the six infinite float tweens — the moment the hero
          scrolls away. */
       let running = false
       const parallax = () => {
@@ -316,15 +309,14 @@ export default function AboutUs() {
           const p = self.progress
           gsap.set('.big-results', { scale: 1 + 0.15 * p, opacity: 1 - 0.4 * p })
           gsap.set('.small-team', { y: -60 * p, opacity: 1 - p * 1.5 })
-          /* One entry per team member — seven, fanning out symmetrically. */
+          /* One entry per team member — six, fanning out symmetrically. */
           const moves = [
-            { x: -270, y: -40, rot: -26 },
-            { x: -180, y: 40, rot: -16 },
-            { x: -80, y: 110, rot: -7 },
-            { x: 0, y: 130, rot: 0 },
-            { x: 80, y: 110, rot: 7 },
-            { x: 180, y: 40, rot: 16 },
-            { x: 270, y: -40, rot: 26 },
+            { x: -250, y: -30, rot: -24 },
+            { x: -150, y: 60, rot: -13 },
+            { x: -45, y: 125, rot: -4 },
+            { x: 45, y: 125, rot: 4 },
+            { x: 150, y: 60, rot: 13 },
+            { x: 250, y: -30, rot: 24 },
           ]
           cards.forEach((card, i) => {
             const m = moves[i]
@@ -491,7 +483,7 @@ export default function AboutUs() {
       })
 
       /* The hero is the first screen, so everything in it — the pointer loop
-         and the seven infinite float tweens — is running while the visitor is
+         and the six infinite float tweens — is running while the visitor is
          reading the timeline three sections down. Off screen, all of it stops. */
       const heroIo = hero
         ? new IntersectionObserver(
@@ -540,7 +532,7 @@ export default function AboutUs() {
 
       <section className="hero">
         <h1 className="small-team">
-          <span className="word"><span>Seven</span></span>&nbsp;<span className="word"><span>minds,</span></span>
+          <span className="word"><span>Six</span></span>&nbsp;<span className="word"><span>minds,</span></span>
         </h1>
 
         <div className="big-results-wrap">
@@ -637,7 +629,7 @@ export default function AboutUs() {
         <div className="team-head">
           <div>
             
-            <h2>Seven people,<br />one <em>engineering team</em>.</h2>
+            <h2>Six people,<br />one <em>engineering team</em>.</h2>
           </div>
           <p>Every person you see here touches every project we ship. No middle layer, no handoffs to strangers — just direct work with the people doing it.</p>
         </div>
@@ -672,7 +664,7 @@ export default function AboutUs() {
 
       <section className="stats">
         <div className="stats-inner">
-          <h3>Seven humans.<br />One <em>tight ship</em>.</h3>
+          <h3>Six humans.<br />One <em>tight ship</em>.</h3>
           {STATS.map((s) => (
             <div className="stat-block" key={s.label}>
               <div className="num" data-count={s.count}>

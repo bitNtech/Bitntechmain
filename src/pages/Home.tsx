@@ -29,18 +29,19 @@ const JOURNEY = [
    these already existed for the services list; three were added for the
    sectors that had no mark yet. */
 /* Label, animated mark, and the plate behind it. The file names are spelled
-   out rather than derived from the label: two of them do not match it
-   ('SMBs' -> SMB.jpg, 'Startups' -> startup.jpg), and a derived path would
-   survive a Windows dev server — which is case- and near-enough-insensitive —
-   then 404 on a Linux host. */
+   out rather than derived from the label, and kept lower-case: a mixed-case
+   path survives a Windows dev server — which is case-insensitive — then 404s
+   on a Linux host. Plates are Unsplash-licensed photos cropped to the card's
+   1.24 ratio at 800px; a replaced plate gets a new file name, because /assets
+   is served with a long cache and an edited file at an old URL never lands. */
 const INDUSTRIES = [
-  ['Healthcare', GlyphPulse, '/assets/healthcare.jpg'],
-  ['Agriculture', GlyphSprout, '/assets/agriculture.jpg'],
-  ['Manufacturing', GlyphGear, '/assets/manufacturing.jpg'],
-  ['Education', GlyphLearn, '/assets/education.jpg'],
-  ['Startups', GlyphCompass, '/assets/startup.jpg'],
-  ['SMBs', GlyphChart, '/assets/SMB.jpg'],
-  ['Security', GlyphShield, '/assets/security.jpg'],
+  ['Healthcare', GlyphPulse, '/assets/industry-healthcare.jpg'],
+  ['Agriculture', GlyphSprout, '/assets/industry-agriculture.jpg'],
+  ['Manufacturing', GlyphGear, '/assets/industry-manufacturing.jpg'],
+  ['Education', GlyphLearn, '/assets/industry-education.jpg'],
+  ['Startups', GlyphCompass, '/assets/industry-startups.jpg'],
+  ['SMBs', GlyphChart, '/assets/industry-smb.jpg'],
+  ['Security', GlyphShield, '/assets/industry-security.jpg'],
 ] as const
 
 /**

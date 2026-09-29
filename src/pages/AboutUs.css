@@ -176,15 +176,18 @@
     inset 0 -4px 8px rgba(120, 20, 0, 0.4);
 }
 
-/* Seven cards, one per person in TEAM - sizes taper from the centre out so the
-   composition stays organic while every member keeps a readable face. */
-.about-us .card-1 { width: 130px; height: 175px; left: 4%;  top: 40px; z-index: 1; }
-.about-us .card-2 { width: 170px; height: 230px; left: 13%; top: 60px; z-index: 2; }
-.about-us .card-3 { width: 205px; height: 275px; left: 25%; top: 20px; z-index: 4; }
-.about-us .card-4 { width: 240px; height: 320px; left: 39%; top: 0px;  z-index: 5; }
-.about-us .card-5 { width: 205px; height: 275px; left: 55%; top: 20px; z-index: 4; }
-.about-us .card-6 { width: 170px; height: 230px; left: 69%; top: 60px; z-index: 2; }
-.about-us .card-7 { width: 130px; height: 175px; left: 82%; top: 40px; z-index: 1; }
+/* Six cards, one per person in TEAM - sizes taper from the centre pair out so
+   the composition stays organic while every member keeps a readable face.
+   Positions are measured from the centre line in --u, a pixel that shrinks
+   with the viewport, so the fan keeps its overlaps at every width instead of
+   opening gaps on wide screens and colliding on narrow ones. */
+.about-us .cards-row { --u: min(1px, calc(100vw / 1080)); }
+.about-us .card-1 { width: calc(140 * var(--u)); height: calc(190 * var(--u)); left: calc(50% - 490 * var(--u)); top: calc(70 * var(--u)); z-index: 1; }
+.about-us .card-2 { width: calc(185 * var(--u)); height: calc(250 * var(--u)); left: calc(50% - 370 * var(--u)); top: calc(45 * var(--u)); z-index: 2; }
+.about-us .card-3 { width: calc(230 * var(--u)); height: calc(305 * var(--u)); left: calc(50% - 215 * var(--u)); top: 0; z-index: 4; }
+.about-us .card-4 { width: calc(230 * var(--u)); height: calc(305 * var(--u)); left: calc(50% - 15 * var(--u)); top: calc(8 * var(--u)); z-index: 5; }
+.about-us .card-5 { width: calc(185 * var(--u)); height: calc(250 * var(--u)); left: calc(50% + 185 * var(--u)); top: calc(45 * var(--u)); z-index: 2; }
+.about-us .card-6 { width: calc(140 * var(--u)); height: calc(190 * var(--u)); left: calc(50% + 350 * var(--u)); top: calc(70 * var(--u)); z-index: 1; }
 
 /* No stock portraits: a member without a real photo shows their initials on
    the same card face. Shared by the hero cards and the team grid. */
@@ -581,10 +584,11 @@
   margin: 0;
 }
 
-/* Seven does not divide by four, so this is flex rather than grid: the last row
-   holds three and centres instead of leaving a hole. */
+/* Six people, three to a row on desktop and two on phones. Flex rather than
+   grid so a future odd head-count centres its last row instead of leaving a
+   hole. */
 .about-us .team-grid {
-  max-width: 1280px;
+  max-width: 1040px;
   margin: 0 auto;
   display: flex;
   flex-wrap: wrap;
@@ -592,7 +596,7 @@
   gap: 24px;
 }
 .about-us .team-grid > .t-card {
-  flex: 0 1 calc((100% - 72px) / 4);
+  flex: 0 1 calc((100% - 48px) / 3);
 }
 
 .about-us .t-card {
@@ -822,13 +826,15 @@
     height: 200px;
     top: 46%;
   }
-  .about-us .card-1 { width: 70px;  height: 95px;  left: 0%;  top: 30px; }
-  .about-us .card-2 { width: 88px;  height: 118px; left: 11%; top: 45px; }
-  .about-us .card-3 { width: 105px; height: 140px; left: 25%; top: 15px; }
-  .about-us .card-4 { width: 122px; height: 165px; left: 40%; top: 0; }
-  .about-us .card-5 { width: 105px; height: 140px; left: 58%; top: 15px; }
-  .about-us .card-6 { width: 88px;  height: 118px; left: 72%; top: 45px; }
-  .about-us .card-7 { width: 70px;  height: 95px;  left: 85%; top: 30px; }
+  /* Same fan, tighter: 400 units edge to edge, which fits a 420px-wide phone
+     at full size and scales down together below that. */
+  .about-us .cards-row { --u: min(1px, calc(100vw / 420)); }
+  .about-us .card-1 { width: calc(62 * var(--u));  height: calc(84 * var(--u));  left: calc(50% - 200 * var(--u)); top: calc(38 * var(--u)); }
+  .about-us .card-2 { width: calc(80 * var(--u));  height: calc(108 * var(--u)); left: calc(50% - 158 * var(--u)); top: calc(22 * var(--u)); }
+  .about-us .card-3 { width: calc(100 * var(--u)); height: calc(135 * var(--u)); left: calc(50% - 92 * var(--u));  top: 0; }
+  .about-us .card-4 { width: calc(100 * var(--u)); height: calc(135 * var(--u)); left: calc(50% - 8 * var(--u));   top: calc(6 * var(--u)); }
+  .about-us .card-5 { width: calc(80 * var(--u));  height: calc(108 * var(--u)); left: calc(50% + 78 * var(--u));  top: calc(22 * var(--u)); }
+  .about-us .card-6 { width: calc(62 * var(--u));  height: calc(84 * var(--u));  left: calc(50% + 138 * var(--u)); top: calc(38 * var(--u)); }
   .about-us .card-initials { font-size: 1.2rem; }
   .about-us .team-section {
     padding: 80px 20px 40px;

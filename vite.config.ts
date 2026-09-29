@@ -9,6 +9,12 @@ export default defineConfig({
        (`color-mix`, nesting, `@container`-era syntax) supports this, so there
        is nothing to gain from shipping older output. */
     target: 'es2022',
+    /* Hashed build output goes to /static, not Vite's default /assets: public/
+       already owns /assets for the un-hashed files (GLBs, photos), and the two
+       need opposite cache rules. A content-hashed file can be cached forever;
+       a GLB replaced at the same URL cannot, or returning visitors keep the
+       old one for a year. See vercel.json and public/_headers. */
+    assetsDir: 'static',
     /* Deliberately the default esbuild minifier and not lightningcss:
        lightningcss rewrites vendor prefixes against its own target list, and
        with no browserslist here it decided `-webkit-backdrop-filter` alone was

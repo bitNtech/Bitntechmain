@@ -11,11 +11,13 @@ import ErrorBoundary from '../ErrorBoundary'
  * page's own chunk entirely and are fetched only for a visit that will show
  * them (see `canAffordHeavyMedia`).
  *
- * The .glb files are quantised (KHR_mesh_quantization, which three decodes
- * natively — no Draco or Meshopt decoder to fetch): 17.8 MB -> 8.2 MB for the
- * workspace, 3.6 -> 1.5 for the arm. `gltf-transform quantize`, not `optimize`:
- * `optimize` also prunes and joins nodes, and both rigs are driven by node
- * *name*, so joining them silently killed every joint.
+ * The .glb files are quantised, welded and meshopt-compressed
+ * (`gltf-transform weld` then `gltf-transform meshopt`): 17.8 MB -> 1.6 MB for
+ * the workspace, 3.6 -> 0.6 for the arm. drei's useGLTF carries the meshopt
+ * decoder inline, so there is nothing extra to fetch — and it matters, because
+ * the host serves model/gltf-binary uncompressed. Not `optimize`: it also
+ * prunes and joins nodes, and both rigs are driven by node *name*, so joining
+ * them silently killed every joint.
  */
 type Props = {
   mode: 'hardware' | 'software'

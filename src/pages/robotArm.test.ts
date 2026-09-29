@@ -5,11 +5,12 @@
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
+import { MeshoptDecoder } from 'three/examples/jsm/libs/meshopt_decoder.module.js'
 import { ARM_CLUTTER, ARM_JOINT_NAMES, findArmNode, prepareArmScene } from './robotArm.ts'
 
 const glb = readFileSync(new URL('../../public/assets/robot_arm.glb', import.meta.url))
 const scene = await new Promise<any>((resolve, reject) => {
-  new GLTFLoader().parse(glb.buffer.slice(glb.byteOffset, glb.byteOffset + glb.byteLength), '', (g) => resolve(g.scene), reject)
+  new GLTFLoader().setMeshoptDecoder(MeshoptDecoder).parse(glb.buffer.slice(glb.byteOffset, glb.byteOffset + glb.byteLength), '', (g) => resolve(g.scene), reject)
 })
 
 // GLTFLoader really does mangle the names -- if this stops holding, the

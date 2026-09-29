@@ -6,12 +6,13 @@
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
+import { MeshoptDecoder } from 'three/examples/jsm/libs/meshopt_decoder.module.js'
 import { Box3, Vector3 } from 'three'
 import { FACE, MODEL_URL, findAll, prepare } from './nilaModelPrep.ts'
 
 const glb = readFileSync(new URL('../../../public' + MODEL_URL, import.meta.url))
 const scene = await new Promise<any>((resolve, reject) => {
-  new GLTFLoader().parse(glb.buffer.slice(glb.byteOffset, glb.byteOffset + glb.byteLength), '', (g) => resolve(g.scene), reject)
+  new GLTFLoader().setMeshoptDecoder(MeshoptDecoder).parse(glb.buffer.slice(glb.byteOffset, glb.byteOffset + glb.byteLength), '', (g) => resolve(g.scene), reject)
 })
 
 // GLTFLoader rewrites authored names: spaces become underscores.

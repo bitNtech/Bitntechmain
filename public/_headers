@@ -1,15 +1,17 @@
 # Cache policy, read by Netlify and Cloudflare Pages. Other hosts ignore the
 # file; the same two rules belong in their own config if you move.
 #
-# Everything under /assets is content-hashed by Vite, so a changed file is a
-# changed URL and the old one can be kept forever. The HTML that points at them
-# is the opposite: it must be re-checked every visit or a deploy never lands.
+# Everything under /static is content-hashed by Vite, so a changed file is a
+# changed URL and the old one can be kept forever. /assets is public/ copied
+# as-is — GLBs and photos at fixed names — so a day's cache and a revalidate:
+# otherwise a replaced model never reaches anyone who has seen the old one.
+# The HTML must be re-checked every visit or a deploy never lands.
+
+/static/*
+  Cache-Control: public, max-age=31536000, immutable
 
 /assets/*
-  Cache-Control: public, max-age=31536000, immutable
-
-/*.glb
-  Cache-Control: public, max-age=31536000, immutable
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
 
 /logo.png
   Cache-Control: public, max-age=604800

@@ -4,10 +4,10 @@
  * which is how three of them ended up on placeholder values.
  */
 export const CONTACT = {
-  phone: '+91 86102 37292',
+  phone: '+91 78289 14263',
   /* Dial strings have no spaces — a `tel:` with them is silently mis-parsed by
      some Android dialers. */
-  phoneHref: 'tel:+918610237292',
+  phoneHref: 'tel:+917828914263',
   email: 'support@bitntech.in',
   emailHref: 'mailto:support@bitntech.in',
   instagram: { handle: '@bitntech.in', url: 'https://www.instagram.com/bitntech.in/' },

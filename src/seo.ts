@@ -53,7 +53,7 @@ export const ROUTES: RouteSeo[] = [
     path: '/about',
     title: 'About BitNTech — The Engineering Team Behind the Work',
     description:
-      'Meet the seven-person BitNTech team: founders and engineers in AI, software, robotics and operations, and the story of how the studio came together.',
+      'Meet the six-person BitNTech team: founders and engineers in AI, software, robotics and operations, and the story of how the studio came together.',
     keywords: 'about BitNTech, engineering team, AI startup India, founders, technology company',
     priority: '0.6',
   },
@@ -96,7 +96,7 @@ export const ORGANIZATION_LD = {
   description:
     'BitNTech is an engineering studio building AI systems, custom software, automation, IoT and robotics — from first prototype to production deployment.',
   email: 'support@bitntech.in',
-  telephone: '+91-86102-37292',
+  telephone: '+91-78289-14263',
   address: { '@type': 'PostalAddress', addressCountry: 'IN' },
   sameAs: [
     'https://linkedin.com/company/bitntech',
@@ -106,7 +106,7 @@ export const ORGANIZATION_LD = {
   contactPoint: [
     {
       '@type': 'ContactPoint',
-      telephone: '+91-86102-37292',
+      telephone: '+91-78289-14263',
       email: 'support@bitntech.in',
       contactType: 'sales',
       areaServed: 'Worldwide',
@@ -166,7 +166,7 @@ export const FAQ = [
   },
   {
     q: 'How do I contact BitNTech?',
-    a: 'Email support@bitntech.in, call +91 86102 37292, or submit a project brief at https://bitntech.in/contact. BitNTech is currently available for new projects.',
+    a: 'Email support@bitntech.in, call +91 78289 14263, or submit a project brief at https://bitntech.in/contact. BitNTech is currently available for new projects.',
   },
   {
     q: 'Does BitNTech build both hardware and software?',
