@@ -923,16 +923,29 @@
 .t-modal {
   position: fixed;
   inset: 0;
-  z-index: 300;
+  /* Above the nav (310) and Nila (300): at 300 she came later in the DOM and
+     won the tie, so her speech bubble sat on top of the social links. */
+  z-index: 400;
   display: grid;
   place-items: center;
   padding: 1.25rem;
+  /* Portalled to <body>, so it no longer inherits .about-us's type or
+     #root's centring. */
+  font-family: 'DM Sans', system-ui, sans-serif;
+  text-align: center;
   background: rgba(18, 9, 27, .58);
   -webkit-backdrop-filter: blur(16px) saturate(1.2);
   backdrop-filter: blur(16px) saturate(1.2);
   animation: t-fade .28s ease both;
 }
 @keyframes t-fade { from { opacity: 0; } }
+/* Nila steps aside while a profile is open: she perches beside whatever was
+   tapped, and on a phone that put her speech bubble over the social links.
+   The bubble sets its own `visibility: visible` when talking, so it needs a
+   selector that outranks Nila.css's, not just the inherited value. */
+body:has(.t-modal) .nila-companion,
+body:has(.t-modal) .nila-companion .nila-bubble.is-on { visibility: hidden; }
+body:has(.t-modal) .nila-companion { opacity: 0; }
 
 .t-modal__card {
   position: relative;
@@ -964,6 +977,7 @@
   display: grid;
   place-items: center;
   min-height: 260px;
+  overflow: hidden;
   background: linear-gradient(
     180deg,
     var(--nb-orange-1) 0%,
@@ -973,6 +987,11 @@
   );
 }
 .t-modal__portrait img {
+  /* Out of flow and pinned to the box. In flow, `height: 100%` does not
+     resolve against the phone layout's aspect-ratio box, so a tall portrait
+     rendered at its own height and covered the links below it. */
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -1069,10 +1088,18 @@
 .t-modal__x:focus-visible { outline: 2px solid var(--nb-orange-3); outline-offset: 2px; }
 
 @media (max-width: 640px) {
+  /* svh is the viewport with the browser toolbars showing; 88vh ran the foot
+     of the card under them. One column is taller than the side-by-side card,
+     so the card itself scrolls rather than clipping the links. */
   .t-modal__card {
     grid-template-columns: minmax(0, 1fr);
     max-height: 88vh;
+    max-height: 88svh;
+    overflow-y: auto;
+    overscroll-behavior: contain;
   }
+  .t-modal__body { overflow: visible; }
+  .t-modal__links a { padding: 1rem .2rem; }
   .t-modal__portrait { min-height: 0; aspect-ratio: 4 / 3; }
 }
 

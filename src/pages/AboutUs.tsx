@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import './AboutUs.css'
@@ -684,7 +685,10 @@ export default function AboutUs() {
         </div>
       </section>
 
-      {profile && (
+      {/* Portalled to <body>: rendered inside <main> the overlay lost the
+          stacking order on phones, so the fixed nav and Nila painted over the
+          card and swallowed taps on the social links. */}
+      {profile && createPortal(
         <div className="t-modal" onClick={() => setProfile(null)}>
           <div
             className="t-modal__card"
@@ -731,7 +735,8 @@ export default function AboutUs() {
               </ul>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body,
       )}
     </main>
   )
