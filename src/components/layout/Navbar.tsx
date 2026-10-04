@@ -6,6 +6,7 @@ const PAGE_LABELS: Record<string, string> = {
   '/': 'Home',
   '/hardware': 'Hardware',
   '/software': 'Software',
+  '/products': 'Our Products',
   '/about': 'About',
   '/contact': 'Contact',
   '/get-started': 'Get Started',
@@ -175,7 +176,17 @@ export default function Navbar() {
             .filter(([path]) => path !== '/get-started')
             .map(([path, label]) => (
               <li key={path}>
-                <Link to={path} tabIndex={0} viewTransition className={pathname === path ? 'is-active' : ''}>{label}</Link>
+                {/* Product detail pages live under /products, so that link stays lit on them. */}
+                <Link
+                  to={path}
+                  tabIndex={0}
+                  viewTransition
+                  className={pathname === path || (path === '/products' && pathname.startsWith('/products/')) ? 'is-active' : ''}
+                  aria-current={pathname === path ? 'page' : undefined}
+                >
+                  {/* "Our" drops on phones, where six labels share one line. */}
+                  {label.startsWith('Our ') ? <><span className="nav-05__long">Our </span>{label.slice(4)}</> : label}
+                </Link>
               </li>
             ))}
         </ul>

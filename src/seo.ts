@@ -5,6 +5,8 @@
  * one HTML file per route, so what a JS-less crawler (which is most AI answer
  * engines) reads and what React renders can never drift apart.
  */
+import { PRODUCTS } from './data/products.ts'
+
 export const SITE_URL = 'https://bitntech.in'
 export const SITE_NAME = 'BitNTech'
 export const OG_IMAGE = `${SITE_URL}/og-cover.png`
@@ -64,6 +66,24 @@ export const ROUTES: RouteSeo[] = [
       'Tell us what you are building. Reach BitNTech by email, phone or the project brief form and get a scoped reply on your AI, software, hardware or robotics idea.',
     keywords:
       'contact BitNTech, start a project, hire AI developers, software development quote, technology consultation',
+    priority: '0.7',
+  },
+  {
+    path: '/products',
+    title: 'Our Products — AICA, Smart Business Card & VIDYA | BitNTech',
+    description:
+      'Intelligent products engineered for impact: AICA, the AI caller agent, customizable NFC Smart Business Cards, and VIDYA, coming soon from BitNTech.',
+    keywords:
+      'BitNTech products, AICA AI caller agent, AI voice automation, NFC smart business card, digital business card India, VIDYA',
+    priority: '0.8',
+  },
+  {
+    path: '/products/smart-business-card',
+    title: 'NFC Smart Business Card — Custom Designed | BitNTech',
+    description:
+      'Personalized NFC smart business cards designed around your brand and linked to a digital profile. Request a custom design and quotation from BitNTech.',
+    keywords:
+      'NFC business card, smart business card, digital business card, custom NFC card, contactless business card, BitNTech',
     priority: '0.7',
   },
   {
@@ -226,14 +246,47 @@ const serviceLd = (mode: 'software' | 'hardware', name: string) => ({
   },
 })
 
-const breadcrumbLd = (path: string, name: string) => ({
+/** Pairs of [name, path] after Home, in order. */
+const breadcrumbLd = (...trail: [name: string, path: string][]) => ({
   '@context': 'https://schema.org',
   '@type': 'BreadcrumbList',
-  itemListElement: [
-    { '@type': 'ListItem', position: 1, name: 'Home', item: SITE_URL + '/' },
-    { '@type': 'ListItem', position: 2, name, item: SITE_URL + path },
-  ],
+  itemListElement: [['Home', '/'], ...trail].map(([name, path], i) => ({
+    '@type': 'ListItem',
+    position: i + 1,
+    name,
+    item: SITE_URL + path,
+  })),
 })
+
+/* Questions for the Smart Business Card page. Rendered on the page and emitted
+   as FAQPage data from the same list. Wording is deliberately conservative:
+   what a tap does depends on the card and the phone. */
+export const CARD_FAQ = [
+  {
+    q: 'How does an NFC smart business card work?',
+    a: 'The card carries a small NFC chip programmed with a link. When it is held near a phone that supports NFC reading, the phone can open that link — typically your digital profile. On most phones NFC needs to be switched on, and some models need the phone unlocked.',
+  },
+  {
+    q: 'Will it work with every phone?',
+    a: 'No card works with every phone. Most recent Android phones and iPhones can read NFC links, but support and behaviour vary by model, operating system and settings. A printed QR code on the card can be added as a fallback for phones that cannot read NFC.',
+  },
+  {
+    q: 'What can I customize?',
+    a: 'The card design, your name and title, company logo and colours, and the details shown on your digital profile — contact numbers, email, website and social links. Exact material and finish options are confirmed with your quotation.',
+  },
+  {
+    q: 'Can I update my details after the card is made?',
+    a: 'That depends on how the card is configured. When the card points to a hosted digital profile, the profile can be updated without changing the card. Discuss this with us when you enquire so the right setup is chosen.',
+  },
+  {
+    q: 'How do I order, and how much does it cost?',
+    a: 'Send an enquiry with your quantity and design requirements through WhatsApp or email. BitNTech replies with design options and a quotation. There is no online checkout; pricing depends on quantity and customization.',
+  },
+  {
+    q: 'Do you make cards for whole teams?',
+    a: 'Yes. Cards can be designed for individuals, entrepreneurs and organisations, including consistent branding across a team.',
+  },
+]
 
 /** Structured data specific to one route, on top of Organization + WebSite. */
 export function pageLd(path: string): object[] {
@@ -241,9 +294,54 @@ export function pageLd(path: string): object[] {
     case '/':
       return [FAQ_LD]
     case '/software':
-      return [serviceLd('software', 'Software & AI Development'), breadcrumbLd(path, 'Software')]
+      return [serviceLd('software', 'Software & AI Development'), breadcrumbLd(['Software', path])]
     case '/hardware':
-      return [serviceLd('hardware', 'Robotics & Hardware Engineering'), breadcrumbLd(path, 'Hardware')]
+      return [serviceLd('hardware', 'Robotics & Hardware Engineering'), breadcrumbLd(['Hardware', path])]
+    /* An ItemList of what exists, not Product nodes: there are no prices,
+       stock or reviews to state, and Product markup without them is invalid. */
+    case '/products':
+      return [
+        {
+          '@context': 'https://schema.org',
+          '@type': 'CollectionPage',
+          url: `${SITE_URL}/products`,
+          name: routeSeo('/products').title,
+          description: routeSeo('/products').description,
+          mainEntity: {
+            '@type': 'ItemList',
+            itemListElement: PRODUCTS.map((p, i) => ({
+              '@type': 'ListItem',
+              position: i + 1,
+              name: p.name,
+              ...(p.detailUrl ? { url: p.detailUrl.startsWith('/') ? SITE_URL + p.detailUrl : p.detailUrl } : {}),
+            })),
+          },
+        },
+        breadcrumbLd(['Products', path]),
+      ]
+    case '/products/smart-business-card':
+      return [
+        {
+          '@context': 'https://schema.org',
+          '@type': 'Service',
+          '@id': `${SITE_URL}${path}#service`,
+          name: 'Custom NFC Smart Business Card',
+          serviceType: 'NFC business card design and digital profile setup',
+          provider: { '@id': `${SITE_URL}/#organization` },
+          areaServed: 'IN',
+          description: routeSeo(path).description,
+        },
+        {
+          '@context': 'https://schema.org',
+          '@type': 'FAQPage',
+          mainEntity: CARD_FAQ.map(({ q, a }) => ({
+            '@type': 'Question',
+            name: q,
+            acceptedAnswer: { '@type': 'Answer', text: a },
+          })),
+        },
+        breadcrumbLd(['Products', '/products'], ['Smart Business Card', path]),
+      ]
     case '/about':
       return [
         {
@@ -254,7 +352,7 @@ export function pageLd(path: string): object[] {
           description: routeSeo('/about').description,
           about: { '@id': `${SITE_URL}/#organization` },
         },
-        breadcrumbLd(path, 'About'),
+        breadcrumbLd(['About', path]),
       ]
     case '/contact':
     case '/get-started':
@@ -267,7 +365,7 @@ export function pageLd(path: string): object[] {
           description: routeSeo('/contact').description,
           mainEntity: { '@id': `${SITE_URL}/#organization` },
         },
-        breadcrumbLd('/contact', 'Contact'),
+        breadcrumbLd(['Contact', '/contact']),
       ]
     default:
       return []

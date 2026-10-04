@@ -69,7 +69,7 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 460px;
+  width: 590px;
   /* Wraps only the links initially */
   height: 52px;
   background: transparent;
@@ -215,6 +215,13 @@
   opacity: 0.85;
 }
 
+/* --- 861-1100: six labels plus the CTA. At the full padding the centred row
+   reached the Get Started pill around 900px, so the labels draw in a little. */
+@media (max-width: 1100px) and (min-width: 861px) {
+  .nav-05__links a { padding: 8px 10px; }
+  .nav-05__glass { width: 540px; }
+}
+
 /* --- 768-860: the desktop bar, tightened ---------------------------------
    Still the desktop composition — absolutely centred link row, glass pill —
    but the Get Started CTA and the full-size labels do not fit beside it at
@@ -225,7 +232,7 @@
   .nav-05__cta { display: none; }
   .nav-05__links { gap: 2px; }
   .nav-05__links a { font-size: 0.82rem; padding: 8px 11px; }
-  .nav-05__glass { width: 400px; }
+  .nav-05__glass { width: 480px; }
   .nav-05__bar.is-scrolled .nav-05__glass { width: calc(100% - 48px); }
 }
 
@@ -247,18 +254,23 @@
        would then push past the right edge on a 320px screen. */
     min-width: 0;
     justify-content: center;
-    gap: clamp(0px, 0.5vw, 4px);
+    /* Six labels since Products joined; the gap and side padding gave up the
+       ~25px a 320px screen was short, the type floor dropped only for screens under ~345px. */
+    gap: 0;
   }
 
   .nav-05__links a {
-    font-size: clamp(0.58rem, 2.55vw, 0.8rem);
-    padding: 7px clamp(2px, 1.3vw, 11px);
+    font-size: clamp(0.55rem, 2.55vw, 0.8rem);
+    padding: 7px clamp(2px, 0.6vw, 11px);
   }
 
   /* The CTA does not fit beside five labels at this width, which leaves the
      actions box holding nothing. */
   .nav-05__cta { display: none; }
   .nav-05__actions { display: none; }
+
+  /* "Our Products" reads "Products" here — six labels share one line. */
+  .nav-05__long { display: none; }
 }
 
 .nav-05__logo {

@@ -65,6 +65,8 @@ const noscriptBody = (path: string) => `
           <li><a href="/">Home</a></li>
           <li><a href="/software">Software &amp; AI development services</a></li>
           <li><a href="/hardware">Robotics, IoT &amp; embedded hardware engineering</a></li>
+          <li><a href="/products">Our products: AICA, Smart Business Card, VIDYA</a></li>
+          <li><a href="/products/smart-business-card">NFC Smart Business Card</a></li>
           <li><a href="/about">About the BitNTech team</a></li>
           <li><a href="/contact">Contact BitNTech</a></li>
         </ul>

@@ -18,6 +18,7 @@ const NAV_COLUMNS = [
     heading: 'BitNtech',
     links: [
       { label: 'About', to: '/about' },
+      { label: 'Products', to: '/products' },
       { label: 'Solutions', href: '/#solutions' },
       { label: 'Industries', href: '/#industries' },
       { label: 'Contact', to: '/contact' },
