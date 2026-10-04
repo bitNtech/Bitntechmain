@@ -1,7 +1,7 @@
 /* What Nila says and feels. Kept free of React and three so the scheduling
    rules can be checked without a browser — see nilaBrain.test.ts. */
 
-export type NilaMood = 'idle' | 'happy' | 'excited' | 'watching' | 'thinking' | 'success' | 'dizzy'
+export type NilaMood = 'idle' | 'happy' | 'excited' | 'watching' | 'thinking' | 'success' | 'dizzy' | 'sad'
 
 export type NilaLine = { text: string; mood: NilaMood; ms?: number }
 
@@ -16,6 +16,10 @@ export type NilaEvent =
   | 'cta-near'
   | 'form-focus'
   | 'form-sent'
+  | 'dock-near'
+  | 'dock-in'
+  | 'docked'
+  | 'undock'
   | 'route:/'
   | 'route:/about'
   | 'route:/contact'
@@ -66,6 +70,31 @@ const LINES: Partial<Record<NilaEvent, NilaLine[]>> & { idle: NilaLine[] } = {
   ],
   'form-sent': [
     { text: 'Sent! A real human takes it from here.', mood: 'success', ms: 7000 },
+  ],
+  /* The dock is where she gets sent to stop talking, and she takes it
+     personally: wistful, a little dramatic, and never more than a whisper. */
+  'dock-near': [
+    { text: 'Wait — not the quiet corner…', mood: 'sad', ms: 2600 },
+    { text: "No no no, I was just getting to the good part.", mood: 'sad', ms: 2600 },
+    { text: 'Is this about the yapping?', mood: 'sad', ms: 2600 },
+  ],
+  'dock-in': [
+    { text: "Fine. I'll stop yapping.", mood: 'sad', ms: 4200 },
+    { text: 'Okay. Quiet mode. *sniff*', mood: 'sad', ms: 4200 },
+    { text: "I'll just… hang here, then.", mood: 'sad', ms: 4200 },
+  ],
+  docked: [
+    { text: '…I had a really good fact about the next section.', mood: 'sad', ms: 4600 },
+    { text: "It's fine. I'm fine.", mood: 'sad', ms: 3600 },
+    { text: 'If you need me, you know where I am.', mood: 'sad', ms: 4600 },
+    { text: 'Just a robot. On a hook. Thinking about cards.', mood: 'sad', ms: 4600 },
+    { text: 'Remember when we scrolled together?', mood: 'sad', ms: 4600 },
+    { text: '*quietly charging feelings*', mood: 'sad', ms: 4000 },
+  ],
+  undock: [
+    { text: 'You came back! I knew you would.', mood: 'excited' },
+    { text: "Fully charged. I didn't miss you at all. Okay, a little.", mood: 'happy' },
+    { text: 'Free! Right — where were we?', mood: 'excited' },
   ],
   'route:/': [{ text: 'Home. Mind the giant letters.', mood: 'happy' }],
   'route:/about': [{ text: 'Eight of us. I count as staff.', mood: 'happy' }],

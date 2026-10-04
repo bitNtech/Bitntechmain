@@ -318,6 +318,17 @@ export function pageLd(path: string): object[] {
           },
         },
         breadcrumbLd(['Products', path]),
+        // Product films, described only from what we know about the file.
+        ...PRODUCTS.flatMap((p) => (p.video ? [{
+          '@context': 'https://schema.org',
+          '@type': 'VideoObject',
+          name: p.video.title,
+          description: p.summary,
+          thumbnailUrl: SITE_URL + p.video.poster,
+          contentUrl: SITE_URL + p.video.src,
+          uploadDate: p.video.uploaded,
+          duration: `PT${p.video.duration}S`,
+        }] : [])),
       ]
     case '/products/smart-business-card':
       return [

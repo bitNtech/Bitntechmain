@@ -11,11 +11,6 @@
   --pill-line: rgba(255, 255, 255, 0.1);
 }
 
-/* The menu's open state used to live in a hidden checkbox. A checkbox with
-   `display: none` cannot be focused, and its <label> is not a tab stop either,
-   so the mobile menu had no keyboard route in at all. It is React state now
-   and the class sits on the root — see Navbar.tsx. */
-
 .nav-05__progress {
   position: fixed;
   top: 0;
@@ -237,40 +232,191 @@
 }
 
 /* --- <= 767: phones ------------------------------------------------------
-   The row leaves the centre of the bar and joins the flow beside the wordmark.
-   Absolutely centred it would sit on top of the mark here — brand plus five
-   labels is most of the bar's width at 320px — so the two share the line
-   rather than overlap on it. Same five destinations as the desktop header, in
-   the same order, with the same active pill and the same view transition. */
+   Six labels beside the wordmark left each one about 9px tall. Here the bar
+   keeps its desktop composition — wordmark, glass capsule — but the labels
+   become icons in the link colour, the current page opened out into a pill
+   that names it. Switching pages closes one pill and opens the next in the
+   same motion, and the new icon pops as it arrives. */
+.nav-05__tabs { display: none; }
+
 @media (max-width: 767px) {
-  /* The bar's own gap is what keeps the first label off the wordmark. */
-  .nav-05__bar { gap: 8px; }
+  /* How far the bar sits below the top of the screen. It is added to the bar's
+     own padding-top and to the capsule's top inset by the same amount, so the
+     whole header moves down together and the capsule keeps its height rather
+     than stretching. */
+  .nav-05 { --nav-drop: 10px; }
 
-  .nav-05__links {
-    position: static;
-    transform: none;
-    flex: 1;
-    /* `flex: 1` alone still refuses to shrink below its content — the labels
-       would then push past the right edge on a 320px screen. */
-    min-width: 0;
-    justify-content: center;
-    /* Six labels since Products joined; the gap and side padding gave up the
-       ~25px a 320px screen was short, the type floor dropped only for screens under ~345px. */
-    gap: 0;
+  .nav-05__bar {
+    gap: 8px;
+    /* The right side sits a few px further in, so the last icon clears the
+       capsule's rounded end. */
+    padding: 12px 15px 12px 22px;
+    padding-top: calc(12px + var(--nav-drop) + env(safe-area-inset-top));
+    background: transparent;
+    border-bottom: none;
   }
 
-  .nav-05__links a {
-    font-size: clamp(0.55rem, 2.55vw, 0.8rem);
-    padding: 7px clamp(2px, 0.6vw, 11px);
-  }
-
-  /* The CTA does not fit beside five labels at this width, which leaves the
-     actions box holding nothing. */
-  .nav-05__cta { display: none; }
+  .nav-05__links,
   .nav-05__actions { display: none; }
 
-  /* "Our Products" reads "Products" here — six labels share one line. */
-  .nav-05__long { display: none; }
+  /* Compact but never squeezed: it stops shrinking at 320px, where it is
+     15px and the icons beside it still fit. */
+  .nav-05__logo { font-size: clamp(0.94rem, 4vw, 1.08rem); }
+
+  .nav-05__progress { height: 3px; }
+
+  /* The same glass as the desktop bar, at phone dimensions: transparent
+     ground, one backdrop blur, the hairline, and the same widen-on-scroll
+     gesture — here the capsule opens toward the screen edges, because there
+     is no narrower resting width to grow from. Sized by its insets rather
+     than a fixed height, so it fills whatever the bar turns out to be. */
+  .nav-05__glass {
+    display: block;
+    top: calc(env(safe-area-inset-top) + 5px + var(--nav-drop, 0px));
+    bottom: 5px;
+    left: 8px;
+    right: 8px;
+    width: auto;
+    height: auto;
+    transform: none;
+    transition: left .9s cubic-bezier(.16, 1, .3, 1), right .9s cubic-bezier(.16, 1, .3, 1);
+  }
+  .nav-05__bar.is-scrolled .nav-05__glass {
+    left: 4px;
+    right: 4px;
+    width: auto;
+  }
+  /* A lit top edge and a soft drop, so the capsule reads as a slab of glass
+     floating over the page rather than an outline drawn on it. */
+  .nav-05__glass {
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .5), 0 10px 28px -14px rgba(0, 0, 0, .35);
+  }
+  .nav-05__bar--on-dark .nav-05__glass {
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .1), 0 12px 30px -12px rgba(0, 0, 0, .6);
+  }
+  /* Now and then a band of light crosses the glass. Transform only, so it is
+     the compositor's job; it rests off-capsule for most of the cycle. */
+  .nav-05__glass::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    background: linear-gradient(100deg, transparent 35%, rgba(255, 255, 255, .12) 50%, transparent 65%);
+    transform: translateX(-100%);
+    animation: nav-05-sheen 9s cubic-bezier(.65, 0, .35, 1) 1.5s infinite;
+  }
+
+  .nav-05__tabs {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    margin-left: auto;
+    min-width: 0;
+  }
+
+  .nav-05__tabs a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+    width: auto;
+    min-width: 34px;
+    height: 36px;
+    padding: 0 7px;
+    box-sizing: border-box;
+    border-radius: 99px;
+    color: var(--accent);
+    text-decoration: none;
+    -webkit-tap-highlight-color: transparent;
+    transition: background .45s cubic-bezier(.16, 1, .3, 1), color .3s ease, padding .45s cubic-bezier(.16, 1, .3, 1);
+  }
+  .nav-05__tabs a:active { transform: scale(.92); }
+
+  .nav-05__tabs svg {
+    flex: none;
+    width: 20px;
+    height: 20px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  /* The label is there for every tab, folded to nothing until it is current. */
+  .nav-05__tabs span {
+    max-width: 0;
+    overflow: hidden;
+    opacity: 0;
+    white-space: nowrap;
+    font: 700 0.7rem/1 var(--sans);
+    letter-spacing: -.01em;
+    transition: max-width .45s cubic-bezier(.16, 1, .3, 1), margin .45s cubic-bezier(.16, 1, .3, 1), opacity .25s ease;
+  }
+
+  /* Current: a frosted pill — a lit top edge, a hairline, and the accent
+     glowing underneath it. Milky on a light ground, smoked on a dark one. */
+  .nav-05__tabs a.is-active {
+    padding: 0 11px 0 9px;
+    border: 1px solid rgba(34, 9, 52, .1);
+    background: linear-gradient(180deg, rgba(255, 255, 255, .78), rgba(255, 255, 255, .38));
+    -webkit-backdrop-filter: blur(10px) saturate(1.8);
+    backdrop-filter: blur(10px) saturate(1.8);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, .9),
+      0 6px 18px -8px rgba(255, 110, 66, .55);
+    color: var(--text);
+  }
+  .nav-05__bar--on-dark .nav-05__tabs a.is-active {
+    border-color: rgba(255, 255, 255, .2);
+    background: linear-gradient(180deg, rgba(255, 255, 255, .2), rgba(255, 255, 255, .05));
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, .32),
+      inset 0 -8px 16px -10px rgba(255, 110, 66, .45),
+      0 6px 20px -8px rgba(255, 110, 66, .7);
+    color: #fff;
+  }
+  .nav-05__tabs a.is-active svg {
+    stroke-width: 2.2;
+    color: var(--accent);
+    filter: drop-shadow(0 0 6px rgba(255, 110, 66, .55));
+    animation: nav-05-pop .55s cubic-bezier(.34, 1.56, .64, 1);
+  }
+  /* A press lights the icon before the route has even changed. */
+  .nav-05__tabs a:not(.is-active):active { background: rgba(255, 110, 66, .14); }
+  .nav-05__tabs a.is-active span {
+    max-width: 6.5em;
+    margin-left: 5px;
+    opacity: 1;
+    transition-delay: 0s, 0s, .12s;
+  }
+}
+
+@keyframes nav-05-sheen {
+  0% { transform: translateX(-100%); }
+  18%, 100% { transform: translateX(100%); }
+}
+
+@keyframes nav-05-pop {
+  0% { transform: scale(.6) rotate(-12deg); }
+  100% { transform: none; }
+}
+
+/* Under 390px a label no longer fits beside the wordmark and five icons:
+   the current page is the pill alone, and the icons draw in a little. */
+@media (max-width: 389px) {
+  .nav-05__tabs a { min-width: 32px; padding: 0 6px; }
+  .nav-05__tabs a.is-active { min-width: 36px; padding: 0 8px; }
+  .nav-05__tabs a.is-active span { max-width: 0; margin-left: 0; opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nav-05__tabs a,
+  .nav-05__tabs span { transition: none; }
+  .nav-05__tabs a.is-active svg,
+  .nav-05__glass::after { animation: none; }
 }
 
 .nav-05__logo {
@@ -335,67 +481,5 @@
   ::view-transition-old(root),
   ::view-transition-new(root) {
     animation: none;
-  }
-}
-
-/* --- Phones -------------------------------------------------------------
-   Wordmark on the left, menu button on the right, and the glass capsule they
-   sit in. Nothing here applies at 768px and up. */
-@media (max-width: 767px) {
-  /* How far the bar sits below the top of the screen. It is added to the bar's
-     own padding-top and to the capsule's top inset by the same amount, so the
-     whole header moves down together and the capsule keeps its height rather
-     than stretching. */
-  .nav-05 { --nav-drop: 10px; }
-
-  .nav-05__bar {
-    padding: 12px 14px;
-    padding-top: calc(12px + var(--nav-drop) + env(safe-area-inset-top));
-  }
-
-  /* Compact but never squeezed: it stops shrinking at 320px, where it is
-     15px and the button beside it still has 44px of its own. */
-  .nav-05__logo { font-size: clamp(0.94rem, 4vw, 1.08rem); }
-
-  .nav-05__progress { height: 3px; }
-}
-/* --- Phone top bar ------------------------------------------------------
-   The same glass as the desktop bar, at phone dimensions: transparent ground,
-   one backdrop blur, the hairline, and the same widen-on-scroll gesture — here
-   the capsule opens toward the screen edges rather than growing from a
-   link-width pill, because there is no narrower resting width to grow from.
-
-   The blur is confined to a ~50px capsule inset from both edges, not the
-   full-width fixed bar, so it is the same cost the desktop pill already pays. */
-@media (max-width: 767px) {
-  .nav-05__bar {
-    background: transparent;
-    border-bottom: none;
-  }
-
-  .nav-05__glass {
-    display: block;
-    /* Sized by its insets rather than a fixed height, so it fills whatever the
-       bar turns out to be instead of guessing at it — a fixed 48px in a 43px
-       bar hung 11px above the top of the screen. The top inset carries the
-       safe area itself, because the bar's own padding-top does and a pill
-       anchored to the centre would otherwise sit low by half of it. */
-    top: calc(env(safe-area-inset-top) + 5px + var(--nav-drop, 0px));
-    bottom: 5px;
-    left: 14px;
-    right: 14px;
-    width: auto;
-    height: auto;
-    transform: none;
-    transition: left .9s cubic-bezier(.16, 1, .3, 1), right .9s cubic-bezier(.16, 1, .3, 1);
-  }
-
-  .nav-05__bar.is-scrolled .nav-05__glass {
-    /* Desktop grows the pill from the links to the full bar; the phone
-       equivalent is the capsule reaching for the edges. Same curve, same
-       duration, so the two read as one gesture. */
-    left: 8px;
-    right: 8px;
-    width: auto;
   }
 }
