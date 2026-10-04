@@ -902,6 +902,29 @@
   .bh-span { font-size: .54rem; letter-spacing: .26em; }
   .bh-btn { padding: .8rem 1.15rem; font-size: .56rem; letter-spacing: .14em; }
 
+  /* Three buttons wrapped into a ragged 1 + 2 with mismatched widths. A grid
+     makes it deliberate: the primary across the top, the two brackets as an
+     even pair under it, every one a 46px target with its label centred. */
+  .bh-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: .6rem;
+    width: 100%;
+    max-width: 26rem;
+    /* The copy column can be taller than the buttons; rows stay their own height. */
+    align-content: start;
+  }
+  .bh-actions .bh-btn {
+    justify-content: center;
+    box-sizing: border-box;
+    min-height: 46px;
+    padding-inline: .6rem;
+    font-size: .6rem;
+    letter-spacing: .12em;
+  }
+  .bh-actions .bh-btn--go { grid-column: 1 / -1; }
+  .bh-btn--bracket::after { left: 1rem; right: 1rem; }
+
   /* ---- the composition, on a portrait screen ----
      The figure moves under the copy and takes the lower band, and the board
      goes with it. Previously the scene was cropped to the lower 52%, the SVGs

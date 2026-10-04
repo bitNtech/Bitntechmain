@@ -1,10 +1,7 @@
 /* ======================================================================
-   PRODUCTS — the catalogue (/products) and the Smart Business Card page.
-
-   Same system as Contact: a near-black ground, warm ink, mono micro-labels,
-   hairline borders, and the orange accent spent only on interface. Cards are
-   quiet surfaces; the only motion is a short lift on hover and a slow pulse in
-   the AICA waveform, both off under reduced motion.
+   PRODUCTS — the staged catalogue (/products) and the Smart Business Card
+   page. The first half is shared: palette, labels, buttons and the product
+   illustrations. Then the card page, then the stages.
    ====================================================================== */
 
 .pd {
@@ -82,91 +79,6 @@
   line-height: 1.6;
 }
 
-/* ---- grid + card ----------------------------------------------------- */
-
-.pd-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 330px), 1fr));
-  gap: clamp(1rem, 2vw, 1.5rem);
-}
-
-.pd-card {
-  display: flex;
-  flex-direction: column;
-  border: 1px solid var(--line);
-  border-radius: 18px;
-  background: var(--surface);
-  overflow: hidden;
-  transition: transform .3s var(--ease), border-color .3s var(--ease);
-}
-.pd-card:hover { transform: translateY(-3px); border-color: var(--line-2); }
-
-.pd-card__media {
-  position: relative;
-  aspect-ratio: 16 / 10;
-  background:
-    radial-gradient(circle at 50% 45%, rgba(255, 110, 66, .14), transparent 62%),
-    linear-gradient(180deg, var(--surface-2), var(--surface));
-  border-bottom: 1px solid var(--line);
-}
-
-.pd-visual { display: block; width: 100%; height: 100%; }
-
-.pd-status {
-  position: absolute;
-  top: .85rem;
-  left: .85rem;
-  padding: .3rem .65rem;
-  border-radius: 99px;
-  font: 600 .66rem var(--mono);
-  letter-spacing: .08em;
-  text-transform: uppercase;
-  background: rgba(11, 10, 11, .72);
-  border: 1px solid var(--line-2);
-  color: var(--ink);
-}
-.pd-status--coming-soon { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
-
-.pd-card__body {
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  padding: clamp(1.25rem, 2.5vw, 1.75rem);
-}
-.pd-card__body .pd-label { margin-bottom: .6rem; }
-
-.pd-card__name {
-  margin: 0;
-  font-size: 1.45rem;
-  font-weight: 600;
-  letter-spacing: -.02em;
-  line-height: 1.15;
-}
-
-.pd-card__summary { margin: .75rem 0 0; color: var(--ink-2); font-size: .95rem; line-height: 1.55; }
-
-.pd-features {
-  display: grid;
-  gap: .45rem;
-  margin: 1.1rem 0 0;
-  padding: 0;
-  list-style: none;
-  font-size: .9rem;
-  color: var(--ink-2);
-}
-.pd-features li { position: relative; padding-left: 1.35rem; }
-.pd-features li::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: .5em;
-  width: .7rem;
-  height: .35rem;
-  border-left: 2px solid var(--accent);
-  border-bottom: 2px solid var(--accent);
-  transform: rotate(-45deg);
-}
-
 .pd-card__ctas {
   display: flex;
   flex-wrap: wrap;
@@ -193,10 +105,6 @@
 .pd-btn--secondary { background: transparent; color: var(--ink); border-color: var(--line-2); }
 .pd-btn--secondary:hover { border-color: var(--ink); }
 
-/* Coming soon: the same card, turned down. No CTAs are rendered for it. */
-.pd-card--soon .pd-card__media { filter: saturate(.6); }
-.pd-card--soon .pd-card__summary { color: var(--ink-3); }
-
 /* ---- product illustrations ------------------------------------------ */
 
 .pd-ring { fill: none; stroke: rgba(255, 110, 66, .22); stroke-width: 1.5; }
@@ -215,17 +123,112 @@
 .pd-vidya-v { fill: none; stroke: rgba(247, 243, 237, .55); stroke-width: 10; stroke-linecap: round; stroke-linejoin: round; }
 .pd-vidya-word { font: 600 15px var(--mono); letter-spacing: 6px; fill: rgba(247, 243, 237, .6); }
 
-/* ---- closing --------------------------------------------------------- */
-
-.pd-closing {
-  margin-top: clamp(3.5rem, 9vh, 6rem);
-  padding: clamp(2rem, 5vw, 3.5rem);
-  border: 1px solid var(--line);
-  border-radius: 18px;
-  background: var(--surface);
+/* ---- AICA: the voice carries ---- */
+.pd-ripple {
+  fill: none;
+  stroke: rgba(255, 110, 66, .5);
+  stroke-width: 1.5;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: pd-ripple 3.2s cubic-bezier(.2, .6, .3, 1) infinite;
 }
-.pd-closing h2 { margin: 0; font-size: clamp(1.4rem, 3vw, 2rem); letter-spacing: -.02em; }
-.pd-closing p { margin: .6rem 0 1.5rem; color: var(--ink-3); }
+.pd-ripple--2 { animation-delay: 1.6s; }
+@keyframes pd-ripple {
+  from { transform: scale(1); opacity: .9; }
+  to { transform: scale(3); opacity: 0; }
+}
+
+/* ---- Smart Business Card: tap, and the phone answers ---- */
+.pd-tap { animation: pd-tap 4.8s cubic-bezier(.65, 0, .35, 1) infinite; }
+@keyframes pd-tap {
+  0%, 18%, 70%, 100% { transform: translateX(0); }
+  34%, 56% { transform: translateX(22px); }
+}
+.pd-screen { fill: rgba(255, 110, 66, .1); animation: pd-screen 4.8s ease-in-out infinite; }
+@keyframes pd-screen {
+  0%, 30%, 74%, 100% { fill: rgba(255, 110, 66, .1); }
+  40%, 60% { fill: rgba(255, 110, 66, .32); }
+}
+.pd-arc { animation: pd-arc 1.6s ease-in-out infinite; animation-delay: calc(var(--i) * .2s); }
+@keyframes pd-arc {
+  0%, 100% { opacity: .25; }
+  40% { opacity: 1; }
+}
+.pd-sheen { animation: pd-sheen 4.8s ease-in-out infinite; }
+@keyframes pd-sheen {
+  0%, 40% { transform: translateX(0); }
+  70%, 100% { transform: translateX(320px); }
+}
+
+/* ---- VIDYA: still under wraps ---- */
+.js .pd-vidya-v { stroke-dasharray: 1; stroke-dashoffset: 1; }
+.js .pd-stage.is-active .pd-vidya-v { stroke-dashoffset: 0; transition: stroke-dashoffset 1.6s cubic-bezier(.65, 0, .35, 1) .4s; }
+.pd-scan { animation: pd-scan 3.6s linear infinite; }
+@keyframes pd-scan {
+  to { transform: translateY(330px); }
+}
+.pd-redacted { display: grid; gap: .5rem; margin-top: 1.25rem; }
+.pd-redacted i {
+  display: block;
+  height: .7rem;
+  border-radius: 3px;
+  background: linear-gradient(90deg, rgba(247, 243, 237, .07) 0 40%, rgba(247, 243, 237, .16) 50%, rgba(247, 243, 237, .07) 60% 100%) 0 0 / 300% 100%;
+  animation: pd-shimmer 2.4s linear infinite;
+}
+.pd-redacted i:nth-child(1) { width: 92%; }
+.pd-redacted i:nth-child(2) { width: 76%; }
+.pd-redacted i:nth-child(3) { width: 54%; }
+@keyframes pd-shimmer {
+  to { background-position: -150% 0; }
+}
+
+/* ---- backdrop: an engineering grid fading out, two slow glows ---- */
+.pd > .pd-backdrop {
+  position: absolute;
+  inset: 0 0 auto;
+  z-index: -1;
+  height: min(900px, 120vh);
+  max-width: none;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(247, 243, 237, .06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(247, 243, 237, .06) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: radial-gradient(ellipse 80% 70% at 70% 0%, #000 30%, transparent 75%);
+}
+.pd-backdrop i {
+  position: absolute;
+  width: 46rem;
+  height: 46rem;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: .5;
+  animation: pd-drift 18s ease-in-out infinite alternate;
+}
+.pd-backdrop i:first-child { top: -22rem; right: -10rem; background: rgba(255, 110, 66, .35); }
+.pd-backdrop i:last-child { top: 4rem; left: -24rem; background: rgba(255, 170, 90, .10); animation-duration: 24s; animation-direction: alternate-reverse; }
+@keyframes pd-drift {
+  to { transform: translate(-6rem, 4rem) scale(1.1); }
+}
+
+/* ---- hero build: each piece arrives blurred and sharpens, one beat apart ---- */
+.js .pd-in {
+  display: inline-block;
+  animation: pd-in .9s cubic-bezier(.16, 1, .3, 1) both;
+  animation-delay: calc(var(--i, 0) * 90ms + 80ms);
+}
+.js p.pd-in, .js nav.pd-in { display: block; }
+@keyframes pd-in {
+  from { opacity: 0; transform: translateY(18px); filter: blur(8px); }
+}
+
+.pd-title { font-size: clamp(3rem, 9vw, 7.5rem); letter-spacing: -.055em; }
+/* "Our" as an outline, "Products" solid: one word heard, one word read. */
+.pd-title__ghost {
+  color: transparent;
+  -webkit-text-stroke: 1.5px rgba(247, 243, 237, .7);
+}
+.pd-tagline em { font-style: normal; color: var(--accent); }
 
 /* ======================================================================
    SMART BUSINESS CARD
@@ -447,4 +450,677 @@
   .pd-bar { animation: none; }
   .pd-card, .pd-btn { transition: none; }
   .pd-card:hover { transform: none; }
+}
+
+
+/* ======================================================================
+   THE STAGED CATALOGUE (/products)
+
+   One product to a screen. Each stage is a slate sheet with a spotlight in
+   the product's own tint, a giant word behind, the product floating in front
+   of it, a hairline note bottom-left and the details panel on the right.
+
+   Stages are sticky: scrolling lifts the next sheet over the last, and the
+   one underneath recedes by --leave (0..1, written by Products.tsx). The
+   stage on screen carries .is-active, and every entrance below is a
+   transition keyed off it, so leaving and coming back replays it.
+   ====================================================================== */
+
+.pd.pd--stages { padding: 0; }
+.pd--stages > * { max-width: none; }
+
+/* ---- intro ---- */
+.pd-intro {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 100svh;
+  padding: clamp(7rem, 14vh, 9rem) var(--pad) clamp(3rem, 8vh, 5rem);
+  overflow: hidden;
+}
+.pd-intro__wrap { width: 100%; max-width: var(--max); margin-inline: auto; }
+.pd-intro .pd-title { font-size: clamp(3.4rem, 11vw, 10rem); }
+
+.pd-cue {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 1rem;
+  margin-top: clamp(2.5rem, 7vh, 4.5rem);
+  color: var(--ink-3);
+  text-decoration: none;
+  font: 600 .68rem var(--mono);
+  letter-spacing: .22em;
+  text-transform: uppercase;
+}
+.pd-cue i {
+  position: relative;
+  width: 1px;
+  height: 46px;
+  overflow: hidden;
+  background: var(--line);
+}
+.pd-cue i::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--accent);
+  animation: pd-cue 2s cubic-bezier(.65, 0, .35, 1) infinite;
+}
+@keyframes pd-cue {
+  from { transform: translateY(-100%); }
+  to { transform: translateY(100%); }
+}
+.pd-cue:hover { color: var(--ink); }
+
+/* ---- the sheets ---- */
+.pd-stages { position: relative; }
+
+.pd-stage {
+  --tint: 70, 110, 255;
+  --leave: 0;
+  position: sticky;
+  top: 0;
+  height: 100svh;
+  min-height: 600px;
+  overflow: hidden;
+  border-radius: 30px 30px 0 0;
+  background:
+    radial-gradient(55% 65% at 44% 54%, rgba(var(--tint), .24), transparent 72%),
+    linear-gradient(180deg, #1d232b, #10141a);
+  box-shadow: 0 -40px 80px -30px rgba(0, 0, 0, .8);
+}
+.pd-stage--card { --tint: 255, 110, 66; }
+.pd-stage--vidya { --tint: 150, 130, 255; }
+
+.pd-stage__inner {
+  position: absolute;
+  inset: 0;
+  transform: scale(calc(1 - var(--leave) * .07));
+  transform-origin: 50% 0;
+  /* Its own layer: the scale changes every frame of a glide, and composited
+     it costs nothing; repainted, it is the whole screen each frame. */
+  will-change: transform;
+}
+/* Receding: dimmed by a layer over it rather than a filter, which would
+   repaint the whole sheet on every scroll frame. */
+.pd-stage__inner::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 9;
+  background: #05070a;
+  opacity: calc(var(--leave) * .7);
+  pointer-events: none;
+  will-change: opacity;
+}
+
+.pd-stage__count {
+  position: absolute;
+  top: clamp(6.5rem, 13vh, 8rem);
+  left: var(--pad);
+  margin: 0;
+  font: 600 .75rem var(--mono);
+  letter-spacing: .18em;
+  color: var(--ink);
+}
+.pd-stage__count i { font-style: normal; color: var(--ink-3); }
+
+/* The giant word. Each letter is clipped by its own box and rises into it. */
+.pd-stage__word {
+  position: absolute;
+  top: 50%;
+  left: var(--pad);
+  z-index: 1;
+  margin: 0;
+  transform: translateY(-52%);
+  font: 700 clamp(7rem, 19vw, 19rem)/.82 var(--sans);
+  letter-spacing: -.07em;
+  white-space: nowrap;
+  color: #eef0f3;
+  pointer-events: none;
+}
+.pd-stage__word > span { display: inline-block; overflow: hidden; padding: 0 .02em .06em; vertical-align: top; }
+.pd-stage__word > span > span {
+  display: inline-block;
+  transform: translateY(108%);
+  transition: transform 1s cubic-bezier(.16, 1, .3, 1);
+  transition-delay: calc(var(--i) * 70ms);
+}
+.pd-stage.is-active .pd-stage__word > span > span { transform: none; }
+
+/* The product, floating in front of its word. */
+.pd-stage__visual {
+  position: absolute;
+  top: 53%;
+  left: 42%;
+  z-index: 2;
+  width: min(44vw, 620px);
+  opacity: 0;
+  transform: translate(-50%, calc(-50% + 70px)) scale(.9);
+  transition: opacity 1s cubic-bezier(.16, 1, .3, 1) .15s, transform 1.2s cubic-bezier(.16, 1, .3, 1) .15s;
+}
+.pd-stage.is-active .pd-stage__visual { opacity: 1; transform: translate(-50%, -50%); }
+.pd-stage__visual > :first-child { position: relative; z-index: 1; animation: pd-float 6.5s ease-in-out infinite; }
+@keyframes pd-float {
+  50% { transform: translateY(-14px); }
+}
+.pd-stage__shadow {
+  position: absolute;
+  left: 18%;
+  right: 18%;
+  bottom: -9%;
+  height: 26px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, .55);
+  filter: blur(18px);
+  animation: pd-shadow 6.5s ease-in-out infinite;
+}
+@keyframes pd-shadow {
+  50% { transform: scaleX(.86); opacity: .7; }
+}
+
+/* Each product overlaps its word without hiding it. The orb is screened, so
+   its dark surround drops out and the letter shows through the glow; the
+   card sits low, over the feet of the letters; VIDYA, still under wraps, is
+   set against an outline of its own name. */
+/* On the wrapper, not the image: the wrapper's transform and opacity make it
+   its own layer, so a blend set inside it would only ever see itself. */
+.pd-stage--aica .pd-stage__visual { mix-blend-mode: screen; }
+@media (min-width: 861px) { .pd-stage--card .pd-stage__visual { top: 64%; } }
+.pd-stage--vidya .pd-stage__word { color: transparent; -webkit-text-stroke: 1.5px rgba(238, 240, 243, .4); }
+.pd-stage .pd-scan,
+.pd-stage .pd-vidya-word { display: none; }
+.pd-stage--vidya .pd-vidya-v { stroke: #f4f1ec; stroke-width: 12; }
+
+/* The contactless mark set after "NFC", at letter size, in the accent, its
+   waves lighting one after another. */
+.pd-stage__glyph { display: inline-block; width: .5em; height: .74em; margin-left: .08em; }
+.pd-stage__glyph svg { width: 100%; height: 100%; fill: none; stroke: var(--accent); stroke-width: 9; stroke-linecap: round; }
+.pd-stage__glyph path { animation: pd-arc 1.8s ease-in-out infinite; }
+.pd-stage__glyph path:nth-child(2) { animation-delay: .22s; }
+.pd-stage__glyph path:nth-child(3) { animation-delay: .44s; }
+
+.pd-stage--card .pd-visual {
+  transform: perspective(1200px) rotateX(14deg) rotateY(-16deg) rotateZ(2deg);
+  filter: drop-shadow(0 30px 40px rgba(0, 0, 0, .45));
+}
+.pd-stage--vidya .pd-visual { filter: drop-shadow(0 0 40px rgba(150, 130, 255, .25)); }
+
+/* Bottom-left: a hairline and what the product is, as in a spec sheet. */
+.pd-stage__note {
+  position: absolute;
+  left: var(--pad);
+  bottom: clamp(2.5rem, 7vh, 4.5rem);
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  max-width: 260px;
+  margin: 0;
+  color: var(--ink-2);
+  font-size: .85rem;
+  line-height: 1.4;
+  opacity: 0;
+  transition: opacity .8s ease .6s;
+}
+.pd-stage__note i { flex: none; width: 56px; height: 1px; background: var(--ink-3); }
+.pd-stage.is-active .pd-stage__note { opacity: 1; }
+
+/* ---- the details panel, sliding in from the right ---- */
+.pd-stage__panel {
+  position: absolute;
+  top: 50%;
+  right: calc(var(--pad) + 2.5rem);
+  z-index: 3;
+  width: min(380px, 30vw);
+  transform: translateY(-50%);
+}
+.pd-stage__panel > * {
+  opacity: 0;
+  transform: translateX(56px);
+  transition: opacity .8s cubic-bezier(.16, 1, .3, 1), transform .9s cubic-bezier(.16, 1, .3, 1);
+}
+.pd-stage__panel > :nth-child(1) { transition-delay: .3s; }
+.pd-stage__panel > :nth-child(2) { transition-delay: .4s; }
+.pd-stage__panel > :nth-child(3) { transition-delay: .5s; }
+.pd-stage__panel > :nth-child(4) { transition-delay: .6s; }
+.pd-stage.is-active .pd-stage__panel > * { opacity: 1; transform: none; }
+
+.pd-stage__status {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  margin: 0 0 1rem;
+  padding: .35rem .75rem;
+  border: 1px solid var(--line);
+  border-radius: 99px;
+  font: 600 .64rem var(--mono);
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+  background: rgba(10, 12, 16, .4);
+}
+.pd-stage__status::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--ink-3); }
+.pd-stage__status--available::before { background: #6ee7a8; box-shadow: 0 0 0 0 rgba(110, 231, 168, .6); animation: pd-ping 2s ease-out infinite; }
+.pd-stage__status--customizable::before { background: #ffb38a; }
+@keyframes pd-ping {
+  to { box-shadow: 0 0 0 7px rgba(110, 231, 168, 0); }
+}
+
+.pd-stage__name {
+  margin: 0 0 1.25rem;
+  font-size: clamp(1.6rem, 2.4vw, 2.3rem);
+  font-weight: 600;
+  letter-spacing: -.03em;
+  line-height: 1.08;
+}
+
+/* The carousel: slides share one grid cell, so the panel is as tall as its
+   tallest slide, and each is pushed sideways by its place (--off: -1, 0, 1)
+   plus any drag in progress. The viewport clips everything but the current
+   one; the next slides in from the right, the current leaves to the left. */
+.pd-slides__viewport {
+  overflow: hidden;
+  margin-inline: -6px;
+  padding-inline: 6px;
+  touch-action: pan-y;
+  cursor: grab;
+}
+.pd-slides__viewport.is-dragging { cursor: grabbing; user-select: none; }
+.pd-slides__track { display: grid; }
+.pd-slide {
+  grid-area: 1 / 1;
+  opacity: .25;
+  transform: translateX(calc(var(--off) * (100% + 40px) + var(--drag, 0px)));
+  transition: transform .85s cubic-bezier(.65, 0, .35, 1), opacity .85s ease;
+}
+.pd-slide.is-current { opacity: 1; }
+/* Wrapping round: crossing from far left to far right, off screen, at once. */
+.pd-slide.is-jumping,
+.pd-slides__viewport.is-dragging .pd-slide { transition: none; }
+
+.pd-slide__label {
+  margin: 0 0 .75rem;
+  font: 600 .66rem var(--mono);
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+.pd-slide__tagline {
+  margin: 0 0 .75rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  background: linear-gradient(90deg, var(--ink) 30%, var(--accent));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.pd-slide__lead { margin: 0; color: var(--ink-2); font-size: .95rem; line-height: 1.6; }
+
+.pd-slide__list { margin: 0; padding: 0; list-style: none; border-top: 1px solid var(--line); }
+.pd-slide__list li {
+  display: flex;
+  gap: .85rem;
+  align-items: baseline;
+  padding: .6rem 0;
+  border-bottom: 1px solid var(--line);
+  color: var(--ink-2);
+  font-size: .9rem;
+}
+.pd-slide__list b { font: 600 .66rem var(--mono); color: var(--accent); }
+
+.pd-slide__facts { display: grid; gap: .9rem; margin: 0; }
+.pd-slide__facts div { padding-left: .9rem; border-left: 1px solid var(--line-2); }
+.pd-slide__facts dt { font: 600 .62rem var(--mono); letter-spacing: .16em; text-transform: uppercase; color: var(--ink-3); }
+.pd-slide__facts dd { margin: .2rem 0 0; color: var(--ink); font-weight: 600; }
+
+.pd-slides__nav { display: flex; align-items: center; gap: .5rem; margin-top: 1.5rem; }
+/* Each dot is a short bar; the current one is longer and fills while it is up. */
+.pd-slides__dot {
+  position: relative;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  transition: width .4s cubic-bezier(.16, 1, .3, 1);
+}
+.pd-slides__dot::before,
+.pd-slides__dot i {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 3px;
+  margin-top: -1.5px;
+  border-radius: 3px;
+  background: var(--line-2);
+}
+.pd-slides__dot i { right: auto; width: 0; background: var(--accent); }
+.pd-slides__dot.is-current { width: 46px; }
+.pd-slides__dot.is-current i { width: 100%; }
+.pd-slides.is-moving .pd-slides__dot.is-current i { animation: pd-fill linear both; }
+@keyframes pd-fill {
+  from { width: 0; }
+  to { width: 100%; }
+}
+.pd-slides__pause {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  margin-left: .35rem;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: none;
+  color: var(--ink-2);
+  cursor: pointer;
+}
+.pd-slides__pause svg { width: 12px; height: 12px; fill: currentColor; }
+.pd-slides__pause:hover { color: var(--ink); border-color: var(--line-2); }
+
+.pd-stage__panel .pd-card__ctas { padding-top: 1.75rem; margin-top: 0; }
+
+/* ---- AICA: the orb from its film, and the way into the film ---- */
+.pd-orb { position: relative; width: min(100%, 470px); aspect-ratio: 1; margin-inline: auto; }
+.pd-orb__img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+  -webkit-mask-image: radial-gradient(circle, #000 46%, transparent 70%);
+  mask-image: radial-gradient(circle, #000 46%, transparent 70%);
+}
+.pd-orb__ring {
+  position: absolute;
+  inset: -4%;
+  border: 1px dashed rgba(130, 160, 255, .35);
+  border-radius: 50%;
+  animation: pd-spin 40s linear infinite;
+}
+.pd-orb__ring--2 { inset: 8%; border-style: solid; border-color: rgba(130, 160, 255, .14); animation-duration: 60s; animation-direction: reverse; }
+@keyframes pd-spin {
+  to { transform: rotate(360deg); }
+}
+.pd-orb__play {
+  position: absolute;
+  left: 50%;
+  bottom: 2%;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: .7rem;
+  padding: .45rem 1.1rem .45rem .45rem;
+  transform: translateX(-50%);
+  border: 1px solid rgba(255, 255, 255, .16);
+  border-radius: 99px;
+  background: rgba(12, 16, 26, .7);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  color: #fff;
+  font: 600 .9rem var(--sans);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: border-color .2s ease, background .2s ease;
+}
+.pd-orb__play:hover { border-color: rgba(255, 110, 66, .7); background: rgba(12, 16, 26, .85); }
+.pd-orb__play em { font: 600 .66rem var(--mono); font-style: normal; letter-spacing: .12em; color: rgba(255, 255, 255, .6); }
+.pd-orb__icon {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--accent-ink);
+  animation: pd-call 2.2s ease-out infinite;
+}
+.pd-orb__icon svg { width: 15px; height: 15px; margin-left: 2px; fill: currentColor; }
+@keyframes pd-call {
+  from { box-shadow: 0 0 0 0 rgba(255, 110, 66, .55); }
+  to { box-shadow: 0 0 0 14px rgba(255, 110, 66, 0); }
+}
+
+/* ---- the rail: which product is on stage ---- */
+.pd-rail {
+  position: fixed;
+  top: 50%;
+  right: clamp(.75rem, 1.5vw, 1.5rem);
+  z-index: 60;
+  transform: translateY(-50%);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity .4s ease, visibility .4s;
+}
+.pd-rail.is-on { opacity: 1; visibility: visible; }
+.pd-rail ol { display: grid; gap: .35rem; margin: 0; padding: 0; list-style: none; }
+.pd-rail a {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: .5rem;
+  min-height: 32px;
+  color: var(--ink-3);
+  text-decoration: none;
+  font: 600 .64rem var(--mono);
+}
+.pd-rail i { width: 12px; height: 1px; background: currentColor; transition: width .35s cubic-bezier(.16, 1, .3, 1); }
+.pd-rail span {
+  position: absolute;
+  right: calc(100% + .6rem);
+  padding: .25rem .55rem;
+  border-radius: 6px;
+  background: rgba(10, 12, 16, .8);
+  color: var(--ink);
+  white-space: nowrap;
+  opacity: 0;
+  transform: translateX(6px);
+  transition: opacity .2s ease, transform .2s ease;
+  pointer-events: none;
+}
+.pd-rail a:hover span,
+.pd-rail a:focus-visible span { opacity: 1; transform: none; }
+.pd-rail a.is-current { color: var(--accent); }
+.pd-rail a.is-current i { width: 30px; }
+
+/* ---- the film, full screen ---- */
+.pd-film-dialog {
+  width: min(1200px, 94vw);
+  max-width: none;
+  max-height: none;
+  padding: 0;
+  overflow: visible;
+  border: 0;
+  background: transparent;
+}
+.pd-film-dialog::backdrop {
+  background: rgba(4, 6, 10, .88);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+}
+.pd-film-dialog[open] { animation: pd-film-in .45s cubic-bezier(.16, 1, .3, 1); }
+@keyframes pd-film-in {
+  from { opacity: 0; transform: translateY(24px) scale(.97); }
+}
+.pd-film-dialog__frame {
+  aspect-ratio: 16 / 9;
+  max-height: 84svh;
+  overflow: hidden;
+  border-radius: 18px;
+  background: #000;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, .08), 0 40px 120px rgba(0, 0, 0, .6);
+}
+.pd-film-dialog video { display: block; width: 100%; height: 100%; }
+.pd-film-dialog__close {
+  position: absolute;
+  top: -56px;
+  right: 0;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid rgba(255, 255, 255, .2);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, .06);
+  color: #fff;
+  cursor: pointer;
+}
+.pd-film-dialog__close svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
+.pd-film-dialog__close:hover { background: rgba(255, 255, 255, .14); }
+
+/* ---- closing ---- */
+.pd--stages > .pd-closing {
+  position: relative;
+  width: calc(100% - 2 * var(--pad));
+  max-width: var(--max);
+  margin: clamp(4rem, 10vh, 7rem) auto clamp(4rem, 9vh, 6rem);
+  padding: clamp(2rem, 5vw, 3.5rem);
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  background:
+    radial-gradient(40rem 18rem at 100% 100%, rgba(255, 110, 66, .18), transparent 70%),
+    var(--surface);
+}
+.pd--stages > .pd-closing h2 { margin: 0; max-width: 22ch; font-size: clamp(1.7rem, 4vw, 2.8rem); letter-spacing: -.03em; }
+.pd--stages > .pd-closing p:not(.pd-label) { margin: .7rem 0 1.6rem; color: var(--ink-3); }
+
+
+/* ---- tablets and phones: sheets in flow, everything stacked ---- */
+@media (max-width: 860px) {
+  .pd-stage {
+    position: relative;
+    height: auto;
+    min-height: 100svh;
+    border-radius: 24px 24px 0 0;
+  }
+  .pd-stage__inner {
+    position: relative;
+    inset: auto;
+    display: flex;
+    flex-direction: column;
+    min-height: 100svh;
+    padding: clamp(5.5rem, 14vw, 7rem) var(--pad) 4rem;
+    transform: none;
+  }
+  .pd-stage__inner::after { display: none; }
+  .pd-stage__count { position: static; }
+  .pd-stage__word {
+    top: clamp(7rem, 26vw, 10rem);
+    font-size: clamp(5rem, 30vw, 12rem);
+    transform: none;
+    opacity: .92;
+  }
+  .pd-stage__visual {
+    position: relative;
+    top: auto;
+    left: auto;
+    width: min(86vw, 440px);
+    margin: clamp(4rem, 20vw, 7rem) auto 0;
+    transform: translateY(50px) scale(.94);
+  }
+  .pd-stage.is-active .pd-stage__visual { transform: none; }
+  .pd-stage__note { display: none; }
+  .pd-stage__panel {
+    position: relative;
+    top: auto;
+    right: auto;
+    width: 100%;
+    max-width: 520px;
+    margin: 3rem auto 0;
+    transform: none;
+  }
+  .pd-rail { display: none; }
+  .pd--stages > .pd-closing { margin-bottom: 9rem; }
+}
+
+/* ---- phones and tablets tall enough for a stage: the stacked sheets ----
+   One product to a screen again, sticky, the next lifting over the last and
+   one swipe gliding exactly one product (Products.tsx, whose `stacked` query
+   mirrors this one). The visual takes whatever height the count and the panel
+   leave, sized off its own box, so a stage never needs scrolling inside it.
+   Shorter screens keep the in-flow layout above and the browser's scrolling. */
+@media (max-width: 860px) and (min-height: 640px) {
+  .pd-stage {
+    position: sticky;
+    height: 100svh;
+    min-height: 0;
+  }
+  .pd-stage__inner {
+    position: absolute;
+    inset: 0;
+    min-height: 0;
+    padding: calc(env(safe-area-inset-top) + 5rem) var(--pad) calc(var(--app-bottom-nav) + 1.25rem);
+    transform: scale(calc(1 - var(--leave) * .07));
+  }
+  .pd-stage__inner::after { display: block; }
+  .pd-stage__word {
+    top: calc(env(safe-area-inset-top) + 6.5rem);
+    font-size: clamp(4.5rem, min(30vw, 16svh), 12rem);
+  }
+  .pd-stage__visual {
+    flex: 1 1 0;
+    min-height: 0;
+    width: 100%;
+    margin: .75rem 0;
+    display: grid;
+    place-items: center;
+    container-type: size;
+  }
+  .pd-stage__visual .pd-orb { width: min(100cqw, 100cqh, 400px); }
+  .pd-stage__visual .pd-visual { width: min(100cqw, 160cqh, 420px); }
+  .pd-stage__shadow { display: none; }
+  .pd-stage__panel { flex: none; margin: 0 auto; }
+  .pd-stage__status { margin-bottom: .6rem; }
+  .pd-stage__name { margin-bottom: .7rem; font-size: 1.35rem; }
+  .pd-slide__label { margin-bottom: .5rem; }
+  .pd-slide__tagline { margin-bottom: .5rem; font-size: .95rem; }
+  .pd-slide__lead { font-size: .84rem; line-height: 1.5; }
+  .pd-slide__list li { padding: .35rem 0; font-size: .8rem; }
+  .pd-slide__facts { gap: .6rem; }
+  .pd-slides__nav { margin-top: .8rem; }
+  .pd-stage__panel .pd-card__ctas { flex-wrap: nowrap; padding-top: 1rem; }
+  .pd-stage__panel .pd-btn { flex: 1 1 0; min-width: 0; padding-inline: .7rem; font-size: .8rem; }
+}
+
+@media (max-width: 480px) {
+  .pd-orb__play { font-size: .82rem; }
+  .pd-film-dialog__close { top: auto; bottom: -60px; right: 50%; transform: translateX(50%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pd-backdrop i,
+  .js .pd-in,
+  .pd-cue i::after,
+  .pd-stage__visual > :first-child,
+  .pd-stage__shadow,
+  .pd-stage__status--available::before,
+  .pd-orb__ring,
+  .pd-orb__icon,
+  .pd-ripple, .pd-bar,
+  .pd-tap, .pd-screen, .pd-arc, .pd-sheen,
+  .pd-scan, .pd-redacted i,
+  .pd-stage__glyph path,
+  .pd-film-dialog[open] { animation: none; }
+  .pd-ripple, .pd-scan { display: none; }
+  .pd-stage__word > span > span,
+  .pd-stage__visual,
+  .pd-stage__note,
+  .pd-stage__panel > *,
+  .pd-slide { transition: none; }
+  .pd-stage__word > span > span { transform: none; }
+  .pd-stage__visual { opacity: 1; transform: translate(-50%, -50%); }
+  .pd-stage__note, .pd-stage__panel > * { opacity: 1; transform: none; }
+  .js .pd-vidya-v { stroke-dashoffset: 0; transition: none; }
+}
+@media (prefers-reduced-motion: reduce) and (max-width: 860px) {
+  .pd-stage__visual { transform: none; }
 }

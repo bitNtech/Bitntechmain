@@ -72,6 +72,9 @@ export const FACE: Record<NilaMood, { eye: number; mouthX: number; mouthY: numbe
   success: { eye: 0.45, mouthX: 1.25, mouthY: 1.05, mouthDrop: -3, cheeks: 1 },
   // Scrolled far too fast: eyes screwed shut, small round mouth, flushed.
   dizzy: { eye: 0.34, mouthX: 0.5, mouthY: 0.85, mouthDrop: 1, cheeks: 1 },
+  // Parked in the dock: heavy lids, a small flat mouth sitting low. The head
+  // hangs and the eyes drop in NilaModel, which is most of what reads as sad.
+  sad: { eye: 0.58, mouthX: 0.42, mouthY: 0.26, mouthDrop: 3, cheeks: 0 },
 }
 
 /* GLTFLoader does not hand back the names the exporter wrote: spaces become

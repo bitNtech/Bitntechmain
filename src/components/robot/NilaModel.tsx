@@ -51,6 +51,7 @@ export default function NilaModel({ mood, waving = false, facing = 0, travelling
     const t = state.clock.elapsedTime
     const { root, neck, eyes, eyeL, eyeR, mouth, cheeks, armL, armR } = parts
     const dizzy = mood === 'dizzy'
+    const sad = mood === 'sad'
     const { drift, calm, reduced } = budget
     // Dizzy overrides being looked at: she cannot focus on anything.
     const look = !dizzy && lookRef?.current?.active ? lookRef.current : null
@@ -59,7 +60,8 @@ export default function NilaModel({ mood, waving = false, facing = 0, travelling
     const ease = (rate: number) => 1 - Math.exp(-rate * delta)
 
     // Idle float — the whole reason it reads as alive rather than placed.
-    root.position.y = calm ? 0 : Math.sin(t * (dizzy ? 3.4 : 1.6)) * (waving || dizzy ? 0.045 : 0.022)
+    // Sad, she barely bobs at all — a slow, heavy drift.
+    root.position.y = calm ? 0 : Math.sin(t * (dizzy ? 3.4 : sad ? 0.8 : 1.6)) * (waving || dizzy ? 0.045 : sad ? 0.012 : 0.022)
 
     /* Turning. The body swings a third of the way and the head the rest, one
        beat ahead of it, which is what selling a turn as a turn rather than a
@@ -84,8 +86,9 @@ export default function NilaModel({ mood, waving = false, facing = 0, travelling
             // A little head follows the eyes. Only a little: the eyes do the
             // looking, and a head that tracks one-for-one reads as a turret.
             yaw: facing * 0.26 + Math.sin(t * 0.41) * 0.07 * drift + (look ? look.x * 0.16 : 0),
-            nod: Math.sin(t * 0.63) * 0.035 * drift + (mood === 'thinking' ? -0.08 : 0) - (look ? look.y * 0.1 : 0),
-            tilt: Math.sin(t * 0.52) * 0.025 * drift + (mood === 'thinking' ? 0.17 : 0) - (travelling ? facing * 0.08 : 0),
+            // Sad hangs the head and tips it, looking down and away.
+            nod: Math.sin(t * 0.63) * 0.035 * drift + (mood === 'thinking' ? -0.08 : 0) + (sad ? 0.22 : 0) - (look ? look.y * 0.1 : 0),
+            tilt: Math.sin(t * 0.52) * 0.025 * drift + (mood === 'thinking' ? 0.17 : 0) + (sad ? -0.14 : 0) - (travelling ? facing * 0.08 : 0),
           }
       neck.rotation.y = MathUtils.lerp(neck.rotation.y, lead.yaw, ease(dizzy ? 9 : 4))
       // Negated: the head's local +Z points at world -X once she has turned to
@@ -104,7 +107,7 @@ export default function NilaModel({ mood, waving = false, facing = 0, travelling
       : dizzy ? Math.sin(t * 6.2) * 5 : (Math.sin(t * 0.37) * 2.4 + facing * 3) * drift
     const rise = look
       ? look.y * 4.5
-      : dizzy ? Math.cos(t * 6.2) * 3.4 : Math.sin(t * 0.29) * 1.6 * drift
+      : dizzy ? Math.cos(t * 6.2) * 3.4 : sad ? -2.6 : Math.sin(t * 0.29) * 1.6 * drift
     // Snappier when tracking: an eye that lags the cursor looks broken.
     eyes.position.x = MathUtils.lerp(eyes.position.x, wander * parts.gaze, ease(look ? 9 : 3))
     eyes.position.y = MathUtils.lerp(eyes.position.y, rise * parts.gaze, ease(look ? 9 : 3))

@@ -10,6 +10,17 @@ export type ProductStatus = 'available' | 'customizable' | 'coming-soon'
 
 export type ProductCta = { label: string; href: string; external?: boolean }
 
+export type ProductVideo = {
+  /** Under /public, so served as-is at this path. */
+  src: string
+  poster: string
+  title: string
+  /** Seconds. Shown on the play button and in the VideoObject data. */
+  duration: number
+  /** ISO date the film was published, for the VideoObject data. */
+  uploaded: string
+}
+
 export type Product = {
   id: string
   name: string
@@ -19,9 +30,22 @@ export type Product = {
   status: ProductStatus
   statusLabel: string
   summary: string
+  /** A short line from the product's own marketing, shown when featured. */
+  tagline?: string
   features: string[]
+  /** Short facts for the "at a glance" slide. Only what the product's own copy says. */
+  highlights?: { label: string; value: string }[]
+  /** The giant word its stage is set behind on /products. */
+  bigWord: string
+  /** A mark set after the word, as its last "letter". */
+  bigGlyph?: 'nfc'
+  /** What Nila says about it, instead of reading the panel out loud. */
+  nila?: string
   /** Which illustration the card draws — see ProductVisual in pages/Products.tsx. */
   visual: 'aica' | 'card' | 'vidya'
+  /** The flagship gets its own section above the grid. One at most. */
+  featured?: boolean
+  video?: ProductVideo
   detailUrl?: string
   primary?: ProductCta
   secondary?: ProductCta
@@ -36,14 +60,31 @@ export const PRODUCTS: Product[] = [
     status: 'available',
     statusLabel: 'Available for enquiries',
     summary:
-      'An AI-powered voice calling platform that automates business communication: it answers customer enquiries, supports appointment booking and routes callers to the right team.',
+      'An AI voice agent for business calls. AICA picks up, understands what the caller needs, answers enquiries, books appointments on the call and hands complex calls to your team.',
+    // From the AICA launch film.
+    tagline: 'Answer. Understand. Resolve. 24/7.',
     features: [
-      'Natural voice conversations',
-      'Automated enquiry handling',
-      'Appointment booking workflows',
-      'Call routing and escalation',
+      'Business calls in Tamil, English and Tanglish',
+      'Answers enquiries like timings and report status',
+      'Books appointments on the call',
+      'Hands complex calls over to your team',
     ],
+    highlights: [
+      { label: 'Languages', value: 'Tamil · English · Tanglish' },
+      { label: 'Availability', value: '24/7' },
+      { label: 'Hand-off', value: 'Complex calls go to your team' },
+    ],
+    bigWord: 'AICA',
+    nila: "That's AICA, our flagship. Press 'See what AICA can do' — I'll step aside for the film.",
     visual: 'aica',
+    featured: true,
+    video: {
+      src: '/assets/aica-ad.mp4',
+      poster: '/assets/aica-poster.jpg',
+      title: 'Meet AICA — the AI voice agent from BitNTech',
+      duration: 43,
+      uploaded: '2026-10-04',
+    },
     detailUrl: 'https://aica.bitntech.in/',
     primary: { label: 'Explore AICA', href: 'https://aica.bitntech.in/', external: true },
     secondary: { label: 'Request a Demo', href: whatsappHref(WA_MESSAGES.aica), external: true },
@@ -63,6 +104,14 @@ export const PRODUCTS: Product[] = [
       'Personalized digital profile',
       'For individuals and teams',
     ],
+    highlights: [
+      { label: 'Share', value: 'One tap on a compatible phone' },
+      { label: 'Design', value: 'Made to your brand' },
+      { label: 'Order', value: 'Quoted per quantity — no checkout' },
+    ],
+    bigWord: 'NFC',
+    bigGlyph: 'nfc',
+    nila: 'The Smart Business Card. Tap it on a phone and your profile opens. Mostly. Phones vary.',
     visual: 'card',
     detailUrl: '/products/smart-business-card',
     primary: { label: 'Customize Your Card', href: '/products/smart-business-card#enquire' },
@@ -77,6 +126,8 @@ export const PRODUCTS: Product[] = [
     statusLabel: 'Coming Soon',
     summary: 'A new product from BitNTech. More details coming soon.',
     features: [],
+    bigWord: 'VIDYA',
+    nila: "VIDYA. I'm not allowed to say anything yet. I've tried.",
     visual: 'vidya',
   },
 ]

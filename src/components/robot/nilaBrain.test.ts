@@ -47,6 +47,15 @@ assert.equal(explainLine('   '), null, 'an untitled box is not worth a line')
 assert.equal(pickLine('shaken').mood, 'dizzy')
 assert.equal(pickLine('headrush').mood, 'dizzy')
 
+// In the dock she is sad, every time, and short — it is a whisper, not a speech.
+for (const event of ['dock-near', 'dock-in', 'docked'] as const) {
+  for (let i = 0; i < 20; i++) {
+    const line = pickLine(event)
+    assert.equal(line.mood, 'sad', `${event}: ${line.text}`)
+    assert.ok(line.text.length <= 60, `${event} line too long: ${line.text}`)
+  }
+}
+
 // Never stand on top of the thing you are explaining.
 const box = { left: 100, right: 500, top: 200, bottom: 400 }
 const spot = besideBox(box, vp)

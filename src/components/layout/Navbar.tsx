@@ -12,6 +12,16 @@ const PAGE_LABELS: Record<string, string> = {
   '/get-started': 'Get Started',
 }
 
+/** The phone tab bar: a short label and an icon for each page. */
+const TABS: { path: string; label: string; icon: React.ReactNode }[] = [
+  { path: '/', label: 'Home', icon: <path d="M3.5 10.5 12 3.5l8.5 7V20a1 1 0 0 1-1 1H15v-6H9v6H4.5a1 1 0 0 1-1-1z" /> },
+  { path: '/hardware', label: 'Hardware', icon: <><rect x="6" y="6" width="12" height="12" rx="2" /><rect x="9.5" y="9.5" width="5" height="5" rx=".5" /><path d="M9.5 2.5V6M14.5 2.5V6M9.5 18v3.5M14.5 18v3.5M2.5 9.5H6M2.5 14.5H6M18 9.5h3.5M18 14.5h3.5" /></> },
+  { path: '/software', label: 'Software', icon: <path d="m8 7-5 5 5 5M16 7l5 5-5 5M13.5 4l-3 16" /> },
+  { path: '/products', label: 'Products', icon: <path d="M20.5 7.5 12 3 3.5 7.5v9L12 21l8.5-4.5zM3.5 7.5 12 12l8.5-4.5M12 12v9" /> },
+  { path: '/about', label: 'About', icon: <><circle cx="12" cy="12" r="9" /><circle cx="12" cy="10" r="3" /><path d="M6.6 18.4a6 6 0 0 1 10.8 0" /></> },
+  { path: '/contact', label: 'Contact', icon: <path d="M20.5 12a8.5 8.5 0 0 1-12.4 7.6L3.5 20.5l1-4.4A8.5 8.5 0 1 1 20.5 12z" /> },
+]
+
 /**
  * Whether the page's own ground under a point is dark, or null if nothing
  * opaque is there. `elementsFromPoint` hands back the stack topmost-first,
@@ -59,7 +69,6 @@ export default function Navbar() {
   const [onDark, setOnDark] = useState(true)
   const [isScrolled, setIsScrolled] = useState(false)
   const [sectionsCount, setSectionsCount] = useState(1)
-
   useEffect(() => {
     const timer = setTimeout(() => {
       // Find sections or main containers to count segments
@@ -184,12 +193,26 @@ export default function Navbar() {
                   className={pathname === path || (path === '/products' && pathname.startsWith('/products/')) ? 'is-active' : ''}
                   aria-current={pathname === path ? 'page' : undefined}
                 >
-                  {/* "Our" drops on phones, where six labels share one line. */}
-                  {label.startsWith('Our ') ? <><span className="nav-05__long">Our </span>{label.slice(4)}</> : label}
+                  {label}
                 </Link>
               </li>
             ))}
         </ul>
+
+        {/* Phones: six labels do not fit beside the wordmark, so below 768px
+            they become icons, with the current page opened out into a pill
+            that names it. Only one of the two lists is ever displayed. */}
+        <div className="nav-05__tabs">
+          {TABS.map(({ path, label, icon }) => {
+            const current = pathname === path || (path === '/products' && pathname.startsWith('/products/'))
+            return (
+              <Link key={path} to={path} className={current ? 'is-active' : ''} aria-current={pathname === path ? 'page' : undefined}>
+                <svg viewBox="0 0 24 24" aria-hidden="true">{icon}</svg>
+                <span>{label}</span>
+              </Link>
+            )
+          })}
+        </div>
 
         <div className="nav-05__actions">
           {!onContact && <Link to="/get-started" tabIndex={0} className="nav-05__cta">Get Started <span>↗</span></Link>}

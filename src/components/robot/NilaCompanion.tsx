@@ -68,16 +68,45 @@ function visibleBoxes(): Box[] {
   return out
 }
 
-/* Timeout: she leaves for a while and comes back by herself. Kept in
-   localStorage so a reload or a new route does not end it early. */
-const TIMEOUT_KEY = 'nila-timeout-until'
-const TIMEOUT_MS = 10 * 60 * 1000
+/* The "stop yapping" dock: a panel on the right edge of the screen. It slides
+   out while she is being dragged; drop her on it and she hangs from its hook,
+   sulking, until tapped. She takes it personally — sad face, the odd wistful
+   whisper. Remembered across reloads, so a parked Nila stays parked. */
+const DOCK_KEY = 'nila-docked'
+/* How close to the hook a drop has to land, in px. Generous on purpose: a
+   finger dragging her covers her up, so aiming is half guesswork. */
+const DOCK_SNAP = 90
+/** How far below the panel's top edge she hangs. Matches .nila-dock in CSS. */
+const DOCK_HANG = 68
+/** Seconds between sulky whispers while she is docked. */
+const SIGH_EVERY = 32000
 
-function timeoutLeft(): number {
+/** Where she hangs: centred in the panel (58px, or 44px on a phone, where it
+    sits over content), low enough to stay off the hero, clear of the foot. */
+function dockPoint() {
+  const w = window.innerWidth
+  const h = window.innerHeight
+  const half = w <= 560 ? 22 : 29
+  /* Her box shrinks on smaller screens (see Nila.css) but is always placed as
+     if it were 84px, so its visual centre sits left of `x` by the difference. */
+  const size = w <= 560 ? 56 : w <= 860 ? 68 : 84
+  return { x: w - half + (HALF - size / 2), y: Math.round(Math.min(h * 0.58, h - 110)) }
+}
+
+function readDocked(): boolean {
   try {
-    return Math.max(0, Number(localStorage.getItem(TIMEOUT_KEY)) - Date.now())
+    return localStorage.getItem(DOCK_KEY) === '1'
   } catch {
-    return 0
+    return false
+  }
+}
+
+function writeDocked(on: boolean) {
+  try {
+    if (on) localStorage.setItem(DOCK_KEY, '1')
+    else localStorage.removeItem(DOCK_KEY)
+  } catch {
+    // Storage blocked: she stays docked for this visit only.
   }
 }
 
@@ -106,8 +135,41 @@ export default function NilaCompanion() {
   const [exchange, setExchange] = useState<{ q: string; a: string } | null>(null)
   // Her small talk stays rare: what she has to say is on the page in front of
   // her, not in a canned rotation.
-  const { text, mood, nudging, say, sayText } = useNilaTalk(awake, 'greet', 45000)
-  const [pos, setPos] = useState(() => perch(pathname, { w: window.innerWidth, h: window.innerHeight }))
+  const [docked, setDocked] = useState(readDocked)
+  /* A film is playing (the AICA ad on /products). She steps out of frame
+     until it stops: talking over a video with sound is rude, and her WebGL
+     scene competes with the decoder on weaker devices. Media events do not
+     bubble, so this listens in the capture phase. */
+  const [filmPlaying, setFilmPlaying] = useState(false)
+  useEffect(() => {
+    const on = (e: Event) => { if (e.target instanceof HTMLVideoElement) setFilmPlaying(true) }
+    const off = (e: Event) => { if (e.target instanceof HTMLVideoElement) setFilmPlaying(false) }
+    document.addEventListener('play', on, true)
+    document.addEventListener('pause', off, true)
+    document.addEventListener('ended', off, true)
+    return () => {
+      document.removeEventListener('play', on, true)
+      document.removeEventListener('pause', off, true)
+      document.removeEventListener('ended', off, true)
+    }
+  }, [])
+  // What she opens with when she next wakes: a greeting, or relief at being let out.
+  const [wakeEvent, setWakeEvent] = useState<NilaEvent>('greet')
+  // No small talk from the dock — only the whispers scheduled below.
+  const { text, mood, nudging, say, sayText } = useNilaTalk(awake && !docked && !filmPlaying, wakeEvent, 45000)
+  // Set by dock(), so the first line in the dock is the sulk, not a whisper.
+  const justDocked = useRef(false)
+  // Whether the last drag frame was over the dock, and when she last protested.
+  const nearDock = useRef({ on: false, said: -Infinity })
+  // Read by the route and scroll handlers without re-subscribing them.
+  const dockedRef = useRef(docked)
+  useEffect(() => {
+    dockedRef.current = docked
+  }, [docked])
+  // The dock is only on screen while she is held, or while she is in it.
+  const [dragging, setDragging] = useState(false)
+  const [overDock, setOverDock] = useState(false)
+  const [pos, setPos] = useState(() => (readDocked() ? dockPoint() : perch(pathname, { w: window.innerWidth, h: window.innerHeight })))
   // Which way she is turned, and whether she is mid-trip: both are body
   // language, so they belong to the model rather than to the layout.
   const [facing, setFacing] = useState(0)
@@ -123,28 +185,6 @@ export default function NilaCompanion() {
   const toured = useRef(new Set<HTMLElement>())
   // False until she has walked on screen once — a fresh page, or a new route.
   const entered = useRef(false)
-  const [benched, setBenched] = useState(() => timeoutLeft() > 0)
-  const [leaving, setLeaving] = useState(false)
-
-  // Serving her time. When it is up she walks back on like on a fresh page.
-  useEffect(() => {
-    if (!benched) return
-    const t = window.setTimeout(() => {
-      entered.current = false
-      setBenched(false)
-    }, timeoutLeft())
-    return () => window.clearTimeout(t)
-  }, [benched])
-
-  // She gets one line on the way out, then goes.
-  useEffect(() => {
-    if (!leaving) return
-    const t = window.setTimeout(() => {
-      setLeaving(false)
-      setBenched(true)
-    }, 1800)
-    return () => window.clearTimeout(t)
-  }, [leaving])
 
   const explain = useCallback((box: Box, tone: NilaMood = 'happy') => {
     // A written line wins: nothing generated from a name and a job title is
@@ -153,9 +193,11 @@ export default function NilaCompanion() {
     if (line) sayText(line, tone)
   }, [sayText])
 
-  // A new route resets the tour.
+  // A new route resets the tour — unless she is docked, where she stays put.
   useEffect(() => {
+    if (dockedRef.current) return
     setAwake(false)
+    setWakeEvent('greet')
     setPinned(false)
     setTarget(null)
     setExchange(null)
@@ -172,7 +214,7 @@ export default function NilaCompanion() {
   // not had its turn yet. No new box means she stays put — every move of hers
   // goes somewhere specific, rather than just somewhere.
   useEffect(() => {
-    if (pinned || asking) return
+    if (pinned || asking || docked) return
     const middleOf = (box: Box) => {
       const r = box.el.getBoundingClientRect()
       return Math.abs((r.top + r.bottom) / 2 - window.innerHeight / 2)
@@ -201,7 +243,7 @@ export default function NilaCompanion() {
       window.clearTimeout(settle)
       window.removeEventListener('scroll', onScroll)
     }
-  }, [pathname, pinned, asking])
+  }, [pathname, pinned, asking, docked])
 
   // Dropped and staying put: she explains whatever scrolls under her, and lets
   // herself go once the thing you pinned her to has left the screen entirely —
@@ -242,11 +284,12 @@ export default function NilaCompanion() {
 
   useEffect(() => {
     const onResize = () => {
-      if (target && !pinned) setPos(besideBox(target.el.getBoundingClientRect(), { w: window.innerWidth, h: window.innerHeight }))
+      if (docked) setPos(dockPoint())
+      else if (target && !pinned) setPos(besideBox(target.el.getBoundingClientRect(), { w: window.innerWidth, h: window.innerHeight }))
     }
     window.addEventListener('resize', onResize)
     return () => window.removeEventListener('resize', onResize)
-  }, [target, pinned])
+  }, [target, pinned, docked])
 
   // She is only ever off screen between routes, and she has to walk back on.
   useEffect(() => {
@@ -260,7 +303,7 @@ export default function NilaCompanion() {
      limited, because a nudge every time the pointer crosses a link is not a
      character, it is a fly. */
   useEffect(() => {
-    if (pinned || asking) return
+    if (pinned || asking || docked) return
     const CTA = 'a[href="/get-started"], a[href="/contact"], .nila-bubble__cta, .nav-05__cta'
     const FIELD = 'form input, form textarea, form select'
     let last = 0
@@ -284,7 +327,7 @@ export default function NilaCompanion() {
       document.removeEventListener('pointerover', onOver)
       document.removeEventListener('focusin', onFocus)
     }
-  }, [pinned, asking, say])
+  }, [pinned, asking, docked, say])
 
   /* Her speech sits above her head, which puts it off the top of the screen
      whenever she perches high — the tour parks her within a rail's width of
@@ -373,7 +416,7 @@ export default function NilaCompanion() {
       const speed = Math.abs(window.scrollY - at) / (now - when)
       at = window.scrollY
       when = now
-      if (speed > 4.5 && now - last > 25000) {
+      if (speed > 4.5 && now - last > 25000 && !dockedRef.current) {
         last = now
         say('headrush')
       }
@@ -382,16 +425,51 @@ export default function NilaCompanion() {
     return () => window.removeEventListener('scroll', onScroll)
   }, [say])
 
-  const sendToTimeout = () => {
-    try {
-      localStorage.setItem(TIMEOUT_KEY, String(Date.now() + TIMEOUT_MS))
-    } catch {
-      // Storage blocked: the timeout still holds until the next reload.
+  /* In the dock: one sulk on arrival (or a whisper a little later, when she
+     was already docked on page load), then a wistful line every half minute.
+     Never more — the dock is the "stop yapping" button, after all. */
+  useEffect(() => {
+    if (!docked) return
+    const event: NilaEvent = justDocked.current ? 'dock-in' : 'docked'
+    const first = window.setTimeout(() => say(event), justDocked.current ? 1300 : 7000)
+    justDocked.current = false
+    const sigh = window.setInterval(() => say('docked'), SIGH_EVERY)
+    return () => {
+      window.clearTimeout(first)
+      window.clearInterval(sigh)
     }
+  }, [docked, say])
+
+  const dock = () => {
+    writeDocked(true)
+    justDocked.current = true
+    setDocked(true)
     setPinned(false)
     setAsking(false)
-    setLeaving(true)
-    sayText('Fine. Off to the corner. Back in 10 minutes.', 'thinking')
+    setExchange(null)
+    setTarget(null)
+    setPos(dockPoint())
+  }
+
+  const release = () => {
+    writeDocked(false)
+    setWakeEvent('undock')
+    setDocked(false)
+    setAwake(true)
+  }
+
+  const undock = () => {
+    release()
+    toured.current.clear()
+    setPos(perch(pathname, { w: window.innerWidth, h: window.innerHeight }))
+  }
+
+  // Enter or Space on her does what a tap does. Pointer taps arrive through
+  // the pointer handlers below, so only keyboard clicks (detail 0) land here.
+  const onKeyboardClick = (e: React.MouseEvent) => {
+    if (e.detail !== 0) return
+    if (docked) undock()
+    else setAsking((open) => !open)
   }
 
   const onPointerDown = (e: React.PointerEvent) => {
@@ -430,8 +508,18 @@ export default function NilaCompanion() {
     // and a finger is never as still as a mouse, so it takes more than a cursor.
     const slop = e.pointerType === 'mouse' ? 8 : 14
     if (!drag.current.moved && Math.hypot(e.clientX - pos.x, e.clientY - pos.y) < slop) return
+    if (!drag.current.moved) setDragging(true)
     drag.current.moved = true
     trackShake(e.clientX)
+    const d = dockPoint()
+    const near = Math.hypot(e.clientX - d.x, e.clientY - d.y) < DOCK_SNAP
+    // Carried over the dock she sees where this is going, and protests once.
+    if (near && !nearDock.current.on && !docked && performance.now() - nearDock.current.said > 8000) {
+      nearDock.current.said = performance.now()
+      say('dock-near')
+    }
+    nearDock.current.on = near
+    setOverDock(near)
     // Same rails the perches obey, or a drag parks her (and her bubble) half
     // off the screen edge.
     const { side, floor } = rails({ w: window.innerWidth, h: window.innerHeight })
@@ -445,6 +533,22 @@ export default function NilaCompanion() {
     if (!drag.current.active) return
     const dragged = drag.current.moved
     drag.current = { active: false, moved: false }
+    setDragging(false)
+    setOverDock(false)
+    nearDock.current.on = false
+    if (!dragged && docked) {
+      undock()
+      return
+    }
+    if (dragged) {
+      const d = dockPoint()
+      if (Math.hypot(e.clientX - d.x, e.clientY - d.y) < DOCK_SNAP) {
+        dock()
+        return
+      }
+      // Pulled out of the dock by hand: awake, and staying where she was put.
+      if (docked) release()
+    }
     if (!dragged) {
       // One click opens the ask bubble, the next puts her back on the tour.
       setAsking((open) => {
@@ -482,12 +586,33 @@ export default function NilaCompanion() {
     }, 420)
   }
 
-  if (!awake || benched) return null
+  if ((!awake && !docked) || filmPlaying) return null
+
+  const resting = docked && !dragging
 
   return (
+    <>
+    {(dragging || docked) && (
+      <div
+        className={`nila-dock${overDock ? ' is-near' : ''}${resting ? ' is-docked' : ''}`}
+        style={{ top: dockPoint().y - DOCK_HANG }}
+        aria-hidden="true"
+      >
+        <span className="nila-dock__hook" />
+        <span className="nila-dock__label">{resting ? 'Sulking' : <>Stop<br />yapping</>}</span>
+        <span className="nila-dock__row">
+          {/* A muted speaker: the one thing this panel is for. */}
+          <svg className="nila-dock__mute" viewBox="0 0 24 24">
+            <path d="M4 9h4l5-4v14l-5-4H4z" />
+            <path d="m16 9 5 6m0-6-5 6" />
+          </svg>
+          <span className="nila-dock__lamp" />
+        </span>
+      </div>
+    )}
     <div
       ref={el}
-      className={`nila-companion${pinned ? ' is-pinned' : ''}${leaving ? ' is-leaving' : ''}`}
+      className={`nila-companion${pinned ? ' is-pinned' : ''}${resting ? ' is-docked' : ''}`}
       data-side={pos.x > window.innerWidth / 2 ? 'right' : 'left'}
       data-vside={vside}
       style={{ left: 0, top: 0, transform: `translate(${pos.x - HALF}px, ${pos.y - HALF}px)` }}
@@ -530,35 +655,47 @@ export default function NilaCompanion() {
              and can start from off screen, so a bubble left on during it rides
              out of the viewport with her — which is how a message ends up
              invisible. It also just reads better: she lands, then talks. */
-          className={`nila-bubble${text && !travelling ? ' is-on' : ''}${nudging ? ' is-nudge' : ''}`}
+          className={`nila-bubble${text && !travelling ? ' is-on' : ''}${nudging ? ' is-nudge' : ''}${docked ? ' is-whisper' : ''}`}
           role="status"
-          aria-live="polite"
+          // Her sighs from the dock are atmosphere, not news.
+          aria-live={docked ? 'off' : 'polite'}
         >
           <span>{text}</span>
         </div>
       )}
+      {/* Her own little weather while she sulks. */}
+      {resting && <span className="nila-cloud" aria-hidden="true"><i /><i /><i /></span>}
       <div className="nila-companion__float">
-        <NilaScene mood={mood} waving={nudging} facing={facing} travelling={travelling} />
+        {/* Sad in the dock, and already sad on the way into it. Looking back
+            toward the page she has been sent away from. */}
+        <NilaScene
+          mood={docked || overDock ? 'sad' : mood}
+          waving={!docked && nudging}
+          facing={resting ? -1 : facing}
+          travelling={travelling}
+        />
       </div>
       <button
         type="button"
         className="nila-companion__hit"
-        aria-label={asking ? 'Close the chat and let Nila carry on explaining' : 'Ask Nila a question, or drag her onto something for her to explain'}
+        aria-label={
+          docked ? 'Nila is sulking in the stop-yapping dock. Bring her back'
+            : asking ? 'Close the chat and let Nila carry on explaining'
+              : 'Ask Nila a question, or drag her onto something for her to explain, or onto the stop-yapping dock at the screen edge to quiet her'
+        }
+        onClick={onKeyboardClick}
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
       />
-      {!leaving && (
-        <button
-          type="button"
-          className="nila-companion__timeout"
-          onClick={sendToTimeout}
-          aria-label="Put Nila in timeout for 10 minutes"
-          title="Timeout (10 min)"
-        >
-          <span aria-hidden="true">⏸</span>
+      {/* Dragging is the way to the dock for a pointer; this is the way for
+          a keyboard. Invisible until focused. */}
+      {!docked && (
+        <button type="button" className="nila-companion__dockbtn" onClick={dock}>
+          Send Nila to the stop-yapping dock
         </button>
       )}
     </div>
+    </>
   )
 }
