@@ -65,3 +65,20 @@ for crawlers that do not run JavaScript — which is most AI answer engines.
 
 Before going live, replace `SITE_URL` in `src/seo.ts` and the `Sitemap:` line in
 `public/robots.txt` if the domain is not `https://bitntech.in`.
+
+---
+
+## Products and enquiries
+
+* `src/data/products.ts` is the catalogue. Add a record there to add a card to
+  `/products`; the page, its structured data and the noscript summary read it.
+* `src/contact.ts` holds every contact detail, the WhatsApp number
+  (`CONTACT.whatsapp`, digits only with country code) and the product-specific
+  WhatsApp openers (`WA_MESSAGES`).
+* The Smart Business Card form (`/products/smart-business-card`) has no
+  backend. It validates in the browser, then opens WhatsApp click-to-chat or an
+  email draft with the enquiry prefilled; the visitor presses Send. Nothing is
+  stored. To deliver enquiries without that step, add a server endpoint (e.g. a
+  Vercel function) that sends mail with credentials kept in server-side
+  environment variables, add a honeypot/rate limit there, and post the form to
+  it — never put SMTP or API keys in `src/`.

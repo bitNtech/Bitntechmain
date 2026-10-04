@@ -449,6 +449,15 @@ export default function HeroScene() {
             </span>
             <b aria-hidden="true">]</b>
           </Link>
+
+          <Link className="bh-btn bh-btn--bracket" to="/products">
+            <b aria-hidden="true">[</b>
+            <span className="bh-btn__swap">
+              <span>Our products</span>
+              <span aria-hidden="true">Our products</span>
+            </span>
+            <b aria-hidden="true">]</b>
+          </Link>
         </div>
       </div>
 

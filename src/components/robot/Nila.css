@@ -219,6 +219,42 @@
 
 .nila-companion.is-pinned .nila-companion__hit { cursor: grabbing; }
 
+/* Timeout: a small pause badge on her page-facing lower corner. Shown on
+   hover or focus with a mouse; always shown on touch, which has no hover. */
+.nila-companion__timeout {
+  position: absolute;
+  bottom: -4px;
+  right: -4px;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, .35);
+  border-radius: 50%;
+  background: #14161a;
+  color: #f4f4f4;
+  font-size: 11px;
+  line-height: 1;
+  cursor: pointer;
+  pointer-events: auto;
+  opacity: 0;
+  transition: opacity .2s var(--ease), background .2s var(--ease);
+}
+/* A 44px target around a 26px badge. */
+.nila-companion__timeout::before { content: ''; position: absolute; inset: -9px; }
+.nila-companion[data-side='right'] .nila-companion__timeout { right: auto; left: -4px; }
+.nila-companion:hover .nila-companion__timeout,
+.nila-companion__timeout:focus-visible { opacity: 1; }
+.nila-companion__timeout:hover { background: #ff6e42; color: #14161a; }
+@media (hover: none) {
+  .nila-companion__timeout { opacity: .85; }
+}
+
+/* On her way out she fades with her parting line. */
+.nila-companion.is-leaving { opacity: 0; transition: opacity .6s ease 1.2s; }
+
 /* --- ask box ------------------------------------------------------------ */
 
 /* Her chat is two speech bubbles and a field, stacked over her head — no

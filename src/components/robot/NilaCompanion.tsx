@@ -68,6 +68,19 @@ function visibleBoxes(): Box[] {
   return out
 }
 
+/* Timeout: she leaves for a while and comes back by herself. Kept in
+   localStorage so a reload or a new route does not end it early. */
+const TIMEOUT_KEY = 'nila-timeout-until'
+const TIMEOUT_MS = 10 * 60 * 1000
+
+function timeoutLeft(): number {
+  try {
+    return Math.max(0, Number(localStorage.getItem(TIMEOUT_KEY)) - Date.now())
+  } catch {
+    return 0
+  }
+}
+
 /** The box under a point, ignoring Nila herself — used when you drop her. */
 function boxAt(x: number, y: number): Box | null {
   const under = document.elementsFromPoint(x, y).find((el) => !el.closest('.nila-companion') && !el.closest(FURNITURE))
@@ -110,6 +123,28 @@ export default function NilaCompanion() {
   const toured = useRef(new Set<HTMLElement>())
   // False until she has walked on screen once — a fresh page, or a new route.
   const entered = useRef(false)
+  const [benched, setBenched] = useState(() => timeoutLeft() > 0)
+  const [leaving, setLeaving] = useState(false)
+
+  // Serving her time. When it is up she walks back on like on a fresh page.
+  useEffect(() => {
+    if (!benched) return
+    const t = window.setTimeout(() => {
+      entered.current = false
+      setBenched(false)
+    }, timeoutLeft())
+    return () => window.clearTimeout(t)
+  }, [benched])
+
+  // She gets one line on the way out, then goes.
+  useEffect(() => {
+    if (!leaving) return
+    const t = window.setTimeout(() => {
+      setLeaving(false)
+      setBenched(true)
+    }, 1800)
+    return () => window.clearTimeout(t)
+  }, [leaving])
 
   const explain = useCallback((box: Box, tone: NilaMood = 'happy') => {
     // A written line wins: nothing generated from a name and a job title is
@@ -347,6 +382,18 @@ export default function NilaCompanion() {
     return () => window.removeEventListener('scroll', onScroll)
   }, [say])
 
+  const sendToTimeout = () => {
+    try {
+      localStorage.setItem(TIMEOUT_KEY, String(Date.now() + TIMEOUT_MS))
+    } catch {
+      // Storage blocked: the timeout still holds until the next reload.
+    }
+    setPinned(false)
+    setAsking(false)
+    setLeaving(true)
+    sayText('Fine. Off to the corner. Back in 10 minutes.', 'thinking')
+  }
+
   const onPointerDown = (e: React.PointerEvent) => {
     drag.current = { active: true, moved: false }
     shake.current = { ...shake.current, anchor: e.clientX, dir: 0, turns: 0, since: performance.now() }
@@ -435,12 +482,12 @@ export default function NilaCompanion() {
     }, 420)
   }
 
-  if (!awake) return null
+  if (!awake || benched) return null
 
   return (
     <div
       ref={el}
-      className={`nila-companion${pinned ? ' is-pinned' : ''}`}
+      className={`nila-companion${pinned ? ' is-pinned' : ''}${leaving ? ' is-leaving' : ''}`}
       data-side={pos.x > window.innerWidth / 2 ? 'right' : 'left'}
       data-vside={vside}
       style={{ left: 0, top: 0, transform: `translate(${pos.x - HALF}px, ${pos.y - HALF}px)` }}
@@ -501,6 +548,17 @@ export default function NilaCompanion() {
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
       />
+      {!leaving && (
+        <button
+          type="button"
+          className="nila-companion__timeout"
+          onClick={sendToTimeout}
+          aria-label="Put Nila in timeout for 10 minutes"
+          title="Timeout (10 min)"
+        >
+          <span aria-hidden="true">⏸</span>
+        </button>
+      )}
     </div>
   )
 }
