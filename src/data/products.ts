@@ -85,8 +85,8 @@ export const PRODUCTS: Product[] = [
       duration: 43,
       uploaded: '2026-10-04',
     },
-    detailUrl: 'https://aica.bitntech.in/',
-    primary: { label: 'Explore AICA', href: 'https://aica.bitntech.in/', external: true },
+    detailUrl: '/products/aica',
+    primary: { label: 'Explore AICA', href: '/products/aica' },
     secondary: { label: 'Request a Demo', href: whatsappHref(WA_MESSAGES.aica), external: true },
   },
   {

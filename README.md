@@ -82,3 +82,9 @@ Before going live, replace `SITE_URL` in `src/seo.ts` and the `Sitemap:` line in
   Vercel function) that sends mail with credentials kept in server-side
   environment variables, add a honeypot/rate limit there, and post the form to
   it — never put SMTP or API keys in `src/`.
+* The AICA page (`/products/aica`, "Explore AICA" on `/products`) lives in
+  `src/pages/aica/`, with its film, captions and orb in `public/assets/aica/`.
+  Its words and numbers are in `content.ts`, and every style is scoped under
+  `.aica-page` so none of it reaches other routes. Its demo form POSTs JSON to
+  `VITE_DEMO_ENDPOINT` when that is set at build time, and opens WhatsApp with
+  the details filled in when it is not.

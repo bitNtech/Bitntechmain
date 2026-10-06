@@ -16,6 +16,7 @@ const ContactUs = lazy(() => import('./pages/ContactUs'))
 const ExperiencePage = lazy(() => import('./pages/ExperiencePage'))
 const Products = lazy(() => import('./pages/Products'))
 const SmartBusinessCard = lazy(() => import('./pages/SmartBusinessCard'))
+const AicaPage = lazy(() => import('./pages/aica/AicaPage'))
 
 /**
  * A router without this lands every new page at the scroll offset of the one
@@ -87,6 +88,7 @@ function App() {
           <Route path="/software" element={<ExperiencePage mode="software" />} />
           <Route path="/products" element={<Products />} />
           <Route path="/products/smart-business-card" element={<SmartBusinessCard />} />
+          <Route path="/products/aica" element={<AicaPage />} />
           {/* The nav's "Get Started" CTA pointed at a route that did not exist,
               leaving a blank page. Contact is where that intent lands. */}
           <Route path="/get-started" element={<ContactUs />} />

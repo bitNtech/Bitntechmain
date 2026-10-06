@@ -466,7 +466,10 @@
    transition keyed off it, so leaving and coming back replays it.
    ====================================================================== */
 
-.pd.pd--stages { padding: 0; }
+/* flow-root: the closing card's bottom margin otherwise collapses out
+   through this padding-less ground and shows the cream #root behind it as a
+   band between the card and the footer. */
+.pd.pd--stages { display: flow-root; padding: 0; }
 .pd--stages > * { max-width: none; }
 
 /* ---- intro ---- */
