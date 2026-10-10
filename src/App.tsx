@@ -1,5 +1,5 @@
 import { Suspense, lazy, useEffect, useLayoutEffect, useState } from 'react'
-import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
+import { BrowserRouter, Navigate, Routes, Route, useLocation } from 'react-router-dom'
 import Navbar from './components/layout/Navbar'
 import Footer from './components/layout/Footer'
 import Seo from './components/Seo'
@@ -16,6 +16,7 @@ const ContactUs = lazy(() => import('./pages/ContactUs'))
 const ExperiencePage = lazy(() => import('./pages/ExperiencePage'))
 const Products = lazy(() => import('./pages/Products'))
 const SmartBusinessCard = lazy(() => import('./pages/SmartBusinessCard'))
+const NotFound = lazy(() => import('./pages/NotFound'))
 
 /**
  * A router without this lands every new page at the scroll offset of the one
@@ -87,10 +88,10 @@ function App() {
           <Route path="/software" element={<ExperiencePage mode="software" />} />
           <Route path="/products" element={<Products />} />
           <Route path="/products/smart-business-card" element={<SmartBusinessCard />} />
-          {/* The nav's "Get Started" CTA pointed at a route that did not exist,
-              leaving a blank page. Contact is where that intent lands. */}
-          <Route path="/get-started" element={<ContactUs />} />
-          <Route path="*" element={<Home />} />
+          {/* Old CTA address. The host 301s it (vercel.json); this covers an
+              in-app link to it. */}
+          <Route path="/get-started" element={<Navigate to="/contact" replace />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </Suspense>
       <Footer />

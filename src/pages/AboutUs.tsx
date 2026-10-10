@@ -36,42 +36,42 @@ type Member = {
 
 const TEAM: readonly Member[] = [
   {
-    name: 'Veeraragavan Natarajan', role: 'Founder & CEO', img: '/assets/veera.jpg', rot: -9, depth: 14,
+    name: 'Veeraragavan Natarajan', role: 'Founder & CEO', img: '/assets/veera.webp', rot: -9, depth: 14,
     instagram: 'https://www.instagram.com/veerzz_23/',
     linkedin: 'www.linkedin.com/in/veeraragavannatarajan',
     github: 'https://github.com/Veeraragavan-Natarajan',
     punch: "Veeraragavan started all this. He decides where we point — then goes and builds it too.",
   },
   {
-    name: 'Prem Kumar Ramamoorthy', role: 'Co-Founder & CTO', img: '/assets/prem-kumar.jpg', rot: -5, depth: 10,
+    name: 'Prem Kumar Ramamoorthy', role: 'Co-Founder & CTO', img: '/assets/prem-kumar.webp', rot: -5, depth: 10,
     instagram: 'https://www.instagram.com/prem_ramamoorthi/',
     linkedin: 'www.linkedin.com/in/premramamoorthy',
     github: 'https://github.com/prem-ramamoorthy',
     punch: "Prem is the CTO. If it runs in production, he has argued with it at least once.",
   },
   {
-    name: 'Akash S', role: 'CSO', img: '/assets/akashimg.jpg', rot: -2, depth: 8,
+    name: 'Akash S', role: 'CSO', img: '/assets/akash.webp', rot: -2, depth: 8,
     instagram: 'https://www.instagram.com/_._akash._.s/',
     linkedin: 'https://www.linkedin.com/in/akash-s-38603a280/',
     github: 'https://github.com/Akashwrites',
     punch: "Akash sets the strategy. He asks 'why' until the plan stops wobbling.",
   },
   {
-    name: 'Narendren S V', role: 'Chief AI Engineer', img: '/assets/narendren.jpg', rot: 3, depth: 12,
+    name: 'Narendren S V', role: 'Chief AI Engineer', img: '/assets/narendren.webp', rot: 3, depth: 12,
     instagram: 'https://www.instagram.com/naren_170406/',
     linkedin: 'https://www.linkedin.com/in/narendren-s-v-b83418328/',
     github: 'https://github.com/Naren1704',
     punch: "Narendren does the AI. He teaches machines to make decisions — including me.",
   },
   {
-    name: 'Shashanth D', role: 'Finance & Marketing Manager', img: '/assets/shashanth.jpg', rot: 0, depth: 6,
+    name: 'Shashanth D', role: 'Finance & Marketing Manager', img: '/assets/shashanth.webp', rot: 0, depth: 6,
     instagram: 'https://www.instagram.com/shashanth_dt/',
     linkedin: 'www.linkedin.com/in/shashanth-dinesh-745201329/',
     github: null,
     punch: "Shashanth handles the money and the message. Both at once, somehow.",
   },
   {
-    name: 'Sri Hari Hara Pandiyan', role: 'Executive Assistant', img: '/assets/sri-hari.jpg', rot: 7, depth: 9,
+    name: 'Sri Hari Hara Pandiyan', role: 'Executive Assistant', img: '/assets/sri-hari.webp', rot: 7, depth: 9,
     instagram: 'https://www.instagram.com/dan_harxx__/',
     linkedin: 'https://www.linkedin.com/in/sri-hari-hara-pandiyan-bb3ab533b/',
     github: null,
@@ -89,7 +89,7 @@ const link = (url: string) => (/^https?:\/\//.test(url) ? url : `https://${url}`
    large one, and it was the only thing the whole page had — seven 900px files
    fetched eagerly above the fold on a phone. `sizes` is what lets the browser
    pick per slot; the 480 is enough for every slot but the modal. */
-const srcSet = (img: string) => `${img.replace(/\.jpg$/, '-480.jpg')} 480w, ${img} 900w`
+const srcSet = (img: string) => `${img.replace(/\.webp$/, '-480.webp')} 480w, ${img} 900w`
 
 const SOCIALS = [
   { key: 'instagram', label: 'Instagram' },

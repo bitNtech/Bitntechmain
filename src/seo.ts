@@ -7,7 +7,7 @@
  */
 import { PRODUCTS } from './data/products.ts'
 
-export const SITE_URL = 'https://bitntech.in'
+export const SITE_URL = 'https://www.bitntech.in'
 export const SITE_NAME = 'BitNTech'
 export const OG_IMAGE = `${SITE_URL}/og-cover.png`
 
@@ -86,16 +86,14 @@ export const ROUTES: RouteSeo[] = [
       'NFC business card, smart business card, digital business card, custom NFC card, contactless business card, BitNTech',
     priority: '0.7',
   },
-  {
-    path: '/get-started',
-    title: 'Start a Project with BitNTech',
-    description:
-      'Tell us what you are building. Reach BitNTech by email, phone or the project brief form and get a scoped reply on your AI, software, hardware or robotics idea.',
-    keywords: 'start a project, contact BitNTech, software development quote',
-    canonical: '/contact',
-    noSitemap: true,
-  },
 ]
+
+/** Head for any URL no route claims. The host answers those with 404.html and a
+    404 status; this is what that page and the in-app catch-all both show. */
+export const NOT_FOUND = {
+  title: 'Page not found | BitNTech',
+  description: 'This page does not exist. Browse BitNTech software, hardware and products, or contact the team.',
+}
 
 export const routeSeo = (path: string): RouteSeo => ROUTES.find((r) => r.path === path) ?? ROUTES[0]
 
@@ -186,7 +184,7 @@ export const FAQ = [
   },
   {
     q: 'How do I contact BitNTech?',
-    a: 'Email support@bitntech.in, call +91 78289 14263, or submit a project brief at https://bitntech.in/contact. BitNTech is currently available for new projects.',
+    a: 'Email support@bitntech.in, call +91 78289 14263, or submit a project brief at https://www.bitntech.in/contact. BitNTech is currently available for new projects.',
   },
   {
     q: 'Does BitNTech build both hardware and software?',
@@ -328,6 +326,7 @@ export function pageLd(path: string): object[] {
           contentUrl: SITE_URL + p.video.src,
           uploadDate: p.video.uploaded,
           duration: `PT${p.video.duration}S`,
+          transcript: p.video.transcript.join(' '),
         }] : [])),
       ]
     case '/products/smart-business-card':
@@ -366,7 +365,6 @@ export function pageLd(path: string): object[] {
         breadcrumbLd(['About', path]),
       ]
     case '/contact':
-    case '/get-started':
       return [
         {
           '@context': 'https://schema.org',

@@ -304,7 +304,7 @@ export default function NilaCompanion() {
      character, it is a fly. */
   useEffect(() => {
     if (pinned || asking || docked) return
-    const CTA = 'a[href="/get-started"], a[href="/contact"], .nila-bubble__cta, .nav-05__cta'
+    const CTA = 'a[href="/contact"], .nila-bubble__cta, .nav-05__cta'
     const FIELD = 'form input, form textarea, form select'
     let last = 0
     const react = (event: NilaEvent) => {

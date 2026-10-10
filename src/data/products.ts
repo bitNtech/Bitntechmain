@@ -19,6 +19,8 @@ export type ProductVideo = {
   duration: number
   /** ISO date the film was published, for the VideoObject data. */
   uploaded: string
+  /** The film's on-screen text in order, shown under it and sent as the VideoObject transcript. */
+  transcript: string[]
 }
 
 export type Product = {
@@ -80,10 +82,21 @@ export const PRODUCTS: Product[] = [
     featured: true,
     video: {
       src: '/assets/aica-ad.mp4',
-      poster: '/assets/aica-poster.jpg',
+      poster: '/assets/aica-poster.webp',
       title: 'Meet AICA — the AI voice agent from BitNTech',
       duration: 43,
       uploaded: '2026-10-04',
+      transcript: [
+        'The calls keep coming. A hospital front desk has four lines ringing, then fourteen callers waiting, asking about OP timings, whether the doctor is in, whether a report is ready, and how much the bill is.',
+        'No one picks up. By 11:48 PM the screen is a list of missed calls.',
+        'Meet AICA, the AI voice agent from BitNTech.',
+        'A caller says, in Tanglish, "Vanakkam, appointment book pannanum" (Hello, I need to book an appointment). AICA understands the mix of Tamil and English and replies in kind.',
+        'AICA books the appointment on the call: General Medicine, tomorrow, 10:30 AM. Confirmed.',
+        'OP timings, report status and billing questions are answered and resolved.',
+        'A complex call that needs a person is handed over to your front-desk team. Call transferred.',
+        'Every line answered, from 7:48 AM to past midnight. Handle call peaks without adding headcount.',
+        'AICA. Answer. Understand. Resolve. 24/7. AI voice agent for business calls in Tamil, English and Tanglish. aica.bitntech.in',
+      ],
     },
     detailUrl: 'https://aica.bitntech.in/',
     primary: { label: 'Explore AICA', href: 'https://aica.bitntech.in/', external: true },

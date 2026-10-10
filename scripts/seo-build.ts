@@ -21,6 +21,7 @@ import { fileURLToPath } from 'node:url'
 import { CONTACT } from '../src/contact.ts'
 import {
   FAQ,
+  NOT_FOUND,
   ORGANIZATION_LD,
   OG_IMAGE,
   ROUTES,
@@ -96,7 +97,7 @@ function head(path: string): string {
        every other route it is never referenced, and preloading it from the
        shared shell was fetching 68 KB nothing would use. */
     ...(path === '/'
-      ? [tag('<link data-static-seo rel="preload" as="image" href="/assets/hero-embryo.jpg" fetchpriority="high" />')]
+      ? [tag('<link data-static-seo rel="preload" as="image" href="/assets/hero-embryo.webp" fetchpriority="high" />')]
       : []),
     meta('name', 'description', r.description),
     meta('name', 'keywords', r.keywords),
@@ -138,6 +139,25 @@ for (const r of ROUTES) {
   writeFileSync(out, html)
 }
 
+/* Every host this ships to (Vercel, Netlify, Cloudflare Pages) answers a URL
+   with no file of its own with 404.html and a 404 status. Without it they fell
+   back to the home page with a 200 — a soft 404 that put the home page in the
+   index under any mistyped address. React boots here too and renders NotFound. */
+writeFileSync(
+  join(dist, '404.html'),
+  shell
+    .replace(/\s*<title>[\s\S]*?<\/title>/, '')
+    .replace(/\s*<meta\s+name="description"[\s\S]*?\/>/, '')
+    .replace(/\s*<meta\s+name="robots"[\s\S]*?\/>/, '')
+    .replace(
+      '</head>',
+      `    <title data-static-seo>${esc(NOT_FOUND.title)}</title>
+    <meta data-static-seo name="robots" content="noindex, follow" />
+    <meta data-static-seo name="description" content="${esc(NOT_FOUND.description)}" />
+  </head>`,
+    ),
+)
+
 writeFileSync(join(dist, 'sitemap.xml'), sitemap)
 
-console.log(`seo-build: ${ROUTES.length} routes stamped, sitemap.xml written`)
+console.log(`seo-build: ${ROUTES.length} routes stamped, 404.html and sitemap.xml written`)

@@ -1124,3 +1124,7 @@
 @media (prefers-reduced-motion: reduce) and (max-width: 860px) {
   .pd-stage__visual { transform: none; }
 }
+
+.pd-transcript { max-width: var(--max); margin-inline: auto; padding: 2rem var(--pad) 0; color: var(--ink-2); font-size: .95rem; }
+.pd-transcript summary { cursor: pointer; color: var(--ink); font-weight: 600; }
+.pd-transcript p { margin: .7rem 0 0; max-width: 65ch; }

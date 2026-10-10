@@ -18,7 +18,7 @@ import './HeroScene.css'
  * stops it dead when the hero leaves the viewport.
  */
 
-/* The figure is /assets/hero-embryo.jpg, laid over the board in the right-hand
+/* The figure is /assets/hero-embryo.webp, laid over the board in the right-hand
    half. It is screen-blended, so the black it was cut on drops out and the
    traces underneath read through its edge rather than stopping at a rectangle.
    Nothing about the board depends on it — the traces run to their own pads. */
@@ -350,7 +350,7 @@ export default function HeroScene() {
             hero's own subject only delays it. */}
         <img
           className="bh-embryo"
-          src="/assets/hero-embryo.jpg"
+          src="/assets/hero-embryo.webp"
           alt=""
           loading="eager"
           fetchPriority="high"

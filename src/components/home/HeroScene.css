@@ -6,7 +6,7 @@
    the form's near edge. Near-black throughout; the orange is spent only on
    interface details.
 
-   The form is /assets/hero-embryo.jpg, screen-blended over the board so the
+   The form is /assets/hero-embryo.webp, screen-blended over the board so the
    black it was cut on drops out and the traces read through its edge instead
    of stopping at a rectangle. It is absolutely positioned and never enters the
    flow; its width is capped so its left edge always lands past the headline's
@@ -253,7 +253,7 @@
 }
 
 /* ---------- the figure --------------------------------------------------
-   /assets/hero-embryo.jpg, over the board rather than beside it.
+   /assets/hero-embryo.webp, over the board rather than beside it.
 
    `mix-blend-mode: screen` is the one exception to the no-blend rule at the
    top of this file, and it is worth it: the asset is cut on black, so screen

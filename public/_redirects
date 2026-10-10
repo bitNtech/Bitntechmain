@@ -1,10 +1,10 @@
-# SPA fallback, read by Netlify and Cloudflare Pages.
+# Read by Netlify and Cloudflare Pages; vercel.json carries the same rules.
 #
-# The build writes a real HTML file for every route in src/seo.ts, and a file
-# that exists always wins over a rule here — so /about is served its own
-# stamped <head>, not this. The rule is only what catches a URL no route
-# claims, so a deep link never 404s before React can route it.
-#
-# 200, not 301: a redirect would change the address bar and lose the path the
-# router needs to read.
-/*  /index.html  200
+# No SPA catch-all: the build writes a real HTML file for every route plus
+# 404.html, and both hosts serve 404.html with a 404 status for anything else.
+# A catch-all answered every mistyped URL with the home page and a 200.
+/get-started              /contact                     301
+/assets/bg.png            /assets/contact-hands.webp   301
+/assets/akashimg.jpg      /assets/akash.webp           301
+/assets/akashimg-480.jpg  /assets/akash-480.webp       301
+/assets/:file.jpg         /assets/:file.webp           301

@@ -54,17 +54,41 @@ and so on. **The host must prefer an existing file over the SPA fallback**, or
 every URL is served the home page's `<head>` and the per-route metadata is lost
 for crawlers that do not run JavaScript — which is most AI answer engines.
 
-* **Netlify / Cloudflare Pages** — works as shipped. `public/_redirects` carries
-  the `/* /index.html 200` fallback, and both check for a matching file first.
-  `public/_headers` sets immutable caching on `/assets/*` and revalidation on HTML.
-* **Vercel** — set `"cleanUrls": true` in `vercel.json` and do *not* add a
-  catch-all rewrite to `/index.html`; add a `404` fallback instead.
-* **nginx** — `try_files $uri $uri/index.html /index.html;`
+There is deliberately **no SPA catch-all**. The build also writes
+`dist/404.html` (noindex), and every host below serves it with a real 404
+status for a URL no route claims. A catch-all to `/index.html` answered every
+mistyped URL with the home page and a 200 — a soft 404.
+
+* **Vercel** — works as shipped. `vercel.json` holds the 301s (`/get-started`
+  and the old `.jpg`/`.png` image URLs) and an `X-Robots-Tag: noindex` header
+  on `*.vercel.app` hosts so deployment URLs stay out of search.
+* **Netlify / Cloudflare Pages** — works as shipped. `public/_redirects` holds
+  the same 301s; `public/_headers` sets the cache rules.
+* **nginx** — `try_files $uri $uri/index.html =404; error_page 404 /404.html;`
 * `vite preview` does *not* do this (its SPA fallback wins), so route metadata
   looks wrong there. It is correct in `dist/`.
 
-Before going live, replace `SITE_URL` in `src/seo.ts` and the `Sitemap:` line in
-`public/robots.txt` if the domain is not `https://bitntech.in`.
+`SITE_URL` in `src/seo.ts` is `https://www.bitntech.in` because production
+308-redirects the apex to `www`; canonicals must point at the host that answers
+with a 200. If the primary domain changes in Vercel, change `SITE_URL` and the
+`Sitemap:` line in `public/robots.txt` together (`npm test` checks they agree).
+
+### Images and media
+
+Photos in `public/assets` are WebP (Pillow, quality ~78); `logo.png` and
+`og-cover.png` stay PNG for favicon and social-card compatibility. The AICA film
+is 720p H.264 with `+faststart`, so it plays before it finishes downloading.
+
+### Manual Search Console steps
+
+1. Add a **Domain property** for `bitntech.in` in Google Search Console and
+   verify with the DNS TXT record it gives you (covers apex, `www`, http and
+   https at once, no code change).
+2. Submit `https://www.bitntech.in/sitemap.xml` under *Sitemaps*.
+3. Run *URL Inspection → Test live URL* on `/`, `/software`, `/products` and
+   `/about`; check the rendered HTML shows the page's H1 and title.
+4. Revisit *Pages* (index coverage) after a week for soft 404s, redirects or
+   "Duplicate without user-selected canonical".
 
 ---
 

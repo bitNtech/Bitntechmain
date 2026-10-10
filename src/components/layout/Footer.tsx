@@ -49,7 +49,7 @@ export default function Footer() {
   /* Same reason as the nav's CTA: on the contact page this link goes nowhere
      new, so the closing statement stands on its own. */
   const { pathname } = useLocation()
-  const onContact = pathname === '/contact' || pathname === '/get-started'
+  const onContact = pathname === '/contact'
 
   /* Sixty circles under an SVG gaussian filter is the most expensive paint on
      the site, and the footer is below the fold on every page — so for almost

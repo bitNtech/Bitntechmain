@@ -9,7 +9,6 @@ const PAGE_LABELS: Record<string, string> = {
   '/products': 'Our Products',
   '/about': 'About',
   '/contact': 'Contact',
-  '/get-started': 'Get Started',
 }
 
 /** The phone tab bar: a short label and an icon for each page. */
@@ -64,8 +63,8 @@ export default function Navbar() {
      cannot know that scrolling Home moves the bar off that hero and onto a
      cream section. So sample the ground under the wordmark itself. */
   /* On the contact page the CTA points at the page you are already on, so it
-     is dropped there. /get-started renders ContactUs as well - see App.tsx. */
-  const onContact = pathname === '/contact' || pathname === '/get-started'
+     is dropped there. */
+  const onContact = pathname === '/contact'
   const [onDark, setOnDark] = useState(true)
   const [isScrolled, setIsScrolled] = useState(false)
   const [sectionsCount, setSectionsCount] = useState(1)
@@ -182,7 +181,6 @@ export default function Navbar() {
 
         <ul className="nav-05__links">
           {Object.entries(PAGE_LABELS)
-            .filter(([path]) => path !== '/get-started')
             .map(([path, label]) => (
               <li key={path}>
                 {/* Product detail pages live under /products, so that link stays lit on them. */}
@@ -215,7 +213,7 @@ export default function Navbar() {
         </div>
 
         <div className="nav-05__actions">
-          {!onContact && <Link to="/get-started" tabIndex={0} className="nav-05__cta">Get Started <span>↗</span></Link>}
+          {!onContact && <Link to="/contact" tabIndex={0} className="nav-05__cta">Get Started <span>↗</span></Link>}
         </div>
       </nav>
     </div>

@@ -1,9 +1,8 @@
-# https://bitntech.in/robots.txt
+# https://www.bitntech.in/robots.txt
 # BitNTech — AI, software, hardware and robotics engineering studio.
 
 User-agent: *
 Allow: /
-Disallow: /*?*
 
 # --- Answer / AI engines -------------------------------------------------
 # Explicitly welcomed: these are how the site gets cited in AI answers.
@@ -68,4 +67,4 @@ Disallow: /
 User-agent: DotBot
 Disallow: /
 
-Sitemap: https://bitntech.in/sitemap.xml
+Sitemap: https://www.bitntech.in/sitemap.xml

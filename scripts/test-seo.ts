@@ -7,6 +7,7 @@
  * catching: a duplicate title, a description search engines will truncate, a
  * canonical pointing at a page that is not in the sitemap. */
 import assert from 'node:assert/strict'
+import { readFileSync } from 'node:fs'
 import { ROUTES, SITE_URL, pageLd, routeSeo } from '../src/seo.ts'
 
 const seen = new Set<string>()
@@ -49,5 +50,11 @@ for (const r of ROUTES) {
 }
 
 assert.ok(SITE_URL.startsWith('https://') && !SITE_URL.endsWith('/'), 'SITE_URL must be an https origin with no trailing slash')
+
+/* SITE_URL must be the host that answers without redirecting (production 308s
+   bitntech.in to www). A canonical that redirects is a mixed signal, and the
+   robots.txt sitemap line has to agree with it. */
+const robots = readFileSync(new URL('../public/robots.txt', import.meta.url), 'utf8')
+assert.ok(robots.includes(`Sitemap: ${SITE_URL}/sitemap.xml`), 'robots.txt Sitemap line does not match SITE_URL')
 
 console.log('seo: ok')

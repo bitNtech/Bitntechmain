@@ -7,7 +7,7 @@
    and the blur-to-sharp build where every delay is one `--i` times a shared
    `--beat`. What deliberately does not carry over is the home board — no
    traces, no pads, no drawn circuitry. Repeating those made this read as the
-   homepage with a form on it. The subject here is /assets/bg.png, the two
+   homepage with a form on it. The subject here is /assets/contact-hands.webp, the two
    hands reaching, and the composition is led by the brief rather than by type.
 
    MOTION
@@ -108,7 +108,7 @@
 }
 
 /* ---------- the plate ---------------------------------------------------
-   /assets/bg.png — the machine hand and the human one, reaching.
+   /assets/contact-hands.webp — the machine hand and the human one, reaching.
 
    It is cut on white, so it is inverted: the ground falls to black and the two
    hands come up as light, which is the only way a white plate belongs on this
@@ -124,7 +124,7 @@
   right: -4%;
   top: 0;
   height: min(94vh, 860px);
-  background: url('/assets/bg.png') center 42% / cover no-repeat;
+  background: url('/assets/contact-hands.webp') center 42% / cover no-repeat;
   /* `invert(.94)`, not `invert(1)`, and that missing 6% is what let the blend
      go. A blended element cannot be promoted to its own composited layer —
      blending needs the pixels underneath — so `screen` was re-running over a

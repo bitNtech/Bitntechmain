@@ -716,6 +716,16 @@ export default function Products() {
         ))}
       </div>
 
+      {/* The film says everything in on-screen text; this is that text for
+          anyone who cannot or would rather not watch it. Outside the stages:
+          they are fixed-height and stacked, and would cover it when open. */}
+      {filmProduct?.video && (
+        <details className="pd-transcript">
+          <summary>{filmProduct.video.title}: read the film</summary>
+          {filmProduct.video.transcript.map((line) => <p key={line}>{line}</p>)}
+        </details>
+      )}
+
       <section className="pd-closing">
         <p className="pd-label">Custom builds</p>
         <h2>Need something built around your business?</h2>

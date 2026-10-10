@@ -136,7 +136,6 @@ const PERCH: Record<string, { x: number; y: number }> = {
   '/software': { x: 0.9, y: 0.34 },
   '/hardware': { x: 0.1, y: 0.34 },
   '/contact': { x: 0.86, y: 0.62 },
-  '/get-started': { x: 0.86, y: 0.62 },
 }
 
 /**

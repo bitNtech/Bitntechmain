@@ -1,5 +1,5 @@
 import { useLocation } from 'react-router-dom'
-import { ORGANIZATION_LD, SITE_NAME, SITE_URL, WEBSITE_LD, routeSeo, pageLd, OG_IMAGE } from '../seo'
+import { NOT_FOUND, ORGANIZATION_LD, SITE_NAME, SITE_URL, WEBSITE_LD, routeSeo, pageLd, OG_IMAGE } from '../seo'
 
 /**
  * Per-route <head>. React 19 hoists `<title>`, `<meta>` and `<link>` out of the
@@ -24,16 +24,24 @@ export default function Seo() {
   const canonical = SITE_URL + (seo.canonical ?? seo.path)
   clearStaticSeo()
 
+  /* An unknown URL gets the not-found page. The host already answered it with
+     a 404 status; this keeps it out of the index after client-side navigation
+     too, with no canonical pointing anywhere. */
+  if (seo.path !== pathname) {
+    return (
+      <>
+        <title>{NOT_FOUND.title}</title>
+        <meta name="robots" content="noindex, follow" />
+        <meta name="description" content={NOT_FOUND.description} />
+      </>
+    )
+  }
+
   const graph = [ORGANIZATION_LD, WEBSITE_LD, ...pageLd(seo.path)]
-  /* The catch-all route renders Home under whatever URL was typed. That is a
-     soft 404 — indexing it would put the same page in the index under a dozen
-     addresses, so unknown paths are kept out of it. */
-  const known = seo.path === pathname
 
   return (
     <>
       <title>{seo.title}</title>
-      {!known && <meta name="robots" content="noindex, follow" />}
       <meta name="description" content={seo.description} />
       <meta name="keywords" content={seo.keywords} />
       <link rel="canonical" href={canonical} />
