@@ -19,7 +19,9 @@ export type ProductVideo = {
   duration: number
   /** ISO date the film was published, for the VideoObject data. */
   uploaded: string
-  /** The film's on-screen text in order, shown under it and sent as the VideoObject transcript. */
+  /** English WebVTT captions. */
+  captions: string
+  /** The film's narration, shown on /products and sent as the VideoObject transcript. */
   transcript: string[]
 }
 
@@ -81,25 +83,23 @@ export const PRODUCTS: Product[] = [
     visual: 'aica',
     featured: true,
     video: {
-      src: '/assets/aica-ad.mp4',
-      poster: '/assets/aica-poster.webp',
+      src: '/assets/aica/aica-film.mp4',
+      poster: '/assets/aica/aica-poster.webp',
+      captions: '/assets/aica/aica-film.en.vtt',
       title: 'Meet AICA — the AI voice agent from BitNTech',
       duration: 43,
       uploaded: '2026-10-04',
+      // The narration, as in aica-film.en.vtt.
       transcript: [
-        'The calls keep coming. A hospital front desk has four lines ringing, then fourteen callers waiting, asking about OP timings, whether the doctor is in, whether a report is ready, and how much the bill is.',
-        'No one picks up. By 11:48 PM the screen is a list of missed calls.',
-        'Meet AICA, the AI voice agent from BitNTech.',
-        'A caller says, in Tanglish, "Vanakkam, appointment book pannanum" (Hello, I need to book an appointment). AICA understands the mix of Tamil and English and replies in kind.',
-        'AICA books the appointment on the call: General Medicine, tomorrow, 10:30 AM. Confirmed.',
-        'OP timings, report status and billing questions are answered and resolved.',
-        'A complex call that needs a person is handed over to your front-desk team. Call transferred.',
-        'Every line answered, from 7:48 AM to past midnight. Handle call peaks without adding headcount.',
-        'AICA. Answer. Understand. Resolve. 24/7. AI voice agent for business calls in Tamil, English and Tanglish. aica.bitntech.in',
+        'Every day, the calls keep coming. Patients waiting. The same questions, again and again. And after hours, no one picks up.',
+        'Meet AICA — the AI voice agent from BitNTech.',
+        'It answers instantly, and understands Tamil, English, or a mix of both. Then it books the appointment, end to end.',
+        'OP timings, report status, billing — handled. And when a call needs a person, it hands over to your team.',
+        'Calls answered day and night. AICA. Answer. Understand. Resolve. 24/7. From BitNTech.',
       ],
     },
-    detailUrl: 'https://aica.bitntech.in/',
-    primary: { label: 'Explore AICA', href: 'https://aica.bitntech.in/', external: true },
+    detailUrl: '/products/aica',
+    primary: { label: 'Explore AICA', href: '/products/aica' },
     secondary: { label: 'Request a Demo', href: whatsappHref(WA_MESSAGES.aica), external: true },
   },
   {

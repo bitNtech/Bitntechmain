@@ -67,6 +67,7 @@ const noscriptBody = (path: string) => `
           <li><a href="/software">Software &amp; AI development services</a></li>
           <li><a href="/hardware">Robotics, IoT &amp; embedded hardware engineering</a></li>
           <li><a href="/products">Our products: AICA, Smart Business Card, VIDYA</a></li>
+          <li><a href="/products/aica">AICA — AI voice agent for Tamil, English &amp; Tanglish calls</a></li>
           <li><a href="/products/smart-business-card">NFC Smart Business Card</a></li>
           <li><a href="/about">About the BitNTech team</a></li>
           <li><a href="/contact">Contact BitNTech</a></li>
@@ -107,12 +108,12 @@ function head(path: string): string {
     meta('property', 'og:title', r.title),
     meta('property', 'og:description', r.description),
     meta('property', 'og:url', canonical),
-    meta('property', 'og:image', OG_IMAGE),
+    meta('property', 'og:image', r.image ?? OG_IMAGE),
     meta('property', 'og:locale', 'en_IN'),
     meta('name', 'twitter:card', 'summary_large_image'),
     meta('name', 'twitter:title', r.title),
     meta('name', 'twitter:description', r.description),
-    meta('name', 'twitter:image', OG_IMAGE),
+    meta('name', 'twitter:image', r.image ?? OG_IMAGE),
     ...[ORGANIZATION_LD, WEBSITE_LD, ...pageLd(path)].map((ld) =>
       tag(
         `<script data-static-seo type="application/ld+json">${JSON.stringify(ld).replace(/</g, '\\u003c')}</script>`,

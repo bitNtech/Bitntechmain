@@ -59,6 +59,16 @@
       "statusCode": 301
     },
     {
+      "source": "/assets/aica-ad.mp4",
+      "destination": "/assets/aica/aica-film.mp4",
+      "statusCode": 301
+    },
+    {
+      "source": "/assets/aica/aica-poster.jpg",
+      "destination": "/assets/aica/aica-poster.webp",
+      "statusCode": 301
+    },
+    {
       "source": "/assets/bg.png",
       "destination": "/assets/contact-hands.webp",
       "statusCode": 301
@@ -74,8 +84,98 @@
       "statusCode": 301
     },
     {
-      "source": "/assets/:file([a-z0-9-]+).jpg",
-      "destination": "/assets/:file.webp",
+      "source": "/assets/aica-poster.jpg",
+      "destination": "/assets/aica/aica-poster.webp",
+      "statusCode": 301
+    },
+    {
+      "source": "/assets/hero-embryo.jpg",
+      "destination": "/assets/hero-embryo.webp",
+      "statusCode": 301
+    },
+    {
+      "source": "/assets/industry-agriculture.jpg",
+      "destination": "/assets/industry-agriculture.webp",
+      "statusCode": 301
+    },
+    {
+      "source": "/assets/industry-education.jpg",
+      "destination": "/assets/industry-education.webp",
+      "statusCode": 301
+    },
+    {
+      "source": "/assets/industry-healthcare.jpg",
+      "destination": "/assets/industry-healthcare.webp",
+      "statusCode": 301
+    },
+    {
+      "source": "/assets/industry-manufacturing.jpg",
+      "destination": "/assets/industry-manufacturing.webp",
+      "statusCode": 301
+    },
+    {
+      "source": "/assets/industry-security.jpg",
+      "destination": "/assets/industry-security.webp",
+      "statusCode": 301
+    },
+    {
+      "source": "/assets/industry-smb.jpg",
+      "destination": "/assets/industry-smb.webp",
+      "statusCode": 301
+    },
+    {
+      "source": "/assets/industry-startups.jpg",
+      "destination": "/assets/industry-startups.webp",
+      "statusCode": 301
+    },
+    {
+      "source": "/assets/narendren.jpg",
+      "destination": "/assets/narendren.webp",
+      "statusCode": 301
+    },
+    {
+      "source": "/assets/narendren-480.jpg",
+      "destination": "/assets/narendren-480.webp",
+      "statusCode": 301
+    },
+    {
+      "source": "/assets/prem-kumar.jpg",
+      "destination": "/assets/prem-kumar.webp",
+      "statusCode": 301
+    },
+    {
+      "source": "/assets/prem-kumar-480.jpg",
+      "destination": "/assets/prem-kumar-480.webp",
+      "statusCode": 301
+    },
+    {
+      "source": "/assets/shashanth.jpg",
+      "destination": "/assets/shashanth.webp",
+      "statusCode": 301
+    },
+    {
+      "source": "/assets/shashanth-480.jpg",
+      "destination": "/assets/shashanth-480.webp",
+      "statusCode": 301
+    },
+    {
+      "source": "/assets/sri-hari.jpg",
+      "destination": "/assets/sri-hari.webp",
+      "statusCode": 301
+    },
+    {
+      "source": "/assets/sri-hari-480.jpg",
+      "destination": "/assets/sri-hari-480.webp",
+      "statusCode": 301
+    },
+    {
+      "source": "/assets/veera.jpg",
+      "destination": "/assets/veera.webp",
+      "statusCode": 301
+    },
+    {
+      "source": "/assets/veera-480.jpg",
+      "destination": "/assets/veera-480.webp",
       "statusCode": 301
     }
   ]

@@ -1,0 +1,210 @@
+/* ======================================================================
+   AICA — base.
+   The page was first built as its own site (aica.bitntech.in), so everything
+   it needs from a reset and a palette lives here, scoped to `.aica-page`:
+   once this chunk loads its CSS stays in the document for the rest of the
+   visit, and nothing in it may reach the other routes.
+
+   Palette is bitntech.in's: near-black ground, cream paper, plum, the
+   orange accent and the footer's pink. AICA's own blue (the orb in its film)
+   is kept for one job only: it is the colour of AICA speaking. Orange is the
+   caller, the business, and every button.
+   ====================================================================== */
+
+.aica-page {
+  --night: #05060a;
+  --coal: #0b0a0b;
+  --coal-2: #141214;
+  --coal-3: #1b181a;
+  --ivory: #f7f3ed;
+  --ivory-2: rgba(247, 243, 237, 0.78);
+  --ivory-3: rgba(247, 243, 237, 0.56);
+  --line-d: rgba(247, 243, 237, 0.13);
+  --line-d2: rgba(247, 243, 237, 0.26);
+
+  --cream: #f5efe3;
+  --cream-2: #ece4d4;
+  --plum: #220934;
+  --paper-text: #57534e;
+  --line-p: #e2d9c8;
+
+  --orange: #ff6e42;
+  --orange-2: #ff8c66;
+  --orange-ink: #1d0c05;
+  --pink: #ed5565;
+
+  --aica: #5b84ff;
+  --aica-deep: #1b3fd0;
+  --ok: #3ccf91;
+  --miss: #ff4d5e;
+
+  --display: 'Archivo', 'DM Sans', system-ui, sans-serif;
+  --sans: 'DM Sans', system-ui, 'Segoe UI', Roboto, sans-serif;
+  --mono: 'DM Mono', ui-monospace, Consolas, monospace;
+  --tamil: 'Noto Sans Tamil', 'DM Sans', system-ui, sans-serif;
+
+  --out: cubic-bezier(0.16, 1, 0.3, 1);
+
+  --pad: clamp(1rem, 4vw, 4.5rem);
+  --max: 1240px;
+
+  color-scheme: dark;
+
+  /* What the page's <body> carried on its own site. #root centres text for
+     the rest of bitntech.in; this page was laid out flush left. */
+  display: block;
+  width: 100%;
+  background: var(--night);
+  color: var(--ivory-2);
+  font: 400 1.0625rem/1.6 var(--sans);
+  letter-spacing: 0.005em;
+  text-align: left;
+}
+
+/* Paper sections follow the visitor's theme; the dark ones are dark by design. */
+.aica-page .paper {
+  --bg: var(--cream);
+  --bg-2: var(--cream-2);
+  --ink: var(--plum);
+  --text: var(--paper-text);
+  --line: var(--line-p);
+  --card: #fbf8f2;
+  background: var(--bg);
+  color: var(--text);
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  .aica-page .paper {
+    --bg: #12100f;
+    --bg-2: #1a1716;
+    --ink: var(--ivory);
+    --text: rgba(247, 243, 237, 0.7);
+    --line: rgba(247, 243, 237, 0.12);
+    --card: #1c1918;
+    color-scheme: dark;
+  }
+}
+
+.aica-page, .aica-page *, .aica-page *::before, .aica-page *::after { box-sizing: border-box; }
+
+.aica-page [lang='ta'], .aica-page .ta { font-family: var(--tamil); letter-spacing: 0; }
+
+.aica-page :is(img, video, svg) { display: block; max-width: 100%; }
+.aica-page :is(h1, h2, h3, h4, p, ul, ol, figure, blockquote) { margin: 0; }
+/* bitntech.in sets its own size, weight and colour on every h1 and h2. */
+.aica-page :is(h1, h2) { font: inherit; letter-spacing: inherit; color: inherit; }
+.aica-page :is(ul, ol) { padding: 0; list-style: none; }
+.aica-page a { color: inherit; }
+.aica-page :is(button, input, select, textarea) { font: inherit; color: inherit; }
+.aica-page button { cursor: pointer; }
+.aica-page :is(a, button, label, summary, input, select) { -webkit-tap-highlight-color: transparent; }
+
+.aica-page :where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid var(--orange);
+  outline-offset: 3px;
+}
+
+.aica-page .sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0;
+}
+
+.aica-page .wrap { width: 100%; max-width: calc(var(--max) + 2 * var(--pad)); margin-inline: auto; padding-inline: var(--pad); }
+
+/* ---- labels: the site's mono kicker, "BITNTECH / PRODUCTS" ---- */
+
+.aica-page .label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6em;
+  font: 500 0.7rem/1.4 var(--mono);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--orange);
+}
+.aica-page .label i { font-style: normal; opacity: 0.55; color: currentColor; }
+.aica-page .label--quiet { color: var(--ivory-3); }
+.aica-page .paper .label--quiet { color: var(--text); }
+
+/* ---- display type ---- */
+
+.aica-page .display {
+  font-family: var(--display);
+  font-weight: 800;
+  font-stretch: 100%;
+  letter-spacing: -0.045em;
+  line-height: 0.95;
+  color: var(--ivory);
+  text-wrap: balance;
+}
+.aica-page .paper .display { color: var(--ink); }
+.aica-page .display em { font-style: normal; color: var(--orange); }
+
+.aica-page .h2 { font-size: clamp(2.4rem, 1.2rem + 5vw, 5.4rem); }
+
+/* An outlined word: "Our" in "Our Products". */
+.aica-page .ghost {
+  color: transparent !important;
+  -webkit-text-stroke: var(--stroke-w, 1.5px) var(--stroke, var(--ivory-2));
+}
+.aica-page .paper .ghost { --stroke: var(--ink); }
+
+/* ---- buttons: bitntech.in's pills ---- */
+
+.aica-page .btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  min-height: 52px;
+  padding: 0.85rem 1.6rem;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  font: 700 1rem/1.1 var(--sans);
+  letter-spacing: -0.005em;
+  text-decoration: none;
+  white-space: nowrap;
+  overflow: hidden;
+  isolation: isolate;
+  transition: transform 0.3s var(--out), border-color 0.25s var(--ease), color 0.25s var(--ease), background-color 0.25s var(--ease);
+}
+.aica-page .btn .arrow { display: inline-block; transition: transform 0.35s var(--out); }
+.aica-page .btn:hover .arrow { transform: translate(2px, -2px); }
+.aica-page .btn:active { transform: scale(0.98); }
+
+.aica-page .btn--orange { background: var(--orange); color: var(--orange-ink); }
+/* A darker fill sweeps in from the left on hover. */
+.aica-page .btn--orange::before {
+  content: '';
+  position: absolute; inset: 0; z-index: -1;
+  background: var(--orange-2);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.45s var(--out);
+}
+.aica-page .btn--orange:hover::before { transform: scaleX(1); }
+
+.aica-page .btn--white { background: #fff; color: #14161a; }
+.aica-page .btn--white:hover { background: var(--ivory); }
+
+.aica-page .btn--line { border-color: var(--line-d2); color: var(--ivory); background: transparent; }
+.aica-page .btn--line:hover { border-color: var(--ivory); }
+
+.aica-page .btn--sm { min-height: 42px; padding: 0.6rem 1.15rem; font-size: 0.875rem; }
+
+/* ---- reveal ----
+   Visible by default; AicaPage marks what is still below the fold as
+   waiting, and lifts it in as it arrives. */
+
+.aica-page .rise { transition: opacity 0.9s var(--out), transform 0.9s var(--out); transition-delay: calc(var(--d, 0) * 90ms); }
+.aica-page .rise.is-waiting { opacity: 0; transform: translateY(32px); }
+
+@media (prefers-reduced-motion: reduce) {
+  .aica-page *, .aica-page *::before, .aica-page *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  .aica-page .rise.is-waiting { opacity: 1; transform: none; }
+}

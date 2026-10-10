@@ -433,7 +433,9 @@ function FilmDialog({ video, open, onClose }: { video: ProductVideo; open: boole
       onClick={(e) => { if (e.target === e.currentTarget) onClose() }}
     >
       <div className="pd-film-dialog__frame">
-        <video ref={videoRef} src={video.src} poster={video.poster} preload="none" playsInline controls title={video.title} />
+        <video ref={videoRef} src={video.src} poster={video.poster} preload="none" playsInline controls title={video.title}>
+          <track kind="captions" src={video.captions} srcLang="en" label="English" default />
+        </video>
       </div>
       <button type="button" className="pd-film-dialog__close" onClick={onClose} aria-label="Close the film">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg>
@@ -716,8 +718,8 @@ export default function Products() {
         ))}
       </div>
 
-      {/* The film says everything in on-screen text; this is that text for
-          anyone who cannot or would rather not watch it. Outside the stages:
+      {/* The film's narration, for anyone who cannot or would rather not
+          watch it. Outside the stages:
           they are fixed-height and stacked, and would cover it when open. */}
       {filmProduct?.video && (
         <details className="pd-transcript">

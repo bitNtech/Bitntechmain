@@ -16,6 +16,7 @@ const ContactUs = lazy(() => import('./pages/ContactUs'))
 const ExperiencePage = lazy(() => import('./pages/ExperiencePage'))
 const Products = lazy(() => import('./pages/Products'))
 const SmartBusinessCard = lazy(() => import('./pages/SmartBusinessCard'))
+const AicaPage = lazy(() => import('./pages/aica/AicaPage'))
 const NotFound = lazy(() => import('./pages/NotFound'))
 
 /**
@@ -88,6 +89,7 @@ function App() {
           <Route path="/software" element={<ExperiencePage mode="software" />} />
           <Route path="/products" element={<Products />} />
           <Route path="/products/smart-business-card" element={<SmartBusinessCard />} />
+          <Route path="/products/aica" element={<AicaPage />} />
           {/* Old CTA address. The host 301s it (vercel.json); this covers an
               in-app link to it. */}
           <Route path="/get-started" element={<Navigate to="/contact" replace />} />

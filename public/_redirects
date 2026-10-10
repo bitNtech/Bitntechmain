@@ -3,8 +3,28 @@
 # No SPA catch-all: the build writes a real HTML file for every route plus
 # 404.html, and both hosts serve 404.html with a 404 status for anything else.
 # A catch-all answered every mistyped URL with the home page and a 200.
-/get-started              /contact                     301
-/assets/bg.png            /assets/contact-hands.webp   301
-/assets/akashimg.jpg      /assets/akash.webp           301
-/assets/akashimg-480.jpg  /assets/akash-480.webp       301
-/assets/:file.jpg         /assets/:file.webp           301
+/get-started                             /contact                                 301
+/assets/aica-ad.mp4                      /assets/aica/aica-film.mp4               301
+/assets/aica/aica-poster.jpg             /assets/aica/aica-poster.webp            301
+/assets/bg.png                           /assets/contact-hands.webp               301
+/assets/akashimg.jpg                     /assets/akash.webp                       301
+/assets/akashimg-480.jpg                 /assets/akash-480.webp                   301
+/assets/aica-poster.jpg                  /assets/aica/aica-poster.webp            301
+/assets/hero-embryo.jpg                  /assets/hero-embryo.webp                 301
+/assets/industry-agriculture.jpg         /assets/industry-agriculture.webp        301
+/assets/industry-education.jpg           /assets/industry-education.webp          301
+/assets/industry-healthcare.jpg          /assets/industry-healthcare.webp         301
+/assets/industry-manufacturing.jpg       /assets/industry-manufacturing.webp      301
+/assets/industry-security.jpg            /assets/industry-security.webp           301
+/assets/industry-smb.jpg                 /assets/industry-smb.webp                301
+/assets/industry-startups.jpg            /assets/industry-startups.webp           301
+/assets/narendren.jpg                    /assets/narendren.webp                   301
+/assets/narendren-480.jpg                /assets/narendren-480.webp               301
+/assets/prem-kumar.jpg                   /assets/prem-kumar.webp                  301
+/assets/prem-kumar-480.jpg               /assets/prem-kumar-480.webp              301
+/assets/shashanth.jpg                    /assets/shashanth.webp                   301
+/assets/shashanth-480.jpg                /assets/shashanth-480.webp               301
+/assets/sri-hari.jpg                     /assets/sri-hari.webp                    301
+/assets/sri-hari-480.jpg                 /assets/sri-hari-480.webp                301
+/assets/veera.jpg                        /assets/veera.webp                       301
+/assets/veera-480.jpg                    /assets/veera-480.webp                   301

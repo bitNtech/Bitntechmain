@@ -21,6 +21,8 @@ export type RouteSeo = {
   /** Left out of the sitemap: duplicate URLs. */
   noSitemap?: boolean
   priority?: string
+  /** Share image, absolute. Defaults to OG_IMAGE. */
+  image?: string
 }
 
 export const ROUTES: RouteSeo[] = [
@@ -76,6 +78,16 @@ export const ROUTES: RouteSeo[] = [
     keywords:
       'BitNTech products, AICA AI caller agent, AI voice automation, NFC smart business card, digital business card India, VIDYA',
     priority: '0.8',
+  },
+  {
+    path: '/products/aica',
+    title: 'AICA — AI Voice Agent for Tamil, English & Tanglish Calls | BitNTech',
+    description:
+      'AICA is an AI voice agent for inbound calls in Tamil, English and Tanglish — it answers enquiries, completes tasks and hands the tricky calls to your team.',
+    keywords:
+      'AICA, AI voice agent, AI caller agent, Tamil voice AI, Tanglish voice bot, hospital call automation, AI receptionist India, inbound call automation, BitNTech',
+    priority: '0.8',
+    image: `${SITE_URL}/assets/aica/og-aica.jpg`,
   },
   {
     path: '/products/smart-business-card',
@@ -328,6 +340,32 @@ export function pageLd(path: string): object[] {
           duration: `PT${p.video.duration}S`,
           transcript: p.video.transcript.join(' '),
         }] : [])),
+      ]
+    case '/products/aica':
+      return [
+        {
+          '@context': 'https://schema.org',
+          '@type': 'SoftwareApplication',
+          '@id': `${SITE_URL}${path}#app`,
+          name: 'AICA',
+          applicationCategory: 'BusinessApplication',
+          description: 'AI voice agent for inbound business calls in Tamil, English and Tanglish.',
+          url: SITE_URL + path,
+          publisher: { '@id': `${SITE_URL}/#organization` },
+        },
+        {
+          '@context': 'https://schema.org',
+          '@type': 'VideoObject',
+          name: 'Meet AICA — the AI voice agent from BitNTech',
+          description:
+            'AICA answering hospital front-desk calls in Tamil, English and Tanglish: booking an appointment, answering OP timings, and handing a complex call to the team.',
+          thumbnailUrl: `${SITE_URL}/assets/aica/aica-poster.webp`,
+          contentUrl: `${SITE_URL}/assets/aica/aica-film.mp4`,
+          transcript: PRODUCTS.find((p) => p.id === 'aica')!.video!.transcript.join(' '),
+          uploadDate: '2026-10-04',
+          duration: 'PT43S',
+        },
+        breadcrumbLd(['Products', '/products'], ['AICA', path]),
       ]
     case '/products/smart-business-card':
       return [
